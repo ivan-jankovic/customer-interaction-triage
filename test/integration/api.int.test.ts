@@ -112,7 +112,7 @@ describe("intake API with PostgreSQL", () => {
   });
 
   it("pages over 25 new rows newest first in pages of 10, 10 and 5", async () => {
-    await sql`truncate interactions`.execute(testDb.db);
+    await sql`truncate interactions cascade`.execute(testDb.db); // cascade: classifications reference interactions (P03)
     for (let i = 1; i <= 25; i++) await post({ channel: "chat", text: `page test ${i}` });
 
     const texts: string[][] = [];
