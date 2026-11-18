@@ -11,8 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "dataset:plan": "tsx eval/dataset/plan.ts",
-    "dataset:generate": "tsx eval/dataset/generate.ts",
-    "dataset:grade": "tsx eval/dataset/grade.ts",
+    "dataset:generate": "tsx --env-file-if-exists=.env eval/dataset/generate.ts",
+    "dataset:grade": "tsx --env-file-if-exists=.env eval/dataset/grade.ts",
     "dataset:review": "tsx eval/dataset/review.ts",
     "dataset:finalize": "tsx eval/dataset/finalize.ts",
     "dataset:stats": "tsx eval/dataset/stats.ts"
