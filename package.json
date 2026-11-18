@@ -31,7 +31,8 @@
     "build": "node node_modules/@typescript/native/bin/tsc -p tsconfig.build.json",
     "dev": "tsx watch --env-file-if-exists=.env src/api/server.ts",
     "start": "node dist/api/server.js",
-    "db:migrate:dist": "node dist/db/migrate.js latest"
+    "db:migrate:dist": "node dist/db/migrate.js latest",
+    "dataset:load": "tsx --env-file-if-exists=.env eval/dataset/load.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",
