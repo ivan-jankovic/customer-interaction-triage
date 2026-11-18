@@ -10,7 +10,7 @@ The branch `p01-project-skeleton` can be merged when every check below passes.
 - [ ] `npm run format:check` passes. **(ci)**
 - [ ] `npm run typecheck` passes and runs TypeScript 7.0.x (`npx tsc --version` through the script's binary). **(ci)**
 - [ ] `npm test` passes without Docker running, with no network access and no `ANTHROPIC_API_KEY` set; the P00 tests pass unchanged apart from formatting. **(ci)**
-- [ ] `npm run audit` passes; the allowlist is still only GHSA-fc5q-39xc-vjpf on its Vitest paths (or any new entry was decided with the user and recorded in requirements.md). **(ci)**
+- [ ] `npm run audit` passes with an empty allowlist (picomatch 4.0.7 fixed GHSA-fc5q-39xc-vjpf), or any new entry was decided with the user and recorded in requirements.md. **(ci)**
 
 ## Local services
 
