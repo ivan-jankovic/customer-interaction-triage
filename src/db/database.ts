@@ -1,6 +1,7 @@
 import { Kysely, PostgresDialect, type ColumnType, type Generated, type Selectable } from "kysely";
 import pg from "pg";
-import type { Channel, Language } from "../taxonomy.js";
+import type { Classification } from "../llm/schemas/classification.schema.js";
+import type { Channel, Intent, Language, Urgency } from "../taxonomy.js";
 
 /** Lifecycle of an interaction. Only `received` until the queue arrives in P08. */
 export const INTERACTION_STATUSES = ["received"] as const;
@@ -23,9 +24,48 @@ export interface InteractionsTable {
 
 export type InteractionRow = Selectable<InteractionsTable>;
 
+/** Set on insert, never changed: classification rows are not updated. */
+type Immutable<T> = ColumnType<T, T, never>;
+/**
+ * jsonb columns are written as JSON text: pg would turn a JS array into a PostgreSQL array
+ * literal, not JSON. They are read back parsed.
+ */
+type Json<T> = ColumnType<T, string, never>;
+
+/** Table `classifications` (migration 0002, P03 requirements.md). */
+export interface ClassificationsTable {
+  id: Generated<string>;
+  interaction_id: Immutable<string>;
+  outcome: Immutable<"valid" | "invalid" | "error">;
+  intent: Immutable<Intent | null>;
+  urgency: Immutable<Urgency | null>;
+  language: Immutable<Language | null>;
+  fields: ColumnType<Classification["fields"] | null, string | null, never>;
+  summary: Immutable<string | null>;
+  confidence: Immutable<number | null>;
+  raw_output: Immutable<string | null>;
+  errors: Json<string[]>;
+  prompt_version: Immutable<string>;
+  requested_model: Immutable<string>;
+  served_model: Immutable<string>;
+  fell_back: Immutable<boolean>;
+  effort: Immutable<string>;
+  input_tokens: Immutable<number>;
+  output_tokens: Immutable<number>;
+  cache_creation_input_tokens: Immutable<number>;
+  cache_read_input_tokens: Immutable<number>;
+  /** pg returns numeric as a string, to keep its precision. */
+  cost_usd: ColumnType<string | null, number | null, never>;
+  latency_ms: Immutable<number>;
+  created_at: ColumnType<Date, never, never>;
+}
+
+export type ClassificationRow = Selectable<ClassificationsTable>;
+
 /** Table types for Kysely; each phase adds the tables it owns together with their migration. */
 export interface Database {
   interactions: InteractionsTable;
+  classifications: ClassificationsTable;
 }
 
 export function createDb(databaseUrl: string): Kysely<Database> {

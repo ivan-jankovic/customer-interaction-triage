@@ -9,7 +9,7 @@
 | HTTP API | **Fastify** | Intake API; later also serves the review web page. |
 | Database | **PostgreSQL** + **Kysely** | Messages, cases, decision log, review corrections, mock CRM and outage data. Kysely (typed query builder on `pg`) with its built-in migrator; migrations in `src/db/migrations/`, one per change, each table added by the phase that uses it. |
 | Queue | **Redis** + **BullMQ** | Asynchronous processing with retries; Redis runs as a container in Docker Compose with append-only persistence and a volume. Client: ioredis (BullMQ's own). See "Queue consistency" below. |
-| LLM | **Claude** via the **Anthropic SDK** | Structured output through tool use with a JSON Schema; model name configurable. |
+| LLM | **Claude** via the **Anthropic SDK** | Structured output through `output_config.format` with a JSON Schema (forced tool use is rejected by the current models; decided in P03). Model and effort configurable (`TRIAGE_MODEL`, default `claude-opus-5-5`; `TRIAGE_EFFORT`, default `low`). The classifier uses server-side refusal fallbacks and records the model that answered. One client in `src/llm/`, shared with the dataset scripts. |
 | Validation | **Ajv** + **ajv-formats**, types via **json-schema-to-ts** | Every model output is validated before use; invalid output goes to review. |
 | Tests | **Vitest** | Unit tests (`npm test`) never call a model (the LLM client is mocked) and need no Docker. Integration tests (`npm run test:integration`) run against the Compose services. |
 | Lint & format | **ESLint**, **Prettier**, `tsc --noEmit` | typescript-eslint `recommendedTypeChecked`; Prettier with print width 120 (Markdown excluded). |
@@ -34,7 +34,7 @@ Saving a message (PostgreSQL) and enqueueing its job (Redis) are two separate wr
 ## Data model (initial)
 
 - `interactions`: id (uuidv7), external id (the caller's own id, unique when set), channel (`email` | `chat` | `call`), language (`cs` | `sk` | `en`, nullable when unknown), raw text, received at, status, created at (from P02); masked text (P05)
-- `classifications`: interaction id, intent, urgency, extracted fields, summary, confidence, model, prompt version, tokens, latency
+- `classifications` (from P03): one row per attempt, never updated: id, interaction id, outcome (`valid` | `invalid` | `error`), intent, urgency, language, fields (jsonb), summary, confidence (0–1), raw output, errors, prompt version, requested and served model, fell back, effort, tokens (input, output, cache write, cache read), cost, latency, created at. The current classification is the latest valid row.
 - `investigations`: interaction id, steps taken, tools called, likely cause, evidence, confidence
 - `cases`: id, interaction id, customer id (nullable), target team, needs review, reason codes, created at
 - `decision_log`: case id, step, input summary, output, rule applied, timestamp
@@ -75,7 +75,7 @@ Deterministic, rule-based (no model): phone numbers, e-mail addresses, Czech bir
 ## Languages
 
 - **Supported: Czech, Slovak and English.** Slovak is included because Slovak-speaking customers are common in Czechia. Other languages are out of scope.
-- Prompts are written in English and handle messages in any of the three languages. The language each summary is written in is decided in P03.
+- Prompts are written in English and handle messages in any of the three languages. Summaries are always written in **English**, whatever the message's language (decided in P03).
 - The dominant language of each message is recorded (`interactions.language`); messages mixing Czech and Slovak are expected.
 - Evaluation reports metrics **per language** as well as overall, so the smaller English and Slovak sets are not hidden in an average. With few Slovak messages, its numbers are indicative only, and the report says so.
 
@@ -125,6 +125,7 @@ src/
   llm/          client, prompts (versioned), schemas
   db/           migrations, queries
   review/       CLI
+  cli/          other commands (classify)
 eval/
   data/         labelled dataset, injection set
   results/      evaluation runs

@@ -39,6 +39,19 @@ curl -X POST http://localhost:3000/interactions \
 
 `npm run dataset:load -- --file eval/data/injection.jsonl` loads the prompt-injection set the same way. The loader sends only the message, its channel, language and dataset id, never the labels. Field rules and limits are in the [P02 requirements](specs/phases/003-p02-intake-and-storage/requirements.md).
 
+## Classifying a message
+
+The understanding step makes one model call per message with structured output (prompt `classify.v1` in [src/llm/prompts/](src/llm/prompts/)). It needs `ANTHROPIC_API_KEY` in `.env`, and **each run costs money** (about $0.01 per message with the defaults).
+
+```sh
+npm run classify -- msg-001 --dry-run   # show the prompt and its token count (free), store nothing
+npm run classify -- msg-001             # classify one stored interaction (by id or external_id)
+```
+
+Every attempt is stored in `classifications`, also when the output is invalid, with the model that answered, tokens, cost and latency. `TRIAGE_MODEL` (default `claude-opus-5-5`) and `TRIAGE_EFFORT` (default `low`) choose the model and effort. Until masking arrives in P05, the raw (synthetic) text is sent to the model.
+
+Prompts are versioned: [versions.json](src/llm/prompts/versions.json) holds a hash of every prompt file, and a test fails if a published prompt changes. To change a prompt, add a new version.
+
 ## Checks
 
 | Command | What it does |

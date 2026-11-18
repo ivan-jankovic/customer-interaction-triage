@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { Budget } from "../../eval/lib/cost.js";
-import { toApiSchema } from "../../eval/lib/llm.js";
+import { toApiSchema } from "../../src/llm/client.js";
 import { PATHS } from "../../eval/lib/paths.js";
-import { loadPrompt } from "../../eval/lib/prompts.js";
+import { loadPrompt } from "../../src/llm/prompts.js";
 import { GRADE_PROMPT_VERSION, buildGradeRequest, gradeOne, latestGraded } from "../../eval/dataset/grade.js";
 import { agreementSample, findMismatch, normaliseArea } from "../../eval/dataset/mismatch.js";
 import { graderOutputSchema, type GraderOutput } from "../../eval/schema/labels.schema.js";
 import { labels } from "./fixtures.js";
 import { mockLlm } from "./mock-llm.js";
 
-const prompt = loadPrompt(GRADE_PROMPT_VERSION);
+const prompt = loadPrompt(GRADE_PROMPT_VERSION, PATHS.prompts);
 const guide = readFileSync(PATHS.guide, "utf8");
 
 const answer = (o: Partial<GraderOutput> = {}): GraderOutput => ({

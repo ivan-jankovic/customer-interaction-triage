@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loadApiConfig, loadDatabaseUrl, loadServiceConfig } from "../src/config.js";
+import { loadApiConfig, loadClassifierConfig, loadDatabaseUrl, loadServiceConfig } from "../src/config.js";
 
 const DB = "postgres://triage:triage@localhost:5432/triage";
 const REDIS = "redis://localhost:6379";
@@ -62,5 +62,28 @@ describe("loadApiConfig", () => {
 
   it.each(["0", "70000", "abc", "80.5"])("rejects PORT=%s", (port) => {
     expect(() => loadApiConfig({ DATABASE_URL: DB, INTAKE_API_KEY: KEY, PORT: port })).toThrow(/^PORT must be/);
+  });
+});
+
+describe("loadClassifierConfig", () => {
+  it("defaults to claude-opus-5-5 at effort low", () => {
+    expect(loadClassifierConfig({})).toEqual({ model: "claude-opus-5-5", effort: "low" });
+  });
+
+  it("reads TRIAGE_MODEL and TRIAGE_EFFORT", () => {
+    expect(loadClassifierConfig({ TRIAGE_MODEL: "claude-haiku-5-5", TRIAGE_EFFORT: "high" })).toEqual({
+      model: "claude-haiku-5-5",
+      effort: "high",
+    });
+  });
+
+  it("rejects a model without a price", () => {
+    expect(() => loadClassifierConfig({ TRIAGE_MODEL: "claude-unknown" })).toThrow(/no price in src\/llm\/pricing\.ts/);
+  });
+
+  it("rejects an unknown effort level", () => {
+    expect(() => loadClassifierConfig({ TRIAGE_EFFORT: "extreme" })).toThrow(
+      /TRIAGE_EFFORT must be one of low, medium/,
+    );
   });
 });

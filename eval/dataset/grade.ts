@@ -13,9 +13,9 @@ import { pathToFileURL } from "node:url";
 import type { Budget } from "../lib/cost.js";
 import { estimateTokens, type PlannedCall } from "../lib/cost.js";
 import { appendJsonl, readJsonl } from "../lib/jsonl.js";
-import { createAnthropicClient, type LlmClient, type LlmRequest } from "../lib/llm.js";
+import { createAnthropicClient, type LlmClient, type LlmRequest } from "../../src/llm/client.js";
 import { PATHS } from "../lib/paths.js";
-import { loadPrompt, render, type PromptTemplate } from "../lib/prompts.js";
+import { loadPrompt, render, type PromptTemplate } from "../../src/llm/prompts.js";
 import { callWithBudget, logRun, parseRunOptions, runPaidJobs, type Job } from "../lib/run-guard.js";
 import { graderOutputSchema, type GraderOutput } from "../schema/labels.schema.js";
 import { formatAjvErrors, validateGraderOutputSchema } from "../schema/validate.js";
@@ -134,7 +134,7 @@ async function main(): Promise<void> {
   const plan = readJsonl<PlanEntry>(PATHS.plan).filter((e) => e.id.startsWith("msg-"));
   const generated = latestGenerated(readJsonl<GeneratedEntry>(PATHS.generated));
   const graded = latestGraded(readJsonl<GradedEntry>(PATHS.graded));
-  const prompt = loadPrompt(GRADE_PROMPT_VERSION);
+  const prompt = loadPrompt(GRADE_PROMPT_VERSION, PATHS.prompts);
   const guide = readFileSync(PATHS.guide, "utf8");
   const client: LlmClient = options.dryRun
     ? { complete: () => Promise.reject(new Error("dry run")) }

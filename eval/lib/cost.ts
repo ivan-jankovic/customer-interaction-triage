@@ -1,34 +1,15 @@
 // Cost estimates and the hard spending cap for paid dataset runs.
 
-import type { LlmUsage } from "./llm.js";
+import type { LlmUsage } from "../../src/llm/client.js";
+import { costOf as pipelineCostOf } from "../../src/llm/pricing.js";
 
-/**
- * USD per million tokens. Source: Anthropic first-party API prices as listed in the
- * claude-api reference (cached 2026-11-03). Cache writes are 1.25x input and cache
- * reads 0.1x input (5-minute cache). Update the date when prices are re-checked.
- */
-export const PRICES_CHECKED = "2026-11-03";
-export const PRICES: Readonly<Record<string, { input: number; output: number }>> = {
-  "claude-opus-5-5": { input: 4, output: 20 },
-  "claude-sonnet-5-5": { input: 2, output: 10 },
-  "claude-haiku-5-5": { input: 0.1, output: 0.5 },
-};
+export { PRICES, PRICES_CHECKED } from "../../src/llm/pricing.js";
 
-function price(model: string): { input: number; output: number } {
-  const p = PRICES[model];
-  if (!p) throw new Error(`No price known for model ${model}; add it to eval/lib/cost.ts before running.`);
-  return p;
-}
-
+/** Like the pipeline's costOf, but an unknown model is an error: paid dataset runs need a cap. */
 export function costOf(model: string, usage: LlmUsage): number {
-  const p = price(model);
-  return (
-    (usage.input_tokens * p.input +
-      usage.cache_creation_input_tokens * p.input * 1.25 +
-      usage.cache_read_input_tokens * p.input * 0.1 +
-      usage.output_tokens * p.output) /
-    1_000_000
-  );
+  const cost = pipelineCostOf(model, usage);
+  if (cost === null) throw new Error(`No price known for model ${model}; add it to src/llm/pricing.ts before running.`);
+  return cost;
 }
 
 /** Rough token estimate for planning (about 3.5 characters per token for cs/sk/en text). */

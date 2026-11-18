@@ -4,7 +4,7 @@
 import { createInterface } from "node:readline/promises";
 import { appendJsonl } from "./jsonl.js";
 import { Budget, BudgetExceeded, estimateCost, type PlannedCall } from "./cost.js";
-import { ZERO_USAGE, type LlmClient, type LlmRequest, type LlmResult, type LlmUsage } from "./llm.js";
+import { ZERO_USAGE, type LlmClient, type LlmRequest, type LlmResult, type LlmUsage } from "../../src/llm/client.js";
 import { PATHS } from "./paths.js";
 
 export interface RunOptions {

@@ -1,6 +1,10 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { PATHS } from "./paths.js";
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
+
+/** The pipeline's prompts (src/llm/prompts/); the dataset scripts pass eval/prompts/. */
+export const PIPELINE_PROMPTS_DIR = join(dirname(fileURLToPath(import.meta.url)), "prompts");
 
 export interface PromptTemplate {
   version: string;
@@ -8,8 +12,8 @@ export interface PromptTemplate {
   user: string;
 }
 
-/** Loads eval/prompts/<version>.md and splits it on the === system === / === user === markers. */
-export function loadPrompt(version: string, dir: string = PATHS.prompts): PromptTemplate {
+/** Loads <dir>/<version>.md and splits it on the === system === / === user === markers. */
+export function loadPrompt(version: string, dir: string = PIPELINE_PROMPTS_DIR): PromptTemplate {
   const raw = readFileSync(join(dir, `${version}.md`), "utf8");
   const match = /=== system ===\n([\s\S]*?)=== user ===\n([\s\S]*)$/.exec(raw);
   if (!match) throw new Error(`Prompt ${version} must contain "=== system ===" and "=== user ===" sections`);
