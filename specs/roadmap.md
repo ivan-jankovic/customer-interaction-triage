@@ -12,7 +12,7 @@ How to start, implement and finish a phase (branch, spec folder with `requiremen
 
 Phases P00–P14 are the **MVP**. P15–P17 are optional.
 
-## P00: Intents, schemas and labelled dataset
+## ✅ P00: Intents, schemas and labelled dataset
 
 - Final intent list, urgency levels, extracted fields, teams and must-review rules.
 - The fictional company: name (checked not to belong to a real company), services, regions.
