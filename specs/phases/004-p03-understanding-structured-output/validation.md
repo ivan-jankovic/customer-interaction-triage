@@ -14,7 +14,7 @@ How each check is marked:
 
 - [x] `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run build` and `npm run audit` pass. **(ci)**
 - [x] `npm test` passes with no `ANTHROPIC_API_KEY` set and no network. The Anthropic SDK guard in `test/setup/no-model-calls.ts` stays in place, so no unit test constructs a real client. **(ci)**
-- [ ] `npm run test:integration` passes locally and in CI, with a mocked client. **(ci)**
+- [x] `npm run test:integration` passes locally and in CI, with a mocked client. **(ci)**
 - [x] The P00 dataset tests pass with unchanged assertions after the client move (only import paths change). **(ci)**
 
 ## LLM module and prompt
