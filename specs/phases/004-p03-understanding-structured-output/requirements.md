@@ -142,3 +142,11 @@ One row per attempt; rows are never updated. The current classification of an in
 - **The fallback model's price.** `fallbacks: "default"` picks the fallback model by refusal category, so its ID is not known in advance. If it has no entry in `pricing.ts`, `cost_usd` is stored as null and the CLI says so; nothing fails.
 - **Personal data in this table.** `fields.identifiers` and `raw_output` contain identifiers from the raw text. That is accepted with the masking exception above. After P05, the model sees only placeholders, so these columns will hold placeholders too.
 - **Interaction status is unchanged.** P03 does not move interactions out of `received`; P08 adds the processing statuses.
+- **Implementation notes (recorded during implementation):**
+  - **API check (plan 1.1).** Checked against `@anthropic-ai/sdk` 1.10.0. `fallbacks` is a body parameter of the beta Messages endpoint, and the client always uses that endpoint. Whether a fallback model served the response is read from the `fallback_message` entry in `usage.iterations`, which also names that model. Nothing in the SDK's docs rules out combining `fallbacks` with `output_config.format`; the only stated restriction concerns the fallback-credit-token prefill form, which is not used here.
+  - **P00 tests.** Besides import paths, two P00 tests now pass the prompts folder to `loadPrompt` explicitly (`PATHS.prompts`), because the loader's default folder is now the pipeline's `src/llm/prompts/`. Their assertions are unchanged.
+  - **Test guard.** `test/setup/no-model-calls.ts` still makes constructing an `Anthropic` client throw. It now keeps the SDK's static members, such as `Anthropic.APIError`, so the client's error handling can be unit-tested.
+  - **No in-memory classification store.** Plan 4.2 listed one, but no test needed it: the CLI is tested against PostgreSQL. It was left out rather than kept unused.
+  - **Prompt files are not part of the build.** `npm run build` emits only JavaScript, so `dist/` has no `classify.v1.md`. The CLI runs with tsx, so this doesn't matter yet; P08's worker, which runs from `dist/`, must copy the prompt files into the image.
+  - **Caching.** The system prompt is about 3,250 tokens, above the 512-token caching minimum on Opus 5.5. In the demo, the first call wrote it to the cache and the next four read it (3,256 cached tokens each).
+
