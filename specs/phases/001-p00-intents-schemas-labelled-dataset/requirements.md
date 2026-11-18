@@ -127,3 +127,14 @@ Labels are `{ intent, urgency, must_review, review_reasons, expected_team, field
 - P06 will seed the mock CRM from the identifiers recorded here. Some customer numbers should deliberately have no CRM match, to test "not found". This is P06's decision, but the P00 plan keeps a list of identifiers per message to make it possible.
 - The language each summary is written in is decided in P03, not here.
 - Generation and grading need `ANTHROPIC_API_KEY` from the environment. It is never written to the repo.
+
+### Implementation notes (recorded during implementation)
+
+- **Structured output via `output_config.format`, not a forced tool call.** Forced `tool_choice` returns a 400 on `claude-opus-5-5` and `claude-sonnet-5-5`. The JSON Schema is still enforced by the API and re-validated with Ajv. tech-stack.md says "through tool use"; P03 should decide whether to keep this wording for the pipeline.
+- **No server-side refusal fallbacks.** A fallback would silently switch models, and grader independence depends on knowing exactly which model answered. A refusal counts as a failed try (generation retries; a grader refusal becomes an invalid output and goes to review).
+- **`eval/data/.work/` is committed**, not ignored (plan 1.4 said ignore). Its files are paid outputs and the audit trail of how each label was reached.
+- **Phone numbers:** no officially reserved fictional range was found for CZ or SK, so national numbers starting with `0` are used, which neither numbering plan assigns. Bank codes `0001`–`0099` are below the lowest code in use. Details in the labelling guide.
+- **Denylist** lives in `eval/lib/denylist.ts` (used by both `generate` and the dataset tests), not `test/eval/denylist.ts`. Names that are also common Czech/Slovak words or first names are left out or matched case-sensitively, to avoid false positives.
+- **A separate `dataset:finalize` script** writes `dataset.jsonl` and `injection.jsonl` (plan 8.4), so review sessions only ever append to the review log.
+- **Prices for cost estimates** come from the claude-api reference, cached 2026-11-03 (Opus 5.5 $4/$20, Sonnet 5.5 $2/$10, Haiku 5.5 $0.10/$0.50 per million tokens). Estimates ignore caching and are deliberately pessimistic.
+- **`npm audit`:** a high-severity ReDoS advisory in `picomatch` (GHSA-fc5q-39xc-vjpf) affects every published version. It comes in only through Vitest (a dev dependency, run on our own glob patterns). `npm audit --omit=dev` reports 0 vulnerabilities.
