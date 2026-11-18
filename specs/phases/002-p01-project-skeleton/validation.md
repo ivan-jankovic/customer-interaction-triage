@@ -41,7 +41,7 @@ The branch `p01-project-skeleton` can be merged when every check below passes.
 - [x] `README.md` lists the local setup commands, and following them on a clean checkout works. **(manual)**
 - [x] [tech-stack.md](../../tech-stack.md) names Kysely, the TypeScript 6 API for linting, and the CI jobs. **(manual)**
 - [x] `CLAUDE.md` describes the pull request merge flow and `test:integration`. **(manual)**
-- [ ] P01 is marked done in [roadmap.md](../../roadmap.md). **(manual)**
+- [x] P01 is marked done in [roadmap.md](../../roadmap.md). **(manual)**
 
 ## Demo (roadmap)
 
