@@ -13,14 +13,42 @@ const graderOut = {
 };
 
 const records = [
-  record({ id: "msg-001", final: labels(), graders: [
-    { model: "claude-sonnet-5-5", prompt_version: "grade.v1", valid: true, output: graderOut },
-    { model: "claude-haiku-5-5", prompt_version: "grade.v1", valid: true, output: { ...graderOut, urgency: "normal" } },
-  ], review: { needed: true, sampled: false, reviewed: true, outcome: "accepted", changed_fields: [], note: null } }),
-  record({ id: "msg-002", language: "sk", final: labels({ urgency: "normal" }), graders: [
-    { model: "claude-sonnet-5-5", prompt_version: "grade.v1", valid: false, output: null },
-    { model: "claude-haiku-5-5", prompt_version: "grade.v1", valid: true, output: { ...graderOut, urgency: "normal" } },
-  ], review: { needed: true, sampled: false, reviewed: true, outcome: "corrected", changed_fields: ["urgency"], note: null } }),
+  record({
+    id: "msg-001",
+    final: labels(),
+    graders: [
+      { model: "claude-sonnet-5-5", prompt_version: "grade.v1", valid: true, output: graderOut },
+      {
+        model: "claude-haiku-5-5",
+        prompt_version: "grade.v1",
+        valid: true,
+        output: { ...graderOut, urgency: "normal" },
+      },
+    ],
+    review: { needed: true, sampled: false, reviewed: true, outcome: "accepted", changed_fields: [], note: null },
+  }),
+  record({
+    id: "msg-002",
+    language: "sk",
+    final: labels({ urgency: "normal" }),
+    graders: [
+      { model: "claude-sonnet-5-5", prompt_version: "grade.v1", valid: false, output: null },
+      {
+        model: "claude-haiku-5-5",
+        prompt_version: "grade.v1",
+        valid: true,
+        output: { ...graderOut, urgency: "normal" },
+      },
+    ],
+    review: {
+      needed: true,
+      sampled: false,
+      reviewed: true,
+      outcome: "corrected",
+      changed_fields: ["urgency"],
+      note: null,
+    },
+  }),
 ];
 
 describe("stats", () => {

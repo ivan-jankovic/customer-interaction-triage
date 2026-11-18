@@ -99,7 +99,12 @@ export function createAnthropicClient(): LlmClient {
           cache_read_input_tokens: response.usage.cache_read_input_tokens ?? 0,
         };
         if (response.stop_reason === "refusal") {
-          return { ok: false, error: `refusal (${response.stop_details?.category ?? "no category"})`, model: response.model, usage };
+          return {
+            ok: false,
+            error: `refusal (${response.stop_details?.category ?? "no category"})`,
+            model: response.model,
+            usage,
+          };
         }
         if (response.stop_reason === "max_tokens") {
           return { ok: false, error: "max_tokens reached", model: response.model, usage };
@@ -112,7 +117,12 @@ export function createAnthropicClient(): LlmClient {
       } catch (error) {
         // Non-retryable API errors (400, 401, 404) and exhausted retries end here.
         if (error instanceof Anthropic.APIError) {
-          return { ok: false, error: `API error ${error.status ?? "?"}: ${error.message}`, model: request.model, usage: ZERO_USAGE };
+          return {
+            ok: false,
+            error: `API error ${error.status ?? "?"}: ${error.message}`,
+            model: request.model,
+            usage: ZERO_USAGE,
+          };
         }
         throw error;
       }

@@ -51,7 +51,12 @@ export function estimateCost(calls: readonly PlannedCall[]): number {
   );
 }
 
-const ZERO: LlmUsage = { input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 };
+const ZERO: LlmUsage = {
+  input_tokens: 0,
+  output_tokens: 0,
+  cache_creation_input_tokens: 0,
+  cache_read_input_tokens: 0,
+};
 
 export class BudgetExceeded extends Error {}
 

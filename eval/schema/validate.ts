@@ -21,14 +21,17 @@ export function formatAjvErrors(errors: ErrorObject[] | null | undefined): strin
  * - cancellation/complaint review reasons are present exactly when the intent says so;
  * - must_review is true exactly when there is at least one review reason.
  */
-export function labelRuleErrors(labels: Pick<Labels, "intent" | "must_review" | "review_reasons"> & { expected_team?: string }): string[] {
+export function labelRuleErrors(
+  labels: Pick<Labels, "intent" | "must_review" | "review_reasons"> & { expected_team?: string },
+): string[] {
   const errors: string[] = [];
   if (labels.expected_team !== undefined && labels.expected_team !== INTENT_TO_TEAM[labels.intent]) {
     errors.push(`expected_team ${labels.expected_team} does not match intent ${labels.intent}`);
   }
   const ruleReasons = ruleReviewReasons(labels.intent);
   for (const reason of ruleReasons) {
-    if (!labels.review_reasons.includes(reason)) errors.push(`intent ${labels.intent} requires review reason ${reason}`);
+    if (!labels.review_reasons.includes(reason))
+      errors.push(`intent ${labels.intent} requires review reason ${reason}`);
   }
   for (const reason of labels.review_reasons) {
     if (reason !== "unclear" && !ruleReasons.includes(reason)) {

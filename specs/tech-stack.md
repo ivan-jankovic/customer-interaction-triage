@@ -4,17 +4,17 @@
 
 | Area | Choice | Notes |
 |---|---|---|
-| Language | **TypeScript** (strict mode) | |
+| Language | **TypeScript** (strict mode) | TypeScript 7 runs the type check. ESLint's type-aware rules use the TypeScript 6 API (`@typescript/typescript6`) until typescript-eslint supports TS 7.1+ (decided in P01). |
 | Runtime | **Node.js LTS** | |
 | HTTP API | **Fastify** | Intake API; later also serves the review web page. |
-| Database | **PostgreSQL** | Messages, cases, decision log, review corrections, mock CRM and outage data. |
-| Queue | **Redis** + **BullMQ** | Asynchronous processing with retries; Redis runs as a container in Docker Compose with append-only persistence and a volume. See "Queue consistency" below. |
+| Database | **PostgreSQL** + **Kysely** | Messages, cases, decision log, review corrections, mock CRM and outage data. Kysely (typed query builder on `pg`) with its built-in migrator; migrations in `src/db/migrations/`, one per change, each table added by the phase that uses it. |
+| Queue | **Redis** + **BullMQ** | Asynchronous processing with retries; Redis runs as a container in Docker Compose with append-only persistence and a volume. Client: ioredis (BullMQ's own). See "Queue consistency" below. |
 | LLM | **Claude** via the **Anthropic SDK** | Structured output through tool use with a JSON Schema; model name configurable. |
 | Validation | **Ajv** + **ajv-formats**, types via **json-schema-to-ts** | Every model output is validated before use; invalid output goes to review. |
-| Tests | **Vitest** | Unit tests never call a model (the LLM client is mocked). |
-| Lint & format | **ESLint**, **Prettier**, `tsc --noEmit` | |
-| Local setup | **Docker Compose** | PostgreSQL, Redis and the app, one command. Local only; no hosted deployment. |
-| CI | **GitHub Actions** | Lint, type check, unit tests on every push (with PostgreSQL and Redis as services where needed); evaluation subset with a model (API key as a secret). |
+| Tests | **Vitest** | Unit tests (`npm test`) never call a model (the LLM client is mocked) and need no Docker. Integration tests (`npm run test:integration`) run against the Compose services. |
+| Lint & format | **ESLint**, **Prettier**, `tsc --noEmit` | typescript-eslint `recommendedTypeChecked`; Prettier with print width 120 (Markdown excluded). |
+| Local setup | **Docker Compose** | PostgreSQL, Redis and (from P02) the app, one command. Images pinned to exact versions. Local only; no hosted deployment. |
+| CI | **GitHub Actions** | On every pull request and push to `main`: a `checks` job (lint, format, type check, unit tests, dependency audit) and an `integration` job against the Compose services (started with `docker compose up --wait`, so CI uses the same configuration as local). Actions pinned to commit SHAs; Dependabot for npm, Actions and Compose images. From P04: an evaluation subset with a model (API key as a secret). |
 | Package manager | **npm** | |
 
 ## Pipeline

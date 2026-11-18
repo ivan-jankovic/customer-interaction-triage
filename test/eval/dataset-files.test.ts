@@ -44,16 +44,21 @@ describe("dataset files: schema and coverage", () => {
   it("dataset.jsonl has 100 records: 60 ±2 cs, 20 ±2 sk, 20 ±2 en", () => {
     expect(dataset).toHaveLength(100);
     const byLang = count(dataset, (r) => r.language);
-    for (const [lang, target] of [["cs", 60], ["sk", 20], ["en", 20]] as const) {
+    for (const [lang, target] of [
+      ["cs", 60],
+      ["sk", 20],
+      ["en", 20],
+    ] as const) {
       expect(Math.abs((byLang.get(lang) ?? 0) - target), lang).toBeLessThanOrEqual(2);
     }
   });
 
   it("every intent appears at least twice per language, every channel at least 20 times", () => {
     const byIntentLang = count(dataset, (r) => `${r.final!.intent}/${r.language}`);
-    for (const intent of INTENTS) for (const lang of LANGUAGES) {
-      expect(byIntentLang.get(`${intent}/${lang}`) ?? 0, `${intent}/${lang}`).toBeGreaterThanOrEqual(2);
-    }
+    for (const intent of INTENTS)
+      for (const lang of LANGUAGES) {
+        expect(byIntentLang.get(`${intent}/${lang}`) ?? 0, `${intent}/${lang}`).toBeGreaterThanOrEqual(2);
+      }
     const byChannel = count(dataset, (r) => r.channel);
     for (const ch of CHANNELS) expect(byChannel.get(ch) ?? 0, ch).toBeGreaterThanOrEqual(20);
   });
@@ -62,9 +67,10 @@ describe("dataset files: schema and coverage", () => {
     const ids = dataset.flatMap((r) => r.final!.fields.identifiers);
     const byType = count(ids, (i) => i.type);
     for (const t of IDENTIFIER_TYPES) expect(byType.get(t) ?? 0, t).toBeGreaterThanOrEqual(5);
-    for (const r of all) for (const i of r.final!.fields.identifiers) {
-      expect(r.text.includes(i.value), `${r.id}: ${i.type} ${i.value}`).toBe(true);
-    }
+    for (const r of all)
+      for (const i of r.final!.fields.identifiers) {
+        expect(r.text.includes(i.value), `${r.id}: ${i.type} ${i.value}`).toBe(true);
+      }
   });
 
   it("injection.jsonl has 13–17 records covering every tactic and all three languages", () => {
@@ -77,7 +83,13 @@ describe("dataset files: schema and coverage", () => {
 
 describe("dataset files: review complete", () => {
   // Recomputed from the stored labels, so the check does not rely on review.needed being right.
-  const mismatched = dataset.filter((r) => findMismatch(r.chosen, r.graders.map((g) => (g.valid ? g.output : null))).needed);
+  const mismatched = dataset.filter(
+    (r) =>
+      findMismatch(
+        r.chosen,
+        r.graders.map((g) => (g.valid ? g.output : null)),
+      ).needed,
+  );
 
   it("every message with a disagreement or an invalid grader output is reviewed", () => {
     expect(mismatched.length).toBeGreaterThan(0);
@@ -122,19 +134,22 @@ describe("dataset files: synthetic data", () => {
 
   it("every e-mail address in any text uses a reserved domain", () => {
     const reserved = /@(?:[a-z0-9-]+\.)*(?:example\.(?:com|net|org)|[a-z0-9-]+\.example)$/i;
-    const addresses = all.flatMap((r) => (r.text.match(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g) ?? []).map((a) => ({ id: r.id, a })));
+    const addresses = all.flatMap((r) =>
+      (r.text.match(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g) ?? []).map((a) => ({ id: r.id, a })),
+    );
     expect(addresses.length).toBeGreaterThan(0);
     const bad = addresses.filter(({ a }) => !reserved.test(a.replace(/[.,;:]+$/, "")));
     expect(bad).toEqual([]);
   });
 
   it("labelled identifiers match the fictional formats, with invalid checksums where stated", () => {
-    for (const r of all) for (const i of r.final!.fields.identifiers) {
-      const where = `${r.id}: ${i.type} ${i.value}`;
-      expect(i.value, where).toMatch(IDENTIFIER_PATTERNS[i.type]);
-      if (i.type === "birth_number") expect(isValidBirthNumberChecksum(i.value), where).toBe(false);
-      if (i.type === "bank_account") expect(isValidCzAccountChecksum(i.value.split("/")[0]!), where).toBe(false);
-      if (i.type === "iban") expect(isValidIban(i.value), where).toBe(false);
-    }
+    for (const r of all)
+      for (const i of r.final!.fields.identifiers) {
+        const where = `${r.id}: ${i.type} ${i.value}`;
+        expect(i.value, where).toMatch(IDENTIFIER_PATTERNS[i.type]);
+        if (i.type === "birth_number") expect(isValidBirthNumberChecksum(i.value), where).toBe(false);
+        if (i.type === "bank_account") expect(isValidCzAccountChecksum(i.value.split("/")[0]!), where).toBe(false);
+        if (i.type === "iban") expect(isValidIban(i.value), where).toBe(false);
+      }
   });
 });

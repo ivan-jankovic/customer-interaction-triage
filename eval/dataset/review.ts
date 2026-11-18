@@ -19,14 +19,19 @@ async function main(): Promise<void> {
   const pendingRewrites = assembly.records.filter((a) => a.rewritePending).map((a) => a.record.id);
   const notGraded = assembly.records.filter((a) => !a.fullyGraded).map((a) => a.record.id);
   console.log(`${queue.length} messages to review.`);
-  if (pendingRewrites.length) console.log(`Waiting for rewrite (run generate + grade with --only): ${pendingRewrites.join(", ")}`);
+  if (pendingRewrites.length)
+    console.log(`Waiting for rewrite (run generate + grade with --only): ${pendingRewrites.join(", ")}`);
   if (notGraded.length) console.log(`Not graded yet: ${notGraded.join(", ")}`);
   if (queue.length === 0) return;
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   try {
-    const made = await reviewLoop(queue, { ask: (q) => rl.question(q), print: (l) => console.log(l) }, (e) => appendJsonl(PATHS.reviewLog, e));
-    console.log(`\n${made} decisions saved to ${PATHS.reviewLog}. ${queue.length - made} left in this session's queue.`);
+    const made = await reviewLoop(queue, { ask: (q) => rl.question(q), print: (l) => console.log(l) }, (e) =>
+      appendJsonl(PATHS.reviewLog, e),
+    );
+    console.log(
+      `\n${made} decisions saved to ${PATHS.reviewLog}. ${queue.length - made} left in this session's queue.`,
+    );
   } finally {
     rl.close();
   }

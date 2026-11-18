@@ -1,0 +1,5 @@
+# Commits that only reformat code; `git blame` skips them.
+# Enable once per clone: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# Format with Prettier (P01)
+2e9025fe690d66d3ee60ad16e16f96b05961918c

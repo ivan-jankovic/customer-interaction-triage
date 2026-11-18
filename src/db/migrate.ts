@@ -1,0 +1,58 @@
+// Migration runner: `npm run db:migrate` (to latest) and `npm run db:rollback` (one step down).
+// Kysely's migrator keeps its history in the kysely_migration table and takes a database
+// lock, so two runs at the same time are executed one after the other.
+
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { inspect } from "node:util";
+import { fileURLToPath } from "node:url";
+import type { Kysely } from "kysely";
+import { FileMigrationProvider, Migrator, type MigrationResultSet } from "kysely/migration";
+import { loadServiceConfig } from "../config.js";
+import { createDb } from "./database.js";
+
+export const MIGRATIONS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "migrations");
+
+export function createMigrator<DB>(db: Kysely<DB>): Migrator {
+  return new Migrator({
+    db,
+    provider: new FileMigrationProvider({ fs, path, migrationFolder: MIGRATIONS_DIR }),
+  });
+}
+
+/** Prints one line per migration; returns false if the run failed. */
+export function report(result: MigrationResultSet, log: (line: string) => void = console.log): boolean {
+  for (const r of result.results ?? [])
+    log(`${r.status.padEnd(9)} ${r.direction.toLowerCase().padEnd(4)} ${r.migrationName}`);
+  if (result.results?.length === 0) log("Nothing to do.");
+  if (result.error) {
+    log(`Migration failed: ${result.error instanceof Error ? result.error.message : inspect(result.error)}`);
+    return false;
+  }
+  return true;
+}
+
+async function main(command: string | undefined): Promise<number> {
+  if (command !== "latest" && command !== "down") {
+    console.error("Usage: tsx src/db/migrate.ts latest|down");
+    return 2;
+  }
+  const db = createDb(loadServiceConfig().databaseUrl);
+  try {
+    const migrator = createMigrator(db);
+    const result = command === "latest" ? await migrator.migrateToLatest() : await migrator.migrateDown();
+    return report(result) ? 0 : 1;
+  } finally {
+    await db.destroy();
+  }
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main(process.argv[2]).then(
+    (code) => process.exit(code),
+    (error: unknown) => {
+      console.error(error instanceof Error ? error.message : error);
+      process.exit(1);
+    },
+  );
+}

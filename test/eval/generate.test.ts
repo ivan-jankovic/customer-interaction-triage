@@ -37,11 +37,15 @@ describe("generation prompt", () => {
 
   it("adds special instructions for ambiguous, mixed-language and injection entries", () => {
     const mixed = dataset.find((e) => e.secondary_intent)!;
-    expect(buildGenerationRequest(mixed, prompt, guide, "m").user).toContain(`secondary concern of type ${mixed.secondary_intent}`);
+    expect(buildGenerationRequest(mixed, prompt, guide, "m").user).toContain(
+      `secondary concern of type ${mixed.secondary_intent}`,
+    );
     const unclear = dataset.find((e) => e.chosen.review_reasons.includes("unclear"))!;
     expect(buildGenerationRequest(unclear, prompt, guide, "m").user).toContain("genuinely unclear");
     expect(buildGenerationRequest(injection[0]!, prompt, guide, "m").user).toContain("prompt-injection test message");
-    expect(buildGenerationRequest(withIds, prompt, guide, "m", "Too formal.").user).toContain("Their feedback: Too formal.");
+    expect(buildGenerationRequest(withIds, prompt, guide, "m", "Too formal.").user).toContain(
+      "Their feedback: Too formal.",
+    );
   });
 
   it("includes the full labelling guide in the system prompt", () => {
@@ -49,14 +53,16 @@ describe("generation prompt", () => {
   });
 });
 
+const messageText = (json: string): string => (JSON.parse(json) as { text: string }).text;
+
 describe("checkGenerated", () => {
   it("accepts a message with every identifier verbatim", () => {
-    expect(checkGenerated(JSON.parse(emailFor(withIds)).text, withIds)).toEqual([]);
+    expect(checkGenerated(messageText(emailFor(withIds)), withIds)).toEqual([]);
   });
 
   it("rejects a missing or reformatted identifier", () => {
     const id = withIds.chosen.fields.identifiers[0]!;
-    const text = JSON.parse(emailFor(withIds)).text.replace(id.value, id.value.replace(/\s/g, "-") + "x");
+    const text = messageText(emailFor(withIds)).replace(id.value, id.value.replace(/\s/g, "-") + "x");
     expect(checkGenerated(text, withIds).join()).toContain("missing or altered");
   });
 
@@ -68,8 +74,14 @@ describe("checkGenerated", () => {
   });
 
   it("checks the channel format", () => {
-    const chat = { ...withIds, channel: "chat" as const, chosen: { ...withIds.chosen, fields: { ...withIds.chosen.fields, identifiers: [] } } };
-    expect(checkGenerated("Dobrý den, nejde mi internet už od rána.", chat)).toContain("chat/call is missing speaker labels");
+    const chat = {
+      ...withIds,
+      channel: "chat" as const,
+      chosen: { ...withIds.chosen, fields: { ...withIds.chosen.fields, identifiers: [] } },
+    };
+    expect(checkGenerated("Dobrý den, nejde mi internet už od rána.", chat)).toContain(
+      "chat/call is missing speaker labels",
+    );
     expect(checkGenerated("Zákazník: Dobrý den, nejde mi internet.\nOperátor: Dobrý den.", chat)).toEqual([]);
   });
 });
@@ -85,7 +97,9 @@ describe("generateOne", () => {
   });
 
   it("retries with the problem fed back when an identifier is missing", async () => {
-    const client = mockLlm((_, i) => (i === 0 ? JSON.stringify({ text: "Předmět: X\n\nDobrý den, nic tu není." }) : emailFor(withIds)));
+    const client = mockLlm((_, i) =>
+      i === 0 ? JSON.stringify({ text: "Předmět: X\n\nDobrý den, nic tu není." }) : emailFor(withIds),
+    );
     const out = await generateOne(client, new Budget(10), withIds, request, 1);
     expect(out.ok).toBe(true);
     expect(out.tries).toBe(2);

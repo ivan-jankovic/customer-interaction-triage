@@ -89,7 +89,10 @@ export function assemble(files: WorkFiles): Assembly {
     const fullyGraded = gradings.every((g) => g !== undefined);
     const mismatch = isInjection
       ? { needed: true, fields: [] as ComparedField[], invalidGrader: false }
-      : findMismatch(entry.chosen, gradings.map((g) => (g?.valid ? g.output : null)));
+      : findMismatch(
+          entry.chosen,
+          gradings.map((g) => (g?.valid ? g.output : null)),
+        );
 
     const review = reviews.get(entry.id);
     const current = review && review.attempt === gen.attempt ? review : undefined;
@@ -132,7 +135,11 @@ export function assemble(files: WorkFiles): Assembly {
 
   // The agreement sample is drawn over fully graded dataset messages where all three agree.
   const datasetIds = files.plan.filter((e) => e.id.startsWith("msg-")).map((e) => e.id);
-  const agreeing = new Set(records.filter((r) => r.record.id.startsWith("msg-") && r.fullyGraded && !r.record.review.needed).map((r) => r.record.id));
+  const agreeing = new Set(
+    records
+      .filter((r) => r.record.id.startsWith("msg-") && r.fullyGraded && !r.record.review.needed)
+      .map((r) => r.record.id),
+  );
   const sample = agreementSample(datasetIds, agreeing);
 
   for (const a of records) {
@@ -148,6 +155,10 @@ export function assemble(files: WorkFiles): Assembly {
 /** Records still waiting for a human decision. */
 export function reviewQueue(assembly: Assembly): AssembledRecord[] {
   return assembly.records.filter(
-    (a) => a.fullyGraded && !a.rewritePending && !a.record.review.reviewed && (a.record.review.needed || a.record.review.sampled),
+    (a) =>
+      a.fullyGraded &&
+      !a.rewritePending &&
+      !a.record.review.reviewed &&
+      (a.record.review.needed || a.record.review.sampled),
   );
 }

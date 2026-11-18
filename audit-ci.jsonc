@@ -1,37 +1,10 @@
 // Dependency audit: `npm run audit`. Fails on any advisory of any severity (low and up),
 // except the allowlist below. Keep the allowlist as narrow as possible: one advisory,
-// one dependency path, with a reason and an expiry date.
+// one dependency path, with a reason and an expiry date, e.g.
+//   { "GHSA-xxxx-xxxx-xxxx|vitest>vite>pkg": { "active": true, "notes": "why", "expiry": "YYYY-MM-DD" } }
+// History: P00 allowlisted GHSA-fc5q-39xc-vjpf (picomatch, via Vitest); removed in P01 once picomatch 4.0.7 fixed it.
 {
   "$schema": "https://github.com/IBM/audit-ci/raw/main/docs/schema.json",
   "low": true,
-  "allowlist": [
-    {
-      // https://github.com/advisories/GHSA-fc5q-39xc-vjpf (picomatch ReDoS via repeated extglobs).
-      // Affects every published picomatch version, so no upgrade fixes it. picomatch reaches us only
-      // through the Vitest test runner (dev dependency), which matches our own test globs; no
-      // untrusted input reaches it and it does not ship with the app. Recorded in
-      // specs/phases/001-p00-intents-schemas-labelled-dataset/requirements.md.
-      // audit-ci reports three paths (two cut short where npm hoists the package). All three
-      // are listed exactly, so a new path to picomatch (e.g. through a production dependency) still fails.
-      "GHSA-fc5q-39xc-vjpf|picomatch>": {
-        "active": true,
-        "notes": "Dev-only (Vitest); no fixed picomatch release yet. Re-check before expiry.",
-        "expiry": "2027-05-18"
-      }
-    },
-    {
-      "GHSA-fc5q-39xc-vjpf|tinyglobby>fdir>picomatch>": {
-        "active": true,
-        "notes": "Dev-only (Vitest via tinyglobby/fdir); no fixed picomatch release yet. Re-check before expiry.",
-        "expiry": "2027-05-18"
-      }
-    },
-    {
-      "GHSA-fc5q-39xc-vjpf|vitest>vite>tinyglobby>fdir>picomatch": {
-        "active": true,
-        "notes": "Dev-only (Vitest via vite); no fixed picomatch release yet. Re-check before expiry.",
-        "expiry": "2027-05-18"
-      }
-    }
-  ]
+  "allowlist": [],
 }

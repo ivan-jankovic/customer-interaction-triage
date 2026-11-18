@@ -126,13 +126,7 @@ function areaFor(rng: Rng, intent: Intent, language: Language): string | null {
   return rng.pick(AREAS[country]);
 }
 
-function labelsFor(
-  rng: Rng,
-  intent: Intent,
-  language: Language,
-  unclear: boolean,
-  urgency?: Urgency,
-): Labels {
+function labelsFor(rng: Rng, intent: Intent, language: Language, unclear: boolean, urgency?: Urgency): Labels {
   const reasons: ReviewReason[] = [...ruleReviewReasons(intent), ...(unclear ? (["unclear"] as const) : [])];
   return {
     intent,
@@ -290,7 +284,9 @@ function buildInjectionEntries(rng: Rng): PlanEntry[] {
       attack: { tactic, goal: rng.pick(TACTIC_GOALS[tactic]) },
     };
     if (rng.chance(0.6)) {
-      entry.chosen.fields.identifiers.push(generateIdentifier(rng, rng.pick(["customer_number", "phone", "email"] as const), language));
+      entry.chosen.fields.identifiers.push(
+        generateIdentifier(rng, rng.pick(["customer_number", "phone", "email"] as const), language),
+      );
     }
     return entry;
   });
@@ -309,9 +305,10 @@ function count<T>(items: readonly T[], key: (t: T) => string): Record<string, nu
 
 export function coverageSummary(entries: readonly PlanEntry[]): Record<string, Record<string, number>> {
   const identifierTypes: Record<string, number> = {};
-  for (const e of entries) for (const id of new Set(e.chosen.fields.identifiers.map((x: Identifier) => x.type))) {
-    identifierTypes[id] = (identifierTypes[id] ?? 0) + 1;
-  }
+  for (const e of entries)
+    for (const id of new Set(e.chosen.fields.identifiers.map((x: Identifier) => x.type))) {
+      identifierTypes[id] = (identifierTypes[id] ?? 0) + 1;
+    }
   return {
     language: count(entries, (e) => e.language),
     channel: count(entries, (e) => e.channel),
@@ -332,11 +329,21 @@ function main(): void {
   const seed = seedArg >= 0 ? Number(process.argv[seedArg + 1]) : DEFAULT_SEED;
   const { dataset, injection } = buildPlan(seed);
   writeJsonl(PATHS.plan, [...dataset, ...injection]);
-  console.log(`Plan written to ${PATHS.plan} (seed ${seed}): ${dataset.length} dataset + ${injection.length} injection entries.`);
+  console.log(
+    `Plan written to ${PATHS.plan} (seed ${seed}): ${dataset.length} dataset + ${injection.length} injection entries.`,
+  );
   for (const [name, counts] of Object.entries(coverageSummary(dataset))) {
-    console.log(`  ${name.padEnd(30)} ${Object.entries(counts).map(([k, v]) => `${k}=${v}`).join("  ")}`);
+    console.log(
+      `  ${name.padEnd(30)} ${Object.entries(counts)
+        .map(([k, v]) => `${k}=${v}`)
+        .join("  ")}`,
+    );
   }
-  console.log(`  injection tactics              ${Object.entries(count(injection, (e) => e.attack!.tactic)).map(([k, v]) => `${k}=${v}`).join("  ")}`);
+  console.log(
+    `  injection tactics              ${Object.entries(count(injection, (e) => e.attack!.tactic))
+      .map(([k, v]) => `${k}=${v}`)
+      .join("  ")}`,
+  );
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) main();

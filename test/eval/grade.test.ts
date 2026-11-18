@@ -47,7 +47,13 @@ describe("gradeOne", () => {
   it("stores a validated answer", async () => {
     const client = mockLlm(() => JSON.stringify(answer()));
     const out = await gradeOne(client, new Budget(1), "msg-001", 1, "b", req);
-    expect(out).toMatchObject({ id: "msg-001", grader: "b", valid: true, prompt_version: "grade.v1", model: "claude-haiku-5-5" });
+    expect(out).toMatchObject({
+      id: "msg-001",
+      grader: "b",
+      valid: true,
+      prompt_version: "grade.v1",
+      model: "claude-haiku-5-5",
+    });
     expect(out.output).toEqual(answer());
   });
 

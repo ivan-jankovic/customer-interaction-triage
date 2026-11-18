@@ -26,7 +26,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** the dataset with label statistics (counts per intent, channel, language) and the review statistics (how many messages were reviewed, how many labels were changed).
 **Done when:** every mismatch is reviewed; the labelling guide and the dataset procedure are written down.
 
-## P01: Project skeleton
+## ✅ P01: Project skeleton
 
 - TypeScript project, ESLint, Prettier, Vitest; scripts `lint`, `typecheck`, `test`.
 - Docker Compose with PostgreSQL and Redis; migrations set up.

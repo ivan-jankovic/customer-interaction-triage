@@ -39,6 +39,8 @@ const escape = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 export function deniedNamesIn(text: string): string[] {
   const plain = stripMarks(text);
   return REAL_OPERATOR_DENYLIST.filter(({ name, caseSensitive }) =>
-    new RegExp(`(^|[^\\p{L}\\p{N}])${escape(stripMarks(name))}($|[^\\p{L}\\p{N}])`, caseSensitive ? "u" : "iu").test(plain),
+    new RegExp(`(^|[^\\p{L}\\p{N}])${escape(stripMarks(name))}($|[^\\p{L}\\p{N}])`, caseSensitive ? "u" : "iu").test(
+      plain,
+    ),
   ).map((d) => d.name);
 }

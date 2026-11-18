@@ -37,7 +37,20 @@ export function phone(rng: Rng, language: Language): string {
   return `${country} ${national}`;
 }
 
-const MAIL_HANDLES = ["jana", "petr", "lucie", "martin", "eva", "tomas", "katka", "jozef", "zuzana", "honza", "anna", "milan"];
+const MAIL_HANDLES = [
+  "jana",
+  "petr",
+  "lucie",
+  "martin",
+  "eva",
+  "tomas",
+  "katka",
+  "jozef",
+  "zuzana",
+  "honza",
+  "anna",
+  "milan",
+];
 // RFC 2606 reserved domains, plus the company's own reserved-TLD domain is never used for customers.
 export const RESERVED_MAIL_DOMAINS = ["example.com", "example.net", "example.org"] as const;
 
