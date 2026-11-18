@@ -43,7 +43,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** the dataset is loaded and visible in the database.
 **Done when:** API tests pass.
 
-## P03: Understanding with structured output
+## ✅ P03: Understanding with structured output
 
 - Prompt (versioned) and JSON Schema for the classification; Anthropic client with the model configurable.
 - Validation with Ajv; invalid output is recorded as such.

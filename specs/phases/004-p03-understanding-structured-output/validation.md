@@ -46,13 +46,13 @@ How each check is marked:
 - [x] `npm run classify -- --dry-run <id>` prints the prompt and its token count. **(manual)**
 - [x] After the user's go-ahead, the 5 demo messages are classified. Each shows intent, urgency, language, fields, an English summary, confidence, model, tokens, cost and latency, and is stored in `classifications`. **(manual)**
 - [x] The injection demo message's summary describes the request without following the embedded instruction. **(manual)**
-- [ ] The total demo cost and the cache reads are noted in the PR description. **(manual)**
+- [x] The total demo cost and the cache reads are noted in the PR description. **(manual)**
 
 ## Specs updated
 
 - [x] [tech-stack.md](../../tech-stack.md) says structured output uses `output_config.format`, summaries are in English, and lists the `classifications` columns and `src/cli/`. **(manual)**
 - [x] `README.md` and `.env.example` describe `classify`, `TRIAGE_MODEL` and `TRIAGE_EFFORT`. **(manual)**
-- [ ] P03 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
+- [x] P03 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 
