@@ -35,7 +35,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** `docker compose up` starts the database and Redis; `npm test` passes.
 **Done when:** CI is green.
 
-## P02: Intake and storage
+## ✅ P02: Intake and storage
 
 - Intake API endpoint: validate and store an interaction.
 - A loader script that imports the dataset messages through the API.

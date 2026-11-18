@@ -59,7 +59,7 @@ How each check is marked:
 
 - [x] [tech-stack.md](../../tech-stack.md) lists the final `interactions` columns. **(manual)**
 - [x] `README.md` explains how to start the stack, set the API key, call the API and load the dataset. **(manual)**
-- [ ] P02 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
+- [x] P02 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 
