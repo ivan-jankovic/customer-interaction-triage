@@ -14,7 +14,7 @@ How each check is marked:
 
 - [x] `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run build` and `npm run audit` pass. **(ci)**
 - [x] `npm test` passes without Docker running, with no network access and with no `ANTHROPIC_API_KEY` or `INTAKE_API_KEY` set. **(ci)**
-- [ ] `npm run test:integration` passes locally against Compose and in the CI `integration` job. **(ci)**
+- [x] `npm run test:integration` passes locally against Compose and in the CI `integration` job. **(ci)**
 - [x] No new dependency brings an audit advisory, or any new allowlist entry was decided with the user and recorded in requirements.md. **(ci)**
 
 ## Storage
@@ -48,7 +48,7 @@ How each check is marked:
 
 ## Docker and CI
 
-- [ ] `docker compose up -d --wait` builds the image, `migrate` exits 0, and `app`, `postgres` and `redis` report healthy. **(manual)** and **(ci)**
+- [x] `docker compose up -d --wait` builds the image, `migrate` exits 0, and `app`, `postgres` and `redis` report healthy. **(manual)** and **(ci)**
 - [x] The Node base image is pinned to an exact version; the runtime image has no dev dependencies, no `.env`, and runs as a non-root user. **(manual)**
 - [x] The app, PostgreSQL and Redis ports are published on `127.0.0.1` only (`docker compose ps` shows `127.0.0.1:` for each). **(manual)**
 - [x] With `INTAKE_API_KEY` empty, `app` exits with a clear message, while `postgres`, `redis` and `migrate` still start. **(manual)**
