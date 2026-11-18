@@ -5,6 +5,7 @@
 
 import js from "@eslint/js";
 import { defineConfig } from "eslint/config";
+import prettier from "eslint-config-prettier/flat";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
@@ -27,4 +28,6 @@ export default defineConfig(
     files: ["**/*.js"],
     extends: [tseslint.configs.disableTypeChecked],
   },
+  // Last: turns off style rules that Prettier owns.
+  prettier,
 );

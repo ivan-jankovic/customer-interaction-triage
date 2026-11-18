@@ -22,7 +22,9 @@
     "dataset:review": "tsx eval/dataset/review.ts",
     "dataset:finalize": "tsx eval/dataset/finalize.ts",
     "dataset:stats": "tsx eval/dataset/stats.ts",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",
@@ -36,6 +38,8 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "audit-ci": "^7.1.0",
     "eslint": "^10.15.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.10.1",
     "tsx": "^4.23.15",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "typescript-eslint": "^8.73.0",
