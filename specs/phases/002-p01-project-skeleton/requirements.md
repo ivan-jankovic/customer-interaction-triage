@@ -75,6 +75,7 @@ Out of scope (later phases):
 ## Notes
 
 - **P00 code will change.** The formatting commit touches most `.ts` files, and some P00 code needs small fixes for ESLint (for example unhandled promises in the CLI scripts). Behaviour does not change; the P00 tests must still pass unchanged.
+- **Branch protection is not available (outcome of plan 7.6).** GitHub answered "Upgrade to GitHub Pro or make this repository public" (HTTP 403), so the PR-with-green-CI rule is a convention in CLAUDE.md. The repository settings allow only merge commits (no squash or rebase merges) and delete a branch after its PR is merged.
 - **The P00 audit allowlist is gone.** Reinstalling in group 1 pulled picomatch 4.0.7, which fixes GHSA-fc5q-39xc-vjpf; `npm audit` reports nothing, so the allowlist in `audit-ci.jsonc` is now empty.
 - **New dependencies may bring new advisories.** If ESLint or Kysely pull in an advisory, it is raised for a decision, not silently allowlisted.
 - **tech-stack.md is out of date in one place:** it says structured output goes "through tool use", but P00 found that forced tool use is rejected on the current models and used `output_config.format` instead. This is P03's concern; P01 does not change it, but P03's spec should.

@@ -26,7 +26,7 @@ Read all three at the start of every phase. Changes to them need approval: if a 
 ## Implementing a phase
 
 - Work through `plan.md` task group by task group, in order.
-- Keep the app working after each task group: from P01 onwards, `npm run lint`, `npm run typecheck` and `npm test` pass.
+- Keep the app working after each task group: from P01 onwards, `npm run lint`, `npm run format:check`, `npm run typecheck` and `npm test` pass, and `npm run test:integration` too when the group touches the database or Redis (it needs `docker compose up -d --wait`).
 - Make small, focused commits with clear messages.
 - Briefly record why non-obvious technical choices were made, in a code comment or the phase's `requirements.md`, so the reasoning is part of the review before anything is merged.
 - If the plan turns out to be wrong or incomplete, stop and raise it instead of silently changing scope; update `plan.md` once the change is agreed.
@@ -35,7 +35,8 @@ Read all three at the start of every phase. Changes to them need approval: if a 
 
 - A phase is finished when everything in its `validation.md` passes, including the **Demo** and **Done when** criteria from the roadmap.
 - Once it has been reviewed, mark the phase as done in `specs/roadmap.md` (e.g. "✅ P04 …") on the phase branch, so the update is merged together with the work.
-- Ask before merging the branch.
+- Push the phase branch and open a pull request to `main` on GitHub. Merge only when CI (`checks` and `integration`) is green, with a merge commit (the repository allows no other kind). `main` is not protected on this plan, so this is a rule to follow, not one GitHub enforces: never push to `main` directly.
+- Ask before merging the pull request.
 
 ## Engineering rules
 
