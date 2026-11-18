@@ -64,7 +64,7 @@ The branch `p00-intents-schemas-labelled-dataset` can be merged when every check
 ## Specs updated
 
 - [x] [tech-stack.md](../../tech-stack.md) shows the final intents, teams and fields, and links the labelling guide. **(manual)**
-- [ ] P00 is marked done in [roadmap.md](../../roadmap.md). **(manual)**
+- [x] P00 is marked done in [roadmap.md](../../roadmap.md). **(manual)**
 
 ## Scope checks
 
