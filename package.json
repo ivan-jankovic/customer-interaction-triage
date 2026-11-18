@@ -1,0 +1,32 @@
+{
+  "name": "customer-interaction-triage",
+  "version": "0.0.0",
+  "private": true,
+  "description": "First-pass triage of customer messages for a fictional Czech internet and mobile provider.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "dataset:plan": "tsx eval/dataset/plan.ts",
+    "dataset:generate": "tsx eval/dataset/generate.ts",
+    "dataset:grade": "tsx eval/dataset/grade.ts",
+    "dataset:review": "tsx eval/dataset/review.ts",
+    "dataset:finalize": "tsx eval/dataset/finalize.ts",
+    "dataset:stats": "tsx eval/dataset/stats.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.10.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "json-schema-to-ts": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1"
+  }
+}
