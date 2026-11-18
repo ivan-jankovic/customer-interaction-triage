@@ -7,8 +7,13 @@
   "engines": {
     "node": ">=24"
   },
+  "//": [
+    "typescript resolves to the TypeScript 6 API (@typescript/typescript6) because typescript-eslint does not support TS 7.0;",
+    "typecheck runs TypeScript 7 (@typescript/native) by path, since both packages ship a tsc binary.",
+    "Remove the alias once typescript-eslint supports TS 7.1+ (P01 requirements.md)."
+  ],
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node node_modules/@typescript/native/bin/tsc --noEmit",
     "test": "vitest run",
     "audit": "audit-ci --config audit-ci.jsonc",
     "dataset:plan": "tsx eval/dataset/plan.ts",
@@ -26,9 +31,10 @@
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "audit-ci": "^7.1.0",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "^5.1.1"
   }
 }
