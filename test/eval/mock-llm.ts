@@ -1,4 +1,4 @@
-import type { LlmClient, LlmRequest, LlmResult, LlmUsage } from "../../eval/lib/llm.js";
+import type { LlmClient, LlmRequest, LlmResult, LlmUsage } from "../../src/llm/client.js";
 
 export const USAGE: LlmUsage = {
   input_tokens: 1000,

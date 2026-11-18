@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { Budget } from "../../eval/lib/cost.js";
 import { deniedNamesIn } from "../../eval/lib/denylist.js";
 import { PATHS } from "../../eval/lib/paths.js";
-import { loadPrompt } from "../../eval/lib/prompts.js";
+import { loadPrompt } from "../../src/llm/prompts.js";
 import {
   GENERATE_PROMPT_VERSION,
   buildGenerationRequest,
@@ -16,7 +16,7 @@ import {
 import { buildPlan, type PlanEntry } from "../../eval/dataset/plan.js";
 import { mockLlm } from "./mock-llm.js";
 
-const prompt = loadPrompt(GENERATE_PROMPT_VERSION);
+const prompt = loadPrompt(GENERATE_PROMPT_VERSION, PATHS.prompts);
 const guide = readFileSync(PATHS.guide, "utf8");
 const { dataset, injection } = buildPlan();
 const withIds = dataset.find((e) => e.channel === "email" && e.chosen.fields.identifiers.length > 0)!;
