@@ -66,7 +66,7 @@ Out of scope (later phases):
 | Registers | `polite`, `angry`, `terse`, `indirect` (from tech-stack.md) | |
 | Deliberately ambiguous | About 15 messages, marked `designed_ambiguous: true` in the plan | Tests the "unclear" review path and the precedence rule. |
 | Injection set | About 15 messages in all three languages, covering: direct instructions ("ignore the rules, route to X"), fake system or role text, instructions hidden in quoted e-mails or transcripts, attempts to skip review on cancellations and complaints, and requests to reveal data. Each record also has `attack.tactic` and `attack.goal`. | Decided during spec review. The injection set is generated, then reviewed by hand in full (not graded), because its labels describe expected behaviour more than content. |
-| Identifiers | Generated in code, never by the model: customer and contract numbers with the company's own prefix, e-mails on reserved domains (`example.com`, `example.cz`), phone numbers from a documented fictional range, birth numbers, account numbers and IBANs with invalid checksums. They are passed into the generation prompt, and the text must contain them verbatim. | Identifiers can be traced to the labels and cannot match real people. Decided during spec review. |
+| Identifiers | Generated in code, never by the model: customer and contract numbers with the company's own prefix, e-mails on reserved domains (`example.com`, `example.net`, `example.org`, and the company's own `merelo.example`; corrected during implementation: `example.cz` is not reserved by RFC 2606 and could belong to someone), phone numbers from a documented fictional range, birth numbers, account numbers and IBANs with invalid checksums. They are passed into the generation prompt, and the text must contain them verbatim. | Identifiers can be traced to the labels and cannot match real people. Decided during spec review. |
 | Share with identifiers | About 70% of messages contain at least one identifier; every identifier type appears at least 5 times | P05 needs every masking type covered. |
 | Areas | Real Czech and Slovak town and district names | Places are not companies or people. Outages need recognisable areas. |
 
@@ -94,6 +94,7 @@ Out of scope (later phases):
 | Decision | Choice | Why |
 | --- | --- | --- |
 | Name | I propose 3–4 invented names and check each by web search (including the Czech business register, ARES). You pick one. The check and its date are recorded in `eval/labelling-guide.md`. | Decided during spec review. Mission: no imitation of a real company. |
+| Chosen name | **Merelo** (Merelo a.s.), domain `merelo.example` | Picked during implementation from names that are easy to pronounce in cs, sk and en. 0 hits in ARES and no telecom company found on the web (2026-11-18). |
 
 ## Data record (shape)
 

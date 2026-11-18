@@ -42,7 +42,7 @@ The branch `p00-intents-schemas-labelled-dataset` can be merged when every check
 ## Synthetic data and safety
 
 - [ ] No message text contains a name from the denylist of real Czech and Slovak operators (kept in `test/eval/denylist.ts`). **(test)**
-- [ ] Every e-mail address uses `example.com` or `example.cz`. Phone numbers, birth numbers, account numbers and IBANs match the documented fictional formats (invalid checksums where stated). **(test)**
+- [ ] Every e-mail address uses a reserved domain (`example.com`, `example.net`, `example.org` or `*.example`). Phone numbers, birth numbers, account numbers and IBANs match the documented fictional formats (invalid checksums where stated). **(test)**
 - [ ] No `.env` file or API key is committed (`git ls-files` shows no `.env`, and `.gitignore` lists it). **(manual)**
 
 ## Cost guard
