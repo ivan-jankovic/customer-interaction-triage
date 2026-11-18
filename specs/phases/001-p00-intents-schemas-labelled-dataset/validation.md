@@ -8,7 +8,7 @@ The branch `p00-intents-schemas-labelled-dataset` can be merged when every check
 
 - [ ] `npm run typecheck` passes. **(manual)**
 - [ ] `npm test` passes, with no network access and no `ANTHROPIC_API_KEY` set. **(manual)**
-- [ ] `npm audit` reports no high or critical vulnerabilities. **(manual)**
+- [ ] `npm run audit` (audit-ci, threshold `low`) passes. The only allowlisted advisory is GHSA-fc5q-39xc-vjpf on its three Vitest-only paths, with an expiry date (see `audit-ci.jsonc`). **(manual)**
 - [ ] No unit test calls a model: the LLM wrapper is mocked in every test that touches it. **(test)**
 
 ## Taxonomy and company

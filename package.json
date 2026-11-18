@@ -10,6 +10,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "audit": "audit-ci --config audit-ci.jsonc",
     "dataset:plan": "tsx eval/dataset/plan.ts",
     "dataset:generate": "tsx --env-file-if-exists=.env eval/dataset/generate.ts",
     "dataset:grade": "tsx --env-file-if-exists=.env eval/dataset/grade.ts",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
+    "audit-ci": "^7.1.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.1.1"
