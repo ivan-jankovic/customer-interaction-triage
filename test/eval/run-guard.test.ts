@@ -35,7 +35,12 @@ describe("cost", () => {
     expect(costOf("claude-opus-5-5", { ...USAGE, input_tokens: 1_000_000, output_tokens: 0 })).toBeCloseTo(4);
     expect(costOf("claude-sonnet-5-5", { ...USAGE, input_tokens: 0, output_tokens: 1_000_000 })).toBeCloseTo(10);
     expect(
-      costOf("claude-haiku-5-5", { input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 1_000_000, cache_read_input_tokens: 1_000_000 }),
+      costOf("claude-haiku-5-5", {
+        input_tokens: 0,
+        output_tokens: 0,
+        cache_creation_input_tokens: 1_000_000,
+        cache_read_input_tokens: 1_000_000,
+      }),
     ).toBeCloseTo(0.1 * 1.25 + 0.1 * 0.1);
   });
 
@@ -79,7 +84,14 @@ describe("runPaidJobs", () => {
   it("runs every job when confirmed and reports results", async () => {
     const { jobs: js, client } = jobs(5);
     const results: string[] = [];
-    const report = await runPaidJobs("test", js, opts(), () => Promise.resolve(true), silent, (id) => results.push(id));
+    const report = await runPaidJobs(
+      "test",
+      js,
+      opts(),
+      () => Promise.resolve(true),
+      silent,
+      (id) => results.push(id),
+    );
     expect(client.calls).toHaveLength(5);
     expect(results.sort()).toEqual(["j0", "j1", "j2", "j3", "j4"]);
     expect(report.spentUsd).toBeCloseTo(5 * costOf("claude-haiku-5-5", USAGE));
@@ -89,7 +101,13 @@ describe("runPaidJobs", () => {
     const perCall = estimateCost([planned]);
     const cap = perCall * 3.5;
     const { jobs: js, client } = jobs(10);
-    const report = await runPaidJobs("test", js, opts({ maxCost: cap, concurrency: 1 }), () => Promise.resolve(true), silent);
+    const report = await runPaidJobs(
+      "test",
+      js,
+      opts({ maxCost: cap, concurrency: 1 }),
+      () => Promise.resolve(true),
+      silent,
+    );
     expect(report.stoppedByBudget).toBe(true);
     expect(client.calls).toHaveLength(3);
     expect(report.spentUsd).toBeLessThanOrEqual(cap);

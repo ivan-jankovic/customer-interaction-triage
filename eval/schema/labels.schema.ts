@@ -3,14 +3,7 @@
 // work for Ajv and for the API's structured outputs.
 
 import type { FromSchema } from "json-schema-to-ts";
-import {
-  IDENTIFIER_TYPES,
-  INTENTS,
-  REVIEW_REASONS,
-  SERVICE_TYPES,
-  TEAMS,
-  URGENCY,
-} from "../../src/taxonomy.js";
+import { IDENTIFIER_TYPES, INTENTS, REVIEW_REASONS, SERVICE_TYPES, TEAMS, URGENCY } from "../../src/taxonomy.js";
 
 export const identifierSchema = {
   type: "object",

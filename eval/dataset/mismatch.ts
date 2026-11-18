@@ -60,7 +60,11 @@ export function findMismatch(chosen: Labels, graders: readonly (GraderOutput | n
  * mistakes the models share. Ids are shuffled once with the seed and the first
  * `size` agreeing ids are taken, so the sample only changes if agreement changes.
  */
-export function agreementSample(allIds: readonly string[], agreeingIds: ReadonlySet<string>, size = AGREEMENT_SAMPLE_SIZE): Set<string> {
+export function agreementSample(
+  allIds: readonly string[],
+  agreeingIds: ReadonlySet<string>,
+  size = AGREEMENT_SAMPLE_SIZE,
+): Set<string> {
   const order = createRng(AGREEMENT_SAMPLE_SEED).shuffle([...allIds].sort());
   return new Set(order.filter((id) => agreeingIds.has(id)).slice(0, size));
 }

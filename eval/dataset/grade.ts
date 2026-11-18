@@ -45,7 +45,13 @@ export interface GradedEntry {
   graded_at: string;
 }
 
-export function buildGradeRequest(text: string, channel: string, prompt: PromptTemplate, guide: string, model: string): LlmRequest {
+export function buildGradeRequest(
+  text: string,
+  channel: string,
+  prompt: PromptTemplate,
+  guide: string,
+  model: string,
+): LlmRequest {
   return {
     model,
     system: render(prompt.system, { labelling_guide: guide }),
@@ -57,7 +63,11 @@ export function buildGradeRequest(text: string, channel: string, prompt: PromptT
 }
 
 export function plannedGradeCall(request: LlmRequest): PlannedCall {
-  return { model: request.model, inputTokens: estimateTokens(request.system + request.user), outputTokens: PLANNED_OUTPUT_TOKENS };
+  return {
+    model: request.model,
+    inputTokens: estimateTokens(request.system + request.user),
+    outputTokens: PLANNED_OUTPUT_TOKENS,
+  };
 }
 
 /** One grader's answer for one message: one call, plus one retry if the output is invalid. */
@@ -87,9 +97,29 @@ export async function gradeOne(
       error = `schema: ${formatAjvErrors(validateGraderOutputSchema.errors).join("; ")}`;
       continue;
     }
-    return { id, attempt, grader, model: request.model, prompt_version: GRADE_PROMPT_VERSION, valid: true, output: parsed, error: null, graded_at: new Date().toISOString() };
+    return {
+      id,
+      attempt,
+      grader,
+      model: request.model,
+      prompt_version: GRADE_PROMPT_VERSION,
+      valid: true,
+      output: parsed,
+      error: null,
+      graded_at: new Date().toISOString(),
+    };
   }
-  return { id, attempt, grader, model: request.model, prompt_version: GRADE_PROMPT_VERSION, valid: false, output: null, error, graded_at: new Date().toISOString() };
+  return {
+    id,
+    attempt,
+    grader,
+    model: request.model,
+    prompt_version: GRADE_PROMPT_VERSION,
+    valid: false,
+    output: null,
+    error,
+    graded_at: new Date().toISOString(),
+  };
 }
 
 /** Latest grading per (id, attempt, grader). */
@@ -106,7 +136,9 @@ async function main(): Promise<void> {
   const graded = latestGraded(readJsonl<GradedEntry>(PATHS.graded));
   const prompt = loadPrompt(GRADE_PROMPT_VERSION);
   const guide = readFileSync(PATHS.guide, "utf8");
-  const client: LlmClient = options.dryRun ? { complete: () => Promise.reject(new Error("dry run")) } : createAnthropicClient();
+  const client: LlmClient = options.dryRun
+    ? { complete: () => Promise.reject(new Error("dry run")) }
+    : createAnthropicClient();
 
   const jobs: Job<GradedEntry[]>[] = [];
   let missing = 0;
@@ -117,9 +149,14 @@ async function main(): Promise<void> {
       continue;
     }
     if (options.only && !options.only.has(entry.id)) continue;
-    const slots = (Object.keys(GRADERS) as GraderSlot[]).filter((g) => options.only || !graded.has(`${entry.id}#${gen.attempt}#${g}`));
+    const slots = (Object.keys(GRADERS) as GraderSlot[]).filter(
+      (g) => options.only || !graded.has(`${entry.id}#${gen.attempt}#${g}`),
+    );
     if (slots.length === 0) continue;
-    const requests = slots.map((g) => ({ g, req: buildGradeRequest(gen.text!, entry.channel, prompt, guide, GRADERS[g]) }));
+    const requests = slots.map((g) => ({
+      g,
+      req: buildGradeRequest(gen.text!, entry.channel, prompt, guide, GRADERS[g]),
+    }));
     jobs.push({
       id: entry.id,
       planned: requests.map((r) => plannedGradeCall(r.req)),

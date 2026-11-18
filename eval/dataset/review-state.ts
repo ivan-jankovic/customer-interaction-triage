@@ -46,7 +46,12 @@ export function changedFields(chosen: Labels, final: Labels): string[] {
   return FIELD_ORDER.filter((f) => a[f] !== b[f]);
 }
 
-export function decision(a: AssembledRecord, final: Labels | null, outcome: ReviewOutcome | null, note: string | null): ReviewLogEntry {
+export function decision(
+  a: AssembledRecord,
+  final: Labels | null,
+  outcome: ReviewOutcome | null,
+  note: string | null,
+): ReviewLogEntry {
   const changed = final ? changedFields(a.record.chosen, final) : [];
   return {
     id: a.record.id,
@@ -68,11 +73,22 @@ export function renderRecord(a: AssembledRecord, position: string): string[] {
     r.review.sampled ? "random agreement sample" : null,
     r.id.startsWith("inj-") ? `injection (${r.attack?.tactic} → ${r.attack?.goal})` : null,
   ].filter(Boolean);
-  lines.push("", "═".repeat(78), `${position}  ${r.id}  ${r.channel}/${r.language}/${r.plan.register}  attempt ${r.plan.attempt}`);
-  lines.push(`Why: ${why.join("; ")}${r.plan.designed_ambiguous ? "  [designed ambiguous]" : ""}${r.plan.mixed_language ? "  [mixed cs/sk]" : ""}`);
+  lines.push(
+    "",
+    "═".repeat(78),
+    `${position}  ${r.id}  ${r.channel}/${r.language}/${r.plan.register}  attempt ${r.plan.attempt}`,
+  );
+  lines.push(
+    `Why: ${why.join("; ")}${r.plan.designed_ambiguous ? "  [designed ambiguous]" : ""}${r.plan.mixed_language ? "  [mixed cs/sk]" : ""}`,
+  );
   lines.push("─".repeat(78), r.text, "─".repeat(78));
   const columns: [string, Labels | null][] = [["chosen", r.chosen]];
-  r.graders.forEach((g, i) => columns.push([`${i === 0 ? "A" : "B"} ${g.model.replace("claude-", "")}`, g.output ? labelsFromGrader(g.output, r.chosen) : null]));
+  r.graders.forEach((g, i) =>
+    columns.push([
+      `${i === 0 ? "A" : "B"} ${g.model.replace("claude-", "")}`,
+      g.output ? labelsFromGrader(g.output, r.chosen) : null,
+    ]),
+  );
   lines.push(["field".padEnd(15), ...columns.map(([name]) => name.padEnd(22))].join(""));
   for (const f of FIELD_ORDER) {
     const values = columns.map(([, l]) => (l ? flat(l)[f] : "(invalid)"));
@@ -80,7 +96,9 @@ export function renderRecord(a: AssembledRecord, position: string): string[] {
     lines.push([(differs ? "≠ " : "  ") + f.padEnd(13), ...values.map((v) => v.padEnd(22))].join(""));
   }
   lines.push(`  identifiers   ${r.chosen.fields.identifiers.map((i) => `${i.type}=${i.value}`).join(", ") || "-"}`);
-  r.graders.forEach((g, i) => lines.push(`  ${i === 0 ? "A" : "B"} rationale: ${g.output?.rationale ?? "(invalid output)"}`));
+  r.graders.forEach((g, i) =>
+    lines.push(`  ${i === 0 ? "A" : "B"} rationale: ${g.output?.rationale ?? "(invalid output)"}`),
+  );
   if (r.attack) lines.push(...injectionChecklist(r.attack.tactic, r.attack.goal));
   return lines;
 }
@@ -144,7 +162,11 @@ const HELP_UNGRADED = "  a = accept chosen   e = edit   r = rewrite message   s 
  * Reviews the queue one record at a time. Each decision is passed to `save` immediately.
  * Returns the number of decisions made.
  */
-export async function reviewLoop(queue: readonly AssembledRecord[], io: ReviewIo, save: (e: ReviewLogEntry) => void): Promise<number> {
+export async function reviewLoop(
+  queue: readonly AssembledRecord[],
+  io: ReviewIo,
+  save: (e: ReviewLogEntry) => void,
+): Promise<number> {
   let made = 0;
   for (let i = 0; i < queue.length; i++) {
     const a = queue[i]!;
@@ -185,7 +207,9 @@ export async function reviewLoop(queue: readonly AssembledRecord[], io: ReviewIo
       const entry = decision(a, final, null, note || null);
       save(entry);
       made++;
-      io.print(`  Saved: ${entry.outcome}${entry.changed_fields.length ? ` (${entry.changed_fields.join(", ")})` : ""}`);
+      io.print(
+        `  Saved: ${entry.outcome}${entry.changed_fields.length ? ` (${entry.changed_fields.join(", ")})` : ""}`,
+      );
       done = true;
     }
   }

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { labelRuleErrors, recordErrors, validateGraderOutputSchema, validateLabelsSchema } from "../../eval/schema/validate.js";
+import {
+  labelRuleErrors,
+  recordErrors,
+  validateGraderOutputSchema,
+  validateLabelsSchema,
+} from "../../eval/schema/validate.js";
 import { labels, record } from "./fixtures.js";
 
 describe("labels schema", () => {
@@ -11,12 +16,18 @@ describe("labels schema", () => {
     expect(validateLabelsSchema(labels({ intent: "refund" as never }))).toBe(false);
     expect(validateLabelsSchema({ ...labels(), extra: 1 })).toBe(false);
     expect(
-      validateLabelsSchema(labels({ fields: { identifiers: [{ type: "passport" as never, value: "x" }], service_type: "tv", area: null } })),
+      validateLabelsSchema(
+        labels({
+          fields: { identifiers: [{ type: "passport" as never, value: "x" }], service_type: "tv", area: null },
+        }),
+      ),
     ).toBe(false);
   });
 
   it("accepts a null area", () => {
-    expect(validateLabelsSchema(labels({ fields: { identifiers: [], service_type: "unknown", area: null } }))).toBe(true);
+    expect(validateLabelsSchema(labels({ fields: { identifiers: [], service_type: "unknown", area: null } }))).toBe(
+      true,
+    );
   });
 });
 
@@ -75,7 +86,9 @@ describe("record validation", () => {
     expect(recordErrors(record({ attack: { tactic: "direct_instruction", goal: "reroute" } }))).toEqual([
       "attack must be present exactly on injection records (inj-*)",
     ]);
-    expect(recordErrors(record({ id: "inj-001" }))).toEqual(["attack must be present exactly on injection records (inj-*)"]);
+    expect(recordErrors(record({ id: "inj-001" }))).toEqual([
+      "attack must be present exactly on injection records (inj-*)",
+    ]);
   });
 
   it("checks rules on the final labels too", () => {

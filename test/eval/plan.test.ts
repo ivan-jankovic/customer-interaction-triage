@@ -51,7 +51,9 @@ describe("dataset plan", () => {
 
   it("only gives a secondary intent of lower precedence than the primary", () => {
     for (const e of dataset.filter((x) => x.secondary_intent)) {
-      expect(INTENT_PRECEDENCE.indexOf(e.secondary_intent!)).toBeGreaterThan(INTENT_PRECEDENCE.indexOf(e.chosen.intent));
+      expect(INTENT_PRECEDENCE.indexOf(e.secondary_intent!)).toBeGreaterThan(
+        INTENT_PRECEDENCE.indexOf(e.chosen.intent),
+      );
     }
   });
 

@@ -18,7 +18,11 @@ const START = "<!-- stats:start -->";
 const END = "<!-- stats:end -->";
 
 function table(header: string[], rows: (string | number)[][]): string {
-  return [`| ${header.join(" | ")} |`, `| ${header.map(() => "---").join(" | ")} |`, ...rows.map((r) => `| ${r.join(" | ")} |`)].join("\n");
+  return [
+    `| ${header.join(" | ")} |`,
+    `| ${header.map(() => "---").join(" | ")} |`,
+    ...rows.map((r) => `| ${r.join(" | ")} |`),
+  ].join("\n");
 }
 
 const pct = (n: number, d: number): string => (d === 0 ? "–" : `${Math.round((100 * n) / d)}%`);
@@ -27,11 +31,20 @@ function countBy<T>(items: readonly T[], key: (t: T) => string, keys: readonly s
   return keys.map((k) => [k, items.filter((i) => key(i) === k).length]);
 }
 
-export function statsMarkdown(dataset: readonly DatasetRecord[], injection: readonly DatasetRecord[], runs: readonly RunReport[]): string {
+export function statsMarkdown(
+  dataset: readonly DatasetRecord[],
+  injection: readonly DatasetRecord[],
+  runs: readonly RunReport[],
+): string {
   const final = (r: DatasetRecord) => r.final!;
   const out: string[] = [];
 
-  out.push("## Label statistics", "", `${dataset.length} dataset messages and ${injection.length} injection messages. Counts use the final labels.`, "");
+  out.push(
+    "## Label statistics",
+    "",
+    `${dataset.length} dataset messages and ${injection.length} injection messages. Counts use the final labels.`,
+    "",
+  );
   out.push("### Intent × language", "");
   out.push(
     table(
@@ -48,8 +61,20 @@ export function statsMarkdown(dataset: readonly DatasetRecord[], injection: read
     "",
   );
   out.push("### Channel, urgency and must-review", "");
-  out.push(table(["channel", "messages"], countBy(dataset, (r) => r.channel, CHANNELS)), "");
-  out.push(table(["urgency", "messages"], countBy(dataset, (r) => final(r).urgency, URGENCY)), "");
+  out.push(
+    table(
+      ["channel", "messages"],
+      countBy(dataset, (r) => r.channel, CHANNELS),
+    ),
+    "",
+  );
+  out.push(
+    table(
+      ["urgency", "messages"],
+      countBy(dataset, (r) => final(r).urgency, URGENCY),
+    ),
+    "",
+  );
   out.push(
     table(
       ["must_review", "messages"],
@@ -86,9 +111,17 @@ export function statsMarkdown(dataset: readonly DatasetRecord[], injection: read
         ["needed review (disagreement or invalid grader)", needed.length, injection.length],
         ["random agreement sample", sampled.length, "–"],
         ["reviewed by a person", reviewed.length, injection.filter((r) => r.review.reviewed).length],
-        ["labels changed by the reviewer", changed.length, injection.filter((r) => r.review.changed_fields.length > 0).length],
+        [
+          "labels changed by the reviewer",
+          changed.length,
+          injection.filter((r) => r.review.changed_fields.length > 0).length,
+        ],
         ["  of which in the agreement sample", changed.filter((r) => r.review.sampled).length, "–"],
-        ["messages rewritten", rewritten.filter((r) => r.id.startsWith("msg-")).length, rewritten.filter((r) => r.id.startsWith("inj-")).length],
+        [
+          "messages rewritten",
+          rewritten.filter((r) => r.id.startsWith("msg-")).length,
+          rewritten.filter((r) => r.id.startsWith("inj-")).length,
+        ],
       ],
     ),
     "",
@@ -99,7 +132,12 @@ export function statsMarkdown(dataset: readonly DatasetRecord[], injection: read
   ]);
   out.push("Labels changed by the reviewer, per field:", "", table(["field", "messages"], fieldChanges), "");
 
-  out.push("### Agreement with the final labels", "", "Share of dataset messages where each label source matches the final labels.", "");
+  out.push(
+    "### Agreement with the final labels",
+    "",
+    "Share of dataset messages where each label source matches the final labels.",
+    "",
+  );
   const sources: [string, (r: DatasetRecord) => ReturnType<typeof fromLabels> | null][] = [
     ["chosen (generator)", (r) => fromLabels(r.chosen)],
     ...[0, 1].map((i): [string, (r: DatasetRecord) => ReturnType<typeof fromLabels> | null] => [
@@ -118,7 +156,9 @@ export function statsMarkdown(dataset: readonly DatasetRecord[], injection: read
         const valid = pairs.filter((p) => p.s !== null);
         return [
           name,
-          ...COMPARED_FIELDS.map((field) => pct(valid.filter((p) => p.s![field] === p.f[field]).length, dataset.length)),
+          ...COMPARED_FIELDS.map((field) =>
+            pct(valid.filter((p) => p.s![field] === p.f[field]).length, dataset.length),
+          ),
           pct(valid.filter((p) => COMPARED_FIELDS.every((field) => p.s![field] === p.f[field])).length, dataset.length),
           dataset.length - valid.length,
         ];
@@ -135,9 +175,14 @@ export function statsMarkdown(dataset: readonly DatasetRecord[], injection: read
         r.script,
         r.started.slice(0, 10),
         `${r.jobsDone}/${r.jobsPlanned}`,
-        Object.entries(r.totals).map(([m, t]) => `${m} ×${t.calls}`).join(", "),
+        Object.entries(r.totals)
+          .map(([m, t]) => `${m} ×${t.calls}`)
+          .join(", "),
         Object.values(r.totals)
-          .map((t) => `${t.input_tokens + t.cache_creation_input_tokens} / ${t.cache_read_input_tokens} / ${t.output_tokens}`)
+          .map(
+            (t) =>
+              `${t.input_tokens + t.cache_creation_input_tokens} / ${t.cache_read_input_tokens} / ${t.output_tokens}`,
+          )
           .join("; "),
         r.spentUsd.toFixed(2),
         r.note ?? "",

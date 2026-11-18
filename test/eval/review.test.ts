@@ -112,9 +112,17 @@ describe("reviewLoop", () => {
     const first = queue[0]!.record;
     const otherUrgency = first.chosen.urgency === "low" ? "normal" : "low";
     const io = scripted([
-      "a", "", // accept chosen, no note
-      "e", "", otherUrgency, "", "", "", "fixed urgency", // edit: only urgency changes
-      "r", "Too formal for a chat.", // rewrite
+      "a",
+      "", // accept chosen, no note
+      "e",
+      "",
+      otherUrgency,
+      "",
+      "",
+      "",
+      "fixed urgency", // edit: only urgency changes
+      "r",
+      "Too formal for a chat.", // rewrite
       "q",
     ]);
     const made = await reviewLoop(queue, io, (e) => saved.push(e));
@@ -122,7 +130,12 @@ describe("reviewLoop", () => {
     expect(saved[0]).toMatchObject({ id: queue[0]!.record.id, outcome: "accepted", changed_fields: [] });
     expect(saved[1]).toMatchObject({ id: queue[1]!.record.id, outcome: "corrected", note: "fixed urgency" });
     expect(saved[1]!.changed_fields).toContain("urgency");
-    expect(saved[2]).toMatchObject({ id: queue[2]!.record.id, outcome: "rewrite_requested", final: null, note: "Too formal for a chat." });
+    expect(saved[2]).toMatchObject({
+      id: queue[2]!.record.id,
+      outcome: "rewrite_requested",
+      final: null,
+      note: "Too formal for a chat.",
+    });
   });
 
   it("resumes: decided records leave the queue, a rewrite waits for regeneration", async () => {
@@ -141,13 +154,25 @@ describe("reviewLoop", () => {
     const base = files();
     const target = dataset[5]!;
     const log: ReviewLogEntry[] = [
-      { id: target.id, attempt: 1, outcome: "rewrite_requested", final: null, changed_fields: [], note: "x", reviewed_at: "" },
+      {
+        id: target.id,
+        attempt: 1,
+        outcome: "rewrite_requested",
+        final: null,
+        changed_fields: [],
+        note: "x",
+        reviewed_at: "",
+      },
     ];
     const f: WorkFiles = {
       ...base,
       reviewLog: log,
       generated: [...base.generated, gen(target, 2)],
-      graded: [...base.graded, graded(target, "a", agree(target), 2), graded(target, "b", { ...agree(target), area: "Jinde" }, 2)],
+      graded: [
+        ...base.graded,
+        graded(target, "a", agree(target), 2),
+        graded(target, "b", { ...agree(target), area: "Jinde" }, 2),
+      ],
     };
     const a = assemble(f).records.find((r) => r.record.id === target.id)!;
     expect(a.rewritePending).toBe(false);
@@ -182,6 +207,8 @@ describe("reviewLoop", () => {
 
   it("reports changed fields", () => {
     const c = dataset[0]!.chosen;
-    expect(changedFields(c, { ...c, fields: { ...c.fields, area: "Kolín" } })).toEqual(c.fields.area === "Kolín" ? [] : ["area"]);
+    expect(changedFields(c, { ...c, fields: { ...c.fields, area: "Kolín" } })).toEqual(
+      c.fields.area === "Kolín" ? [] : ["area"],
+    );
   });
 });

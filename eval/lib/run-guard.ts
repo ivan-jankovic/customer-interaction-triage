@@ -86,17 +86,38 @@ export async function runPaidJobs<T>(
   const byModel: Record<string, number> = {};
   for (const c of jobs.flatMap((j) => j.planned)) byModel[c.model] = (byModel[c.model] ?? 0) + 1;
 
-  log(`${script}: ${jobs.length} jobs, ${calls} model calls (${Object.entries(byModel).map(([m, n]) => `${m} x${n}`).join(", ")}).`);
+  log(
+    `${script}: ${jobs.length} jobs, ${calls} model calls (${Object.entries(byModel)
+      .map(([m, n]) => `${m} x${n}`)
+      .join(", ")}).`,
+  );
   log(`Estimated cost: $${estimated.toFixed(2)} without retries or caching. Cap: $${options.maxCost.toFixed(2)}.`);
 
   const base = { script, started, jobsPlanned: jobs.length, estimatedUsd: estimated };
   if (options.dryRun || jobs.length === 0) {
     log(options.dryRun ? "Dry run: no model calls made." : "Nothing to do.");
-    return { ...base, dryRun: options.dryRun, finished: new Date().toISOString(), jobsDone: 0, spentUsd: 0, stoppedByBudget: false, totals: {} };
+    return {
+      ...base,
+      dryRun: options.dryRun,
+      finished: new Date().toISOString(),
+      jobsDone: 0,
+      spentUsd: 0,
+      stoppedByBudget: false,
+      totals: {},
+    };
   }
   if (!options.yes && !(await confirm(`Run ${calls} paid model calls (est. $${estimated.toFixed(2)})?`))) {
     log("Not confirmed: no model calls made.");
-    return { ...base, dryRun: true, finished: new Date().toISOString(), jobsDone: 0, spentUsd: 0, stoppedByBudget: false, totals: {}, note: "not confirmed" };
+    return {
+      ...base,
+      dryRun: true,
+      finished: new Date().toISOString(),
+      jobsDone: 0,
+      spentUsd: 0,
+      stoppedByBudget: false,
+      totals: {},
+      note: "not confirmed",
+    };
   }
 
   const budget = new Budget(options.maxCost);
@@ -110,7 +131,8 @@ export async function runPaidJobs<T>(
         const result = await job.run(budget);
         onResult(job.id, result);
         done++;
-        if (done % 10 === 0 || done === jobs.length) log(`  ${done}/${jobs.length} done, spent $${budget.spent.toFixed(2)}`);
+        if (done % 10 === 0 || done === jobs.length)
+          log(`  ${done}/${jobs.length} done, spent $${budget.spent.toFixed(2)}`);
       } catch (error) {
         if (error instanceof BudgetExceeded) {
           stoppedByBudget = true;
