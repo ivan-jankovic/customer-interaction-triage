@@ -1,5 +1,6 @@
 # Local development services: PostgreSQL and Redis. The app service is added in P02.
-# Credentials are for local development only. CI starts the same file (see .github/workflows/ci.yml).
+# Credentials are for local development only, so every port is published on 127.0.0.1 and is
+# unreachable from other machines. CI starts the same file (see .github/workflows/ci.yml).
 name: customer-interaction-triage
 
 services:
@@ -10,7 +11,7 @@ services:
       POSTGRES_PASSWORD: triage
       POSTGRES_DB: triage
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       # PostgreSQL 18+ images keep data under /var/lib/postgresql/<major>/, so the volume is mounted one level up.
       - postgres-data:/var/lib/postgresql
@@ -25,7 +26,7 @@ services:
     # Append-only persistence: queued jobs survive a Redis restart (tech-stack.md, "Queue consistency").
     command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
     volumes:
       - redis-data:/data
     healthcheck:
