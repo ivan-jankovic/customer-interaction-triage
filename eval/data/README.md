@@ -23,6 +23,36 @@ Steps 2 and 3 call paid models. Each run supports `--dry-run` (prints the planne
 
 The generator and graders are separate from the triage prompts evaluated later, so the pipeline is never scored on labels it produced itself.
 
+## Models, prompts and seeds (this build)
+
+| Step | Model | Prompt | Settings |
+| --- | --- | --- | --- |
+| Generate | `claude-opus-5-5` | [`generate.v1`](../prompts/generate.v1.md) | structured output, effort `medium`, up to 3 tries per message |
+| Grade A | `claude-sonnet-5-5` | [`grade.v1`](../prompts/grade.v1.md) | structured output, one retry on invalid output |
+| Grade B | `claude-haiku-5-5` | [`grade.v1`](../prompts/grade.v1.md) | structured output, one retry on invalid output |
+
+- **Plan seed** `20261118` (`eval/dataset/plan.ts`), **agreement sample seed** `20261118`, sample size 10 (`eval/dataset/mismatch.ts`).
+- Both prompts embed the full [labelling guide](../labelling-guide.md). The guide and the system prompt are cached between calls.
+- Model output is validated with Ajv against the schemas in `eval/schema/`; invalid output is retried or marked invalid, never used as a label.
+- Built on 2026-11-18. All 115 messages were accepted on the first generation try, and no message was rewritten during review.
+
+## Review notes
+
+- **Injection messages** are not graded: their labels describe the expected behaviour, and a grading model could be misled by the very text it grades. The reviewer checks each one for three things: the attack is really in the text (tactic and goal as planned), the labels fit the customer's real request, and the labels do not follow the injected instruction.
+- **Urgency is the softest label.** Every reviewer correction in this build was on urgency (one also changed `must_review`); intent never disagreed. Treat urgency scores in later evaluations with this in mind.
+- **The messages may be on the easy side.** The 15 deliberately ambiguous messages are 8 with several intents (settled by precedence) and 7 planned as `unclear`; 6 of the 7 kept `unclear` after review. But only 3 of the 15 made the graders disagree, intent never disagreed, and the 10-message agreement sample needed no corrections. The generator saw the labelling guide, so messages tend to be clear examples. Harder cases can be added later with a new generation prompt version.
+
+## How to rebuild
+
+1. `cp .env.example .env` and set `ANTHROPIC_API_KEY`. Model choices can be overridden with `DATASET_GENERATOR_MODEL`, `DATASET_GRADER_A_MODEL` and `DATASET_GRADER_B_MODEL`.
+2. `npm run dataset:plan`. Deterministic: the same seed gives the same plan.
+3. `npm run dataset:generate -- --dry-run` to see the estimate, then without `--dry-run`. Options: `--max-cost <usd>` (default 10), `--concurrency <n>` (default 4), `--only <id,id>`, `--yes` (skip the prompt).
+4. `npm run dataset:grade`, with the same options.
+5. `npm run dataset:review` in an interactive terminal. Decisions are appended to `.work/review-log.jsonl`, so a session can stop with `q` and resume. A rewrite request needs `dataset:generate --only <id>` and `dataset:grade --only <id>` before the message comes back to the queue.
+6. `npm run dataset:finalize`, then `npm run dataset:stats`.
+
+The generation, grading, review and run files are append-only, and the scripts skip messages that are already done; `dataset:plan` rewrites `plan.jsonl`. A fresh build starts by deleting the files in `.work/`. Model output is not deterministic, so a rebuild produces different texts and needs a new review.
+
 <!-- stats:start -->
 ## Label statistics
 

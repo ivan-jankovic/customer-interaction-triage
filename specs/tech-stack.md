@@ -43,13 +43,28 @@ Saving a message (PostgreSQL) and enqueueing its job (Redis) are two separate wr
 
 Final fields are fixed in the phase specs.
 
-## Intents (initial list, finalized in P00)
+## Intents, teams and labels (finalized in P00)
 
-`billing_question`, `technical_fault`, `tariff_change`, `cancellation`, `complaint`, `other`
+Defined in code in `src/taxonomy.ts`, with definitions, examples and borderline cases in the [labelling guide](../eval/labelling-guide.md).
+
+| Intent | Team |
+| --- | --- |
+| `billing_question` | `billing` |
+| `technical_fault` | `technical_support` |
+| `tariff_change` | `sales` |
+| `cancellation` | `retention` |
+| `complaint` | `complaints` |
+| `other` | `general` |
+
+- **One primary intent per message.** When several apply, precedence decides: `cancellation` > `complaint` > `technical_fault` > `billing_question` > `tariff_change` > `other`.
+- **Urgency:** `low`, `normal`, `high`.
+- **Review reasons in the dataset:** `cancellation`, `complaint` (by rule, from the intent) and `unclear` (by judgement). `must_review` is true exactly when there is at least one reason. Runtime reasons (confidence, CRM mismatch, …) are added in P07.
+- **Fields:** `identifiers` (typed: `customer_number`, `contract_number`, `phone`, `email`, `birth_number`, `bank_account`, `iban`, each with its value exactly as written), `service_type` (`internet`, `mobile`, `tv`, `unknown`) and `area` (town in nominative form, or none).
+- **Dataset record:** `{ intent, urgency, must_review, review_reasons, expected_team, fields: { identifiers, service_type, area } }`, schema in `eval/schema/`.
 
 ## Routing rules (initial)
 
-- Target team by intent (billing, technical support, sales, retention, complaints, general).
+- Target team by intent, as in the table above.
 - **Always review:** `cancellation`, `complaint`, confidence below threshold, invalid model output, customer not found or ambiguous, CRM mismatch, investigation inconclusive.
 - Rules live in code and are covered by unit tests; every applied rule is written to the decision log as a reason code.
 
