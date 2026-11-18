@@ -1,0 +1,13 @@
+# Only package*.json, tsconfig*.json and src/ are copied; this keeps everything else, and
+# above all any .env with real keys, out of the build context.
+.env
+.env.*
+!.env.example
+.git
+node_modules
+dist
+coverage
+eval
+test
+specs
+*.md

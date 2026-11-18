@@ -1,4 +1,4 @@
-# Weekly updates for npm packages, the pinned GitHub Actions SHAs and the Compose images.
+# Weekly updates for npm packages, the pinned GitHub Actions SHAs, the Compose images and the Dockerfile base image.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -30,3 +30,13 @@ updates:
     directory: /
     schedule:
       interval: weekly
+
+  # The Node base image in the Dockerfile. Majors are ignored for the same reason as
+  # @types/node: the image follows the Node 24 runtime (.nvmrc) and moves with it by hand.
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: node
+        update-types: [version-update:semver-major]
