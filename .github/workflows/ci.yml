@@ -31,13 +31,18 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npm run typecheck
+      - run: npm run build
       - run: npm test
       - run: npm run audit
 
   integration:
     name: integration
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    env:
+      # Not a secret: this key only exists inside this throwaway CI stack, which no one else can
+      # reach. It is fixed so the app container starts (P02 requirements.md, "CI").
+      INTAKE_API_KEY: ci-only-intake-key-not-a-secret-0123456789
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -47,8 +52,17 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # The same Compose file as locally, so CI runs Redis with AOF (P01 requirements.md, "Services in CI").
+      # The same Compose file as locally: it builds the app image, runs the migrate service and
+      # starts the API, and Redis runs with AOF (P01 requirements.md, "Services in CI").
       - run: docker compose up -d --wait
+      - name: API answers through the published port
+        run: |
+          curl --fail --silent --show-error http://127.0.0.1:3000/health
+          curl --fail --silent --show-error -o /dev/null -X POST http://127.0.0.1:3000/interactions \
+            -H "x-api-key: $INTAKE_API_KEY" -H 'content-type: application/json' \
+            -d '{"channel":"chat","text":"CI smoke test"}'
+      - if: failure()
+        run: docker compose logs --no-color
       - run: npm run test:integration
       - if: always()
         run: docker compose down -v
