@@ -1,0 +1,28 @@
+# Weekly updates for npm packages, the pinned GitHub Actions SHAs and the Compose images.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      # One PR for routine minor and patch updates; majors arrive one by one.
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Kept on 7.0.x on purpose: the TypeScript 6 API alias for typescript-eslint
+      # (package.json "//" note) is revisited by hand when typescript-eslint supports 7.1+.
+      - dependency-name: "@typescript/native"
+        update-types: [version-update:semver-minor, version-update:semver-major]
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
