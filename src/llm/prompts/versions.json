@@ -1,0 +1,17 @@
+{
+  "//": "SHA-256 of every published prompt file. A published prompt never changes: to edit one, add a new version (e.g. classify.v2) and its entry here. Checked by test/llm/prompt-versions.test.ts.",
+  "prompts": {
+    "classify.v1": {
+      "file": "src/llm/prompts/classify.v1.md",
+      "sha256": "5cbe9e96e1f574927aad9a5f66d095be6ff6aab97367ee56a1f2b20e5ccbe4b6"
+    },
+    "generate.v1": {
+      "file": "eval/prompts/generate.v1.md",
+      "sha256": "1e70e7555f4085e0f55d3c010b51f9b87e937012efc157b6e6ba233fd71a0ef3"
+    },
+    "grade.v1": {
+      "file": "eval/prompts/grade.v1.md",
+      "sha256": "22abf7685dd961dea790e42c974905ff95f2a373ba3e8bd4967b4f68c4891acf"
+    }
+  }
+}
