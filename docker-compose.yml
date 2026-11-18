@@ -1,5 +1,8 @@
-# Local development services: PostgreSQL and Redis. The app service is added in P02.
-# Credentials are for local development only. CI starts the same file (see .github/workflows/ci.yml).
+# The local stack: PostgreSQL, Redis, the one-shot `migrate` service and the intake API (`app`).
+# `docker compose up -d --wait` builds the image (Dockerfile), migrates, then starts the API.
+# Credentials are for local development only, so every port is published on 127.0.0.1 and is
+# unreachable from other machines. CI starts the same file (see .github/workflows/ci.yml).
+# INTAKE_API_KEY is read from .env (see .env.example); without it, `app` exits with a message.
 name: customer-interaction-triage
 
 services:
@@ -10,7 +13,7 @@ services:
       POSTGRES_PASSWORD: triage
       POSTGRES_DB: triage
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       # PostgreSQL 18+ images keep data under /var/lib/postgresql/<major>/, so the volume is mounted one level up.
       - postgres-data:/var/lib/postgresql
@@ -25,11 +28,51 @@ services:
     # Append-only persistence: queued jobs survive a Redis restart (tech-stack.md, "Queue consistency").
     command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
     volumes:
       - redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  # Applies pending migrations and exits; `app` starts only after it succeeded, so the API
+  # never runs against an old schema or races a migration (P02 requirements.md).
+  migrate:
+    build: .
+    image: customer-interaction-triage-app
+    command: ["node", "dist/db/migrate.js", "latest"]
+    environment:
+      DATABASE_URL: postgres://triage:triage@postgres:5432/triage
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    build: .
+    image: customer-interaction-triage-app
+    environment:
+      DATABASE_URL: postgres://triage:triage@postgres:5432/triage
+      INTAKE_API_KEY: ${INTAKE_API_KEY:-}
+      # Inside the container the API must listen on all interfaces; the port mapping below
+      # still publishes it on 127.0.0.1 only.
+      HOST: 0.0.0.0
+      PORT: "3000"
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      # The image has no curl; Node's fetch does the same.
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))",
+        ]
       interval: 2s
       timeout: 3s
       retries: 30

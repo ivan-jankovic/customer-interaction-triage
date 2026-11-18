@@ -9,7 +9,7 @@ import prettier from "eslint-config-prettier/flat";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
-  { ignores: ["node_modules/", "coverage/", "eval/data/"] },
+  { ignores: ["node_modules/", "coverage/", "dist/", "eval/data/"] },
   {
     files: ["**/*.{js,ts}"],
     extends: [js.configs.recommended, tseslint.configs.recommendedTypeChecked],

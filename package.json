@@ -27,12 +27,19 @@
     "format:check": "prettier --check .",
     "db:migrate": "tsx --env-file-if-exists=.env src/db/migrate.ts latest",
     "db:rollback": "tsx --env-file-if-exists=.env src/db/migrate.ts down",
-    "test:integration": "vitest run --config vitest.integration.config.ts"
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "build": "node node_modules/@typescript/native/bin/tsc -p tsconfig.build.json",
+    "dev": "tsx watch --env-file-if-exists=.env src/api/server.ts",
+    "start": "node dist/api/server.js",
+    "db:migrate:dist": "node dist/db/migrate.js latest",
+    "dataset:load": "tsx --env-file-if-exists=.env eval/dataset/load.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",
+    "@fastify/type-provider-json-schema-to-ts": "^5.0.1",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
+    "fastify": "^5.12.8",
     "ioredis": "^6.0.0",
     "json-schema-to-ts": "^3.1.1",
     "kysely": "^0.29.9",

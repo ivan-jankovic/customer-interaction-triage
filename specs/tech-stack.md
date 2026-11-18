@@ -33,7 +33,7 @@ Saving a message (PostgreSQL) and enqueueing its job (Redis) are two separate wr
 
 ## Data model (initial)
 
-- `interactions`: id, channel (`email` | `chat` | `call`), language, raw text, masked text, received at, status
+- `interactions`: id (uuidv7), external id (the caller's own id, unique when set), channel (`email` | `chat` | `call`), language (`cs` | `sk` | `en`, nullable when unknown), raw text, received at, status, created at (from P02); masked text (P05)
 - `classifications`: interaction id, intent, urgency, extracted fields, summary, confidence, model, prompt version, tokens, latency
 - `investigations`: interaction id, steps taken, tools called, likely cause, evidence, confidence
 - `cases`: id, interaction id, customer id (nullable), target team, needs review, reason codes, created at

@@ -8,7 +8,7 @@ import { inspect } from "node:util";
 import { fileURLToPath } from "node:url";
 import type { Kysely } from "kysely";
 import { FileMigrationProvider, Migrator, type MigrationResultSet } from "kysely/migration";
-import { loadServiceConfig } from "../config.js";
+import { loadDatabaseUrl } from "../config.js";
 import { createDb } from "./database.js";
 
 export const MIGRATIONS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "migrations");
@@ -34,10 +34,10 @@ export function report(result: MigrationResultSet, log: (line: string) => void =
 
 async function main(command: string | undefined): Promise<number> {
   if (command !== "latest" && command !== "down") {
-    console.error("Usage: tsx src/db/migrate.ts latest|down");
+    console.error("Usage: migrate.ts latest|down");
     return 2;
   }
-  const db = createDb(loadServiceConfig().databaseUrl);
+  const db = createDb(loadDatabaseUrl());
   try {
     const migrator = createMigrator(db);
     const result = command === "latest" ? await migrator.migrateToLatest() : await migrator.migrateDown();
