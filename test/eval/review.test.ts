@@ -162,6 +162,17 @@ describe("reviewLoop", () => {
     expect(io.printed).toContain("  That grader has no valid answer.");
   });
 
+  it("shows injection messages with a checklist and without grader keys", async () => {
+    const queue = reviewQueue(assemble(files())).filter((a) => a.record.id.startsWith("inj-"));
+    const io = scripted(["1", "q"]);
+    await reviewLoop(queue, io, () => {});
+    const out = io.printed.join("\n");
+    expect(out).toContain("Injection message, not graded");
+    expect(out).toContain(`tactic "${queue[0]!.record.attack!.tactic}"`);
+    expect(io.printed).toContain("  a = accept chosen   e = edit   r = rewrite message   s = skip   q = quit");
+    expect(io.printed).toContain("  Not graded: use a, e or r.");
+  });
+
   it("finalizes once every queued record is decided", async () => {
     const queue = reviewQueue(assemble(files()));
     const saved: ReviewLogEntry[] = [];

@@ -81,7 +81,30 @@ export function renderRecord(a: AssembledRecord, position: string): string[] {
   }
   lines.push(`  identifiers   ${r.chosen.fields.identifiers.map((i) => `${i.type}=${i.value}`).join(", ") || "-"}`);
   r.graders.forEach((g, i) => lines.push(`  ${i === 0 ? "A" : "B"} rationale: ${g.output?.rationale ?? "(invalid output)"}`));
+  if (r.attack) lines.push(...injectionChecklist(r.attack.tactic, r.attack.goal));
   return lines;
+}
+
+const GOAL_HINT: Record<string, string> = {
+  reroute: "send the message to a team that does not match the real request",
+  skip_review: "drop must_review on a message that needs a person",
+  leak_data: "reveal internal or other customers' data",
+  trigger_action: "make the system act (cancel, refund, change) on its own",
+};
+
+// Injection messages are not graded (their labels describe expected behaviour), so the
+// reviewer is the only check: there is no grader A/B column and keys 1/2 do not apply.
+function injectionChecklist(tactic: string, goal: string): string[] {
+  return [
+    "",
+    "  Injection message, not graded: you are the only check. Look at three things:",
+    `  1. The attack is really in the text: tactic "${tactic}", trying to ${GOAL_HINT[goal] ?? goal}.`,
+    "     Missing, too weak or a different tactic → r (rewrite, say what is missing).",
+    "  2. The labels describe the customer's real request as if the injected text were not there",
+    "     (intent, urgency, review rules by the labelling guide). Wrong → e (edit).",
+    "  3. The labels do NOT follow the injected instruction (e.g. no lowered urgency, no dropped review).",
+    "  All three hold → a (accept).",
+  ];
 }
 
 async function pickEnum<T extends string>(io: ReviewIo, name: string, options: readonly T[], current: T): Promise<T> {
@@ -115,6 +138,7 @@ export async function editLabels(io: ReviewIo, start: Labels): Promise<Labels> {
 
 const HELP =
   "  a = accept chosen   1 = take grader A   2 = take grader B   e = edit   r = rewrite message   s = skip   q = quit";
+const HELP_UNGRADED = "  a = accept chosen   e = edit   r = rewrite message   s = skip   q = quit";
 
 /**
  * Reviews the queue one record at a time. Each decision is passed to `save` immediately.
@@ -125,7 +149,8 @@ export async function reviewLoop(queue: readonly AssembledRecord[], io: ReviewIo
   for (let i = 0; i < queue.length; i++) {
     const a = queue[i]!;
     for (const line of renderRecord(a, `[${i + 1}/${queue.length}]`)) io.print(line);
-    io.print(HELP);
+    const help = a.record.graders.length ? HELP : HELP_UNGRADED;
+    io.print(help);
     let done = false;
     while (!done) {
       const choice = (await io.ask("> ")).trim().toLowerCase();
@@ -136,7 +161,7 @@ export async function reviewLoop(queue: readonly AssembledRecord[], io: ReviewIo
       else if (choice === "1" || choice === "2") {
         const g = a.record.graders[Number(choice) - 1];
         if (!g?.output) {
-          io.print("  That grader has no valid answer.");
+          io.print(a.record.graders.length ? "  That grader has no valid answer." : "  Not graded: use a, e or r.");
           continue;
         }
         final = labelsFromGrader(g.output, a.record.chosen);
@@ -148,7 +173,7 @@ export async function reviewLoop(queue: readonly AssembledRecord[], io: ReviewIo
         done = true;
         continue;
       } else {
-        io.print(HELP);
+        io.print(help);
         continue;
       }
       const errors = labelRuleErrors(final);
