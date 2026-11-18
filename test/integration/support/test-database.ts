@@ -35,6 +35,16 @@ export async function createTestDatabase({ migrate }: { migrate: boolean }): Pro
     db,
     async drop() {
       await db.destroy();
+      // pool.end() resolves before the server has closed every connection. Dropping "with (force)"
+      // at that moment terminates connections the client is still closing, which pg reports as
+      // unhandled errors (seen in CI with the API test's parallel connections). So wait until the
+      // server shows none, and keep "force" only as the fallback after 5 seconds.
+      for (let waited = 0; waited < 5_000; waited += 50) {
+        const r = await sql<{ n: string }>`
+          select count(*) as n from pg_stat_activity where datname = ${name}`.execute(admin);
+        if (Number(r.rows[0]?.n) === 0) break;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
       await sql`drop database if exists ${sql.id(name)} with (force)`.execute(admin);
       await admin.destroy();
     },
