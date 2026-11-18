@@ -49,14 +49,16 @@ describe("generation prompt", () => {
   });
 });
 
+const messageText = (json: string): string => (JSON.parse(json) as { text: string }).text;
+
 describe("checkGenerated", () => {
   it("accepts a message with every identifier verbatim", () => {
-    expect(checkGenerated(JSON.parse(emailFor(withIds)).text, withIds)).toEqual([]);
+    expect(checkGenerated(messageText(emailFor(withIds)), withIds)).toEqual([]);
   });
 
   it("rejects a missing or reformatted identifier", () => {
     const id = withIds.chosen.fields.identifiers[0]!;
-    const text = JSON.parse(emailFor(withIds)).text.replace(id.value, id.value.replace(/\s/g, "-") + "x");
+    const text = messageText(emailFor(withIds)).replace(id.value, id.value.replace(/\s/g, "-") + "x");
     expect(checkGenerated(text, withIds).join()).toContain("missing or altered");
   });
 

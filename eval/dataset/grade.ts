@@ -50,7 +50,7 @@ export function buildGradeRequest(text: string, channel: string, prompt: PromptT
     model,
     system: render(prompt.system, { labelling_guide: guide }),
     user: render(prompt.user, { channel, text }),
-    schema: graderOutputSchema as unknown as Record<string, unknown>,
+    schema: graderOutputSchema,
     maxTokens: MAX_TOKENS,
     effort: "medium",
   };

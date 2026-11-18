@@ -104,7 +104,10 @@ export function statsMarkdown(dataset: readonly DatasetRecord[], injection: read
     ["chosen (generator)", (r) => fromLabels(r.chosen)],
     ...[0, 1].map((i): [string, (r: DatasetRecord) => ReturnType<typeof fromLabels> | null] => [
       `grader ${i === 0 ? "A" : "B"} (${dataset[0]?.graders[i]?.model ?? "?"})`,
-      (r) => (r.graders[i]?.output ? fromGrader(r.graders[i]!.output!) : null),
+      (r) => {
+        const output = r.graders[i]?.output;
+        return output ? fromGrader(output) : null;
+      },
     ]),
   ];
   out.push(

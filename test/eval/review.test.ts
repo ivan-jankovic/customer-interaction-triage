@@ -67,10 +67,10 @@ function scripted(answers: string[]): ReviewIo & { printed: string[] } {
   const printed: string[] = [];
   return {
     printed,
-    ask: async () => {
+    ask: () => {
       const next = answers.shift();
-      if (next === undefined) throw new Error("script ran out of answers");
-      return next;
+      if (next === undefined) return Promise.reject(new Error("script ran out of answers"));
+      return Promise.resolve(next);
     },
     print: (l) => printed.push(l),
   };

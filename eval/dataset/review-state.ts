@@ -154,7 +154,7 @@ export async function reviewLoop(queue: readonly AssembledRecord[], io: ReviewIo
     let done = false;
     while (!done) {
       const choice = (await io.ask("> ")).trim().toLowerCase();
-      let final: Labels | null = null;
+      let final: Labels;
       if (choice === "q") return made;
       if (choice === "s") break;
       if (choice === "a") final = normaliseLabels(a.record.chosen);

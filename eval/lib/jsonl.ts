@@ -10,7 +10,7 @@ export function readJsonl<T>(path: string): T[] {
       try {
         return JSON.parse(line) as T;
       } catch (error) {
-        throw new Error(`${path}:${i + 1}: invalid JSON (${String(error)})`);
+        throw new Error(`${path}:${i + 1}: invalid JSON (${String(error)})`, { cause: error });
       }
     });
 }

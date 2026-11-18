@@ -9,7 +9,7 @@ The branch `p01-project-skeleton` can be merged when every check below passes.
 - [ ] `npm run lint` passes with typescript-eslint `recommendedTypeChecked`; every disabled rule or inline disable has a written reason. **(ci)**
 - [ ] `npm run format:check` passes. **(ci)**
 - [ ] `npm run typecheck` passes and runs TypeScript 7.0.x (`npx tsc --version` through the script's binary). **(ci)**
-- [ ] `npm test` passes without Docker running, with no network access and no `ANTHROPIC_API_KEY` set; the P00 tests pass unchanged apart from formatting. **(ci)**
+- [ ] `npm test` passes without Docker running, with no network access and no `ANTHROPIC_API_KEY` set; the P00 tests keep their assertions (only formatting and lint fixes such as `Promise.resolve` instead of `async` without `await`). **(ci)**
 - [ ] `npm run audit` passes with an empty allowlist (picomatch 4.0.7 fixed GHSA-fc5q-39xc-vjpf), or any new entry was decided with the user and recorded in requirements.md. **(ci)**
 
 ## Local services

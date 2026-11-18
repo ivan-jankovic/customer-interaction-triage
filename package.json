@@ -21,7 +21,8 @@
     "dataset:grade": "tsx --env-file-if-exists=.env eval/dataset/grade.ts",
     "dataset:review": "tsx eval/dataset/review.ts",
     "dataset:finalize": "tsx eval/dataset/finalize.ts",
-    "dataset:stats": "tsx eval/dataset/stats.ts"
+    "dataset:stats": "tsx eval/dataset/stats.ts",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",
@@ -30,11 +31,14 @@
     "json-schema-to-ts": "^3.1.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^24.19.2",
     "@typescript/native": "npm:typescript@^7.0.2",
     "audit-ci": "^7.1.0",
+    "eslint": "^10.15.0",
     "tsx": "^4.23.15",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "typescript-eslint": "^8.73.0",
     "vitest": "^5.1.1"
   }
 }
