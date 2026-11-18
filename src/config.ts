@@ -1,6 +1,9 @@
 // Runtime configuration from environment variables. Values for local development are in
 // .env.example; scripts load .env with `--env-file-if-exists=.env`.
 
+import { EFFORTS, type Effort } from "./llm/client.js";
+import { hasPrice } from "./llm/pricing.js";
+
 export interface ServiceConfig {
   databaseUrl: string;
   redisUrl: string;
@@ -51,4 +54,26 @@ export function loadApiConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     throw new Error(`PORT must be a whole number from 1 to 65535, got "${portText}".`);
   }
   return { databaseUrl, intakeApiKey, host: env.HOST?.trim() || "127.0.0.1", port };
+}
+
+export interface ClassifierConfig {
+  model: string;
+  effort: Effort;
+}
+
+/**
+ * The understanding step's model and effort (P03): claude-opus-5-5 at effort low unless
+ * TRIAGE_MODEL / TRIAGE_EFFORT say otherwise. The model must have a price in
+ * src/llm/pricing.ts, so every run's cost can be reported.
+ */
+export function loadClassifierConfig(env: NodeJS.ProcessEnv = process.env): ClassifierConfig {
+  const model = env.TRIAGE_MODEL?.trim() || "claude-opus-5-5";
+  const effort = env.TRIAGE_EFFORT?.trim() || "low";
+  if (!hasPrice(model)) {
+    throw new Error(`TRIAGE_MODEL "${model}" has no price in src/llm/pricing.ts; add it there first.`);
+  }
+  if (!(EFFORTS as readonly string[]).includes(effort)) {
+    throw new Error(`TRIAGE_EFFORT must be one of ${EFFORTS.join(", ")}, got "${effort}".`);
+  }
+  return { model, effort: effort as Effort };
 }
