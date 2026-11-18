@@ -16,6 +16,10 @@ updates:
         update-types: [version-update:semver-minor, version-update:semver-major]
       - dependency-name: typescript
         update-types: [version-update:semver-major]
+      # Matches the Node.js runtime (24, see .nvmrc and "engines"); newer types would allow APIs
+      # Node 24 doesn't have. Raise it by hand together with .nvmrc when moving to a new Node LTS.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
