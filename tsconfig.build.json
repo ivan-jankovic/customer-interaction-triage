@@ -1,0 +1,12 @@
+{
+  // Compiles src/ to dist/ for the container (npm run build, TypeScript 7). Type checking of
+  // everything (eval/, test/) stays with tsconfig.json and `npm run typecheck`.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "dist",
+    "sourceMap": true
+  },
+  "include": ["src"]
+}

@@ -5,3 +5,4 @@ node_modules/
 eval/data/.work/*.lock
 coverage/
 .DS_Store
+dist/
