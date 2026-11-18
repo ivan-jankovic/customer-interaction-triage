@@ -26,7 +26,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:migrate": "tsx --env-file-if-exists=.env src/db/migrate.ts latest",
-    "db:rollback": "tsx --env-file-if-exists=.env src/db/migrate.ts down"
+    "db:rollback": "tsx --env-file-if-exists=.env src/db/migrate.ts down",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",
