@@ -44,6 +44,35 @@ export const ZERO_USAGE: LlmUsage = {
   cache_read_input_tokens: 0,
 };
 
+const UNSUPPORTED_KEYWORDS = new Set([
+  "minLength",
+  "maxLength",
+  "pattern",
+  "minimum",
+  "maximum",
+  "exclusiveMinimum",
+  "exclusiveMaximum",
+  "multipleOf",
+  "minItems",
+  "maxItems",
+  "uniqueItems",
+]);
+
+/**
+ * Structured outputs reject string, number and complex array constraints. They are
+ * removed from the schema sent to the API; callers still validate the full schema with
+ * Ajv, so the constraints are enforced client-side.
+ */
+export function toApiSchema(schema: unknown): unknown {
+  if (Array.isArray(schema)) return schema.map(toApiSchema);
+  if (schema === null || typeof schema !== "object") return schema;
+  return Object.fromEntries(
+    Object.entries(schema)
+      .filter(([key]) => !UNSUPPORTED_KEYWORDS.has(key))
+      .map(([key, value]) => [key, key === "enum" || key === "const" ? value : toApiSchema(value)]),
+  );
+}
+
 export function createAnthropicClient(): LlmClient {
   const client = new Anthropic({ maxRetries: 3 });
   return {
@@ -58,7 +87,9 @@ export function createAnthropicClient(): LlmClient {
           messages: [{ role: "user", content: request.user }],
           output_config: {
             effort: request.effort,
-            ...(request.schema ? { format: { type: "json_schema", schema: request.schema } } : {}),
+            ...(request.schema
+              ? { format: { type: "json_schema", schema: toApiSchema(request.schema) as Record<string, unknown> } }
+              : {}),
           },
         });
         const usage: LlmUsage = {
