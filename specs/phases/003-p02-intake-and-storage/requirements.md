@@ -128,3 +128,9 @@ Labels from the dataset (intent, urgency and so on) never enter this table. They
 - **TypeScript 7 emit.** `npm run build` uses the TypeScript 7 compiler (the `@typescript/native` alias). If its emit turns out to be unsuitable, falling back to the TypeScript 6 compiler for the build is raised as a decision first.
 - **`interactions.language` is now nullable** in [tech-stack.md](../../tech-stack.md)'s data model, and `external_id` and `created_at` are added there.
 - **Postgres and Redis ports are now published on `127.0.0.1` only** (they were on all interfaces since P01). This matches the app's binding and keeps the development credentials off the local network. Decided after spec review.
+- **Implementation notes (recorded during implementation):**
+  - Request bodies are validated with an Ajv instance that has type coercion off (Fastify's default would turn `"text": 123` into `"123"`). Query strings and path parameters keep coercion, because `?limit=10` arrives as text.
+  - The migrator now needs only `DATABASE_URL` (`loadDatabaseUrl`), because the `migrate` container has no Redis.
+  - Errors with status 500 get a generic message, so database error text never reaches the caller.
+  - Dependabot ignores major updates of the `node` base image, for the same reason it ignores `@types/node` majors: the image follows the Node 24 runtime.
+  - The CI integration job also sends one `POST /interactions` through the published port, with `curl`, as a smoke test, and prints the Compose logs if a step fails.
