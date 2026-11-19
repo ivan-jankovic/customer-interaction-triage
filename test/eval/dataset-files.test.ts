@@ -17,6 +17,7 @@ import { deniedNamesIn } from "../../eval/lib/denylist.js";
 import { readJsonl } from "../../eval/lib/jsonl.js";
 import { sha256File } from "../../eval/lib/hash.js";
 import { PATHS } from "../../eval/lib/paths.js";
+import { SMALL_SUBSET_PATH } from "../../eval/subsets.js";
 
 const dataset = readJsonl<DatasetRecord>(PATHS.dataset);
 const injection = readJsonl<DatasetRecord>(PATHS.injection);
@@ -160,6 +161,8 @@ describe("pinned dataset files", () => {
   it.each([
     [PATHS.dataset, "94ee3b2f479d1187005ce434d2e09fbd890447e7ba02ff25641d88261f6c77a9"],
     [PATHS.injection, "1ebe8caec43842d23c90533ddfa69cd440c463b9751bd669105e96a0038e465b"],
+    // P12: the CI threshold (16 of 18 intents) is counted on this subset.
+    [SMALL_SUBSET_PATH, "d9e37e41b8d11484203375af6b7c45b665e36a3a61c6dbdd4a7aeb5f70ac526f"],
   ])("%s is unchanged", (path, hash) => {
     expect(sha256File(path)).toBe(hash);
   });

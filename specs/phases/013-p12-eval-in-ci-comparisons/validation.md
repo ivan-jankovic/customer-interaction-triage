@@ -19,7 +19,7 @@ How each check is marked:
 - [ ] `eval:check` passes a small run with 18/18 and 16/18 right intents and full must-review recall. **(test)**
 - [ ] It fails a run with 15/18 right intents, a run with one missed must-review message, an incomplete run and a `full` run, and exits 1 for each. **(test)**
 - [ ] `--min-intent-correct` raises the bar; the thresholds are message counts in `eval/ci-threshold.ts`. **(test)**
-- [ ] It passes on the stored small `classify.v2` run's metrics. **(test)**
+- [ ] It passes on the kept full `classify.v2` outputs for the 18 small-subset messages (see requirements.md, Implementation notes). **(test)**
 
 ## CI
 

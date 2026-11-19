@@ -99,3 +99,31 @@ Decided during spec review: **`claude-opus-5-5` vs `claude-sonnet-5-5`, on the f
 - **`CLAUDE.md`** says to merge when `checks` and `integration` are green; it gains "and `eval` when it ran".
 - **Pricing:** `src/llm/pricing.ts` already has `claude-sonnet-5-5` ($2 / $10 per million tokens), so `TRIAGE_MODEL` accepts it without a code change.
 - **No new dependencies** are expected.
+
+## Implementation notes
+
+- **The real-data test of `eval:check`** (plan 1.3) doesn't use the stored small `classify.v2` run: that run is from P05, before routing metrics, and `eval/results/*` is not committed, so CI couldn't read it. The test builds a small run from the **kept full `classify.v2` outputs** for the 18 subset messages instead, scored against the real dataset and seed: the same model and prompt as a CI run, without a model call.
+- **The run hands its folder to the workflow** through `$GITHUB_OUTPUT` (`run-id`, `run-dir`), written by `npm run eval` only when that variable is set (plan 4.2).
+- **The key reaches one step only.** `eval.yml` checks for the secret with `secrets.ANTHROPIC_API_KEY != ''` (only "true" or "false" reaches the shell), and gives the key itself to the eval step alone, so `npm ci` install scripts never see it.
+- **The path list is written once,** as a YAML anchor shared by `pull_request` and `push` (GitHub Actions supports anchors and aliases).
+- **`actions/upload-artifact`** is pinned to v7.0.2 (`cf430e0…`, released 2026-10-07).
+
+## Results (recorded during implementation)
+
+- **Comparison** `eval/results/kept/comparisons/p12-opus-vs-sonnet.md`: the kept `claude-opus-5-5` run against a new kept full run on `claude-sonnet-5-5` (`20261119-232004-full-claude-sonnet-5-5-classify.v2`), both `classify.v2`, effort low, `mask.v1`, `summary-judge.v1` on `claude-haiku-5-5`, the same dataset (`94ee3b2f479d`) and `route.v4`. The Sonnet run cost **$0.33** (estimate $1.08 before caching).
+
+  | Metric | Opus 5.5 | Sonnet 5.5 |
+  | --- | --- | --- |
+  | Valid outputs | 100% | 100% |
+  | Intent accuracy / macro F1 | 100% / 1.00 | 100% / 1.00 |
+  | Routing accuracy (team) | 100% | 100% |
+  | Must-review recall / precision | 100% (38/38) / 67.9% | 100% (38/38) / 67.9% |
+  | Review rate | 56% | 56% |
+  | Urgency accuracy | 89% | 85% (cs 90% → 83.3%) |
+  | Service type / area | 98% / 99% | 100% / 100% |
+  | Summary faithful / complete | 4.86 / 4.49 | 4.88 / 4.45 |
+  | Mean confidence, right intents | 0.86 | 0.88 |
+  | Cost per message | $0.0060 | $0.0033 |
+  | Latency p50 / p95 | 2.1 s / 2.9 s | 2.0 s / 2.4 s |
+
+  No must-review message is missed by either model. Every intent is right with both, so this dataset can't show where they differ on intent; the comparison says Sonnet is good enough for the routine path here, not that it is as good in general. The default stays Opus (out of scope).
