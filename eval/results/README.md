@@ -8,7 +8,7 @@
 
 | File | Content |
 | --- | --- |
-| `run.json` | Set and message IDs, classifier and judge (model, effort, prompt version and SHA-256), dataset file and SHA-256, git commit (and whether the tree had uncommitted changes), start and end time, whether the run is complete, and the cost guard's totals |
+| `run.json` | Set and message IDs, classifier and judge (model, effort, prompt version and SHA-256), masker version (from P05; runs before it sent raw text), dataset file and SHA-256, git commit (and whether the tree had uncommitted changes), start and end time, whether the run is complete, and the cost guard's totals |
 | `outputs.jsonl` | One line per message, in ID order: the classification attempt (raw model output, outcome, classification, errors, requested and serving model, usage, cost, latency) and the summary judge's result. No message text. |
 | `metrics.json` | Every metric, computed from `outputs.jsonl` and the dataset's final labels |
 | `report.md` | The metrics as Markdown tables |
