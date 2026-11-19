@@ -70,7 +70,7 @@ How each check is marked:
 
 - [x] [tech-stack.md](../../tech-stack.md) records the queue consistency approach, the worker and its Compose profile, the data model changes and `route.v2`. **(manual)**
 - [x] `README.md` explains starting the worker (with the cost warning), `npm run process`, `npm run queue:status` and the async flow. **(manual)**
-- [ ] P08 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
+- [x] P08 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 
