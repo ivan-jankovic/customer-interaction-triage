@@ -85,11 +85,33 @@ function view(overrides: Partial<CaseView> = {}): CaseView {
       services: [{ service_type: "internet", tariff: "Fiber 300", area: "Kolín", status: "active" }],
     },
     outages: [],
+    investigation: null,
     review: null,
     unmaskings: [],
     ...overrides,
   };
 }
+
+/** A fault's valid investigation (P10). */
+const INVESTIGATION = {
+  id: "inv-1",
+  outcome: "valid",
+  likelyCause: "line_fault",
+  confidence: 0.85,
+  summary: "The customer's mobile line is down with no outage in Žilina.",
+  evidence: [
+    { tool: "get_line_status", finding: "Mobile line down since 2026-11-04 18:00." },
+    { tool: "check_outages", finding: "No outage in Žilina." },
+  ],
+  errors: [],
+  steps: 2,
+  toolCalls: [
+    { turn: 1, tool: "check_outages", input: { area: "Žilina", service_type: "mobile" }, is_error: false },
+    { turn: 1, tool: "get_line_status", input: { customer_id: CUSTOMER }, is_error: false },
+    { turn: 1, tool: "get_recent_tickets", input: { customer_id: "someone-else" }, is_error: true },
+  ],
+  servedModel: "claude-opus-5-5",
+};
 
 describe("renderCase", () => {
   it("shows the position, decision, reasons, classification, masked text, evidence and log", () => {
@@ -167,5 +189,80 @@ describe("menus", () => {
     expect(pick(INTENTS, "0")).toBeNull();
     expect(pick(INTENTS, "7")).toBeNull();
     expect(pick(INTENTS, "cancellation")).toBeNull();
+  });
+});
+
+describe("renderCase: the investigation (P10)", () => {
+  it("shows the cause, confidence, summary, evidence and every tool call with its input", () => {
+    const text = renderCase(view({ investigation: INVESTIGATION }), { index: 1, total: 1 }).join("\n");
+    expect(text).toContain(
+      "Investigation: likely cause line_fault (confidence 0.85), 2 turns, claude-opus-5-5\n" +
+        "  The customer's mobile line is down with no outage in Žilina.\n" +
+        "  - [get_line_status] Mobile line down since 2026-11-04 18:00.\n" +
+        "  - [check_outages] No outage in Žilina.\n" +
+        "  Tools called: \n" +
+        '    1. check_outages {"area":"Žilina","service_type":"mobile"}\n' +
+        `    1. get_line_status {"customer_id":"${CUSTOMER}"}\n` +
+        '    1. get_recent_tickets {"customer_id":"someone-else"}  (error)',
+    );
+  });
+
+  it("shows a step limit with its error", () => {
+    const inv = {
+      ...INVESTIGATION,
+      outcome: "step_limit",
+      likelyCause: null,
+      confidence: null,
+      summary: null,
+      evidence: [],
+      steps: 6,
+      errors: ["step limit: the model still asked for tools after 6 turns"],
+    };
+    const text = renderCase(view({ investigation: inv }), { index: 1, total: 1 }).join("\n");
+    expect(text).toContain(
+      "Investigation: step_limit, 6 turns, claude-opus-5-5: step limit: the model still asked for tools after 6 turns",
+    );
+    expect(text).not.toContain("likely cause");
+  });
+
+  it("says why a case wasn't investigated, and shows nothing for a case without the step", () => {
+    const skipped = renderCase(
+      view({ investigation: { skipped: "intent billing_question is not a technical fault" } }),
+      {
+        index: 1,
+        total: 1,
+      },
+    ).join("\n");
+    expect(skipped).toContain("Investigation: not run (intent billing_question is not a technical fault)");
+    expect(renderCase(view(), { index: 1, total: 1 }).join("\n")).not.toContain("Investigation");
+  });
+
+  it("aligns the decision log's investigate step with the others", () => {
+    const v = view();
+    v.case = {
+      ...v.case,
+      log: [
+        v.case.log[0]!,
+        {
+          seq: 2,
+          step: "investigate",
+          inputSummary: { investigation_id: "inv-1" },
+          output: {
+            outcome: "valid",
+            likely_cause: "line_fault",
+            confidence: 0.85,
+            steps: 2,
+            tools_called: ["get_line_status"],
+          },
+          ruleApplied: "investigate.v1 / claude-opus-5-5",
+          createdAt: T,
+        },
+      ],
+    };
+    const lines = renderCase(v, { index: 1, total: 1 });
+    expect(lines).toContain("  1. mask        (mask.v1) placeholders: [PHONE_1]");
+    expect(lines).toContain(
+      "  2. investigate (investigate.v1 / claude-opus-5-5) valid; cause line_fault, confidence 0.85, 2 turns, tools get_line_status",
+    );
   });
 });
