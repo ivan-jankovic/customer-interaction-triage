@@ -5,7 +5,9 @@ import { describe, expect, it } from "vitest";
 import {
   FALLBACK_BETA,
   createAnthropicClient,
+  toConverseParams,
   toCreateParams,
+  type ConverseRequest,
   type LlmRequest,
   type MessagesApi,
 } from "../../src/llm/client.js";
@@ -181,6 +183,118 @@ describe("createAnthropicClient", () => {
       system: toCreateParams(request).system,
       messages: toCreateParams(request).messages,
       output_config: toCreateParams(request).output_config,
+    });
+  });
+});
+
+describe("converse (P10)", () => {
+  const converseRequest: ConverseRequest = {
+    model: "claude-opus-5-5",
+    system: "agent prompt",
+    messages: [{ role: "user", content: "investigate" }],
+    tools: [
+      {
+        name: "check_outages",
+        description: "outages",
+        input_schema: { type: "object", properties: { area: { type: "string", minLength: 1 } }, required: ["area"] },
+      },
+    ],
+    schema: { type: "object", properties: { s: { type: "string", maxLength: 9 } } },
+    maxTokens: 8000,
+    effort: "low",
+  };
+
+  it("sends strict tools and the answer schema, stripped, with a cached system prompt and no fallbacks", () => {
+    const params = toConverseParams(converseRequest) as unknown as Record<string, unknown>;
+    expect(params).toEqual({
+      model: "claude-opus-5-5",
+      max_tokens: 8000,
+      system: [{ type: "text", text: "agent prompt", cache_control: { type: "ephemeral" } }],
+      messages: [{ role: "user", content: "investigate" }],
+      tools: [
+        {
+          name: "check_outages",
+          description: "outages",
+          input_schema: { type: "object", properties: { area: { type: "string" } }, required: ["area"] },
+          strict: true,
+        },
+      ],
+      output_config: {
+        effort: "low",
+        format: { type: "json_schema", schema: { type: "object", properties: { s: { type: "string" } } } },
+      },
+    });
+    expect(params).not.toHaveProperty("betas");
+    expect(params).not.toHaveProperty("fallbacks");
+  });
+
+  it("returns the tool calls and the raw content to send back unchanged", async () => {
+    const content = [
+      { type: "thinking", thinking: "check outages", signature: "sig" },
+      { type: "tool_use", id: "tu_1", name: "check_outages", input: { area: "Opava" } },
+      { type: "tool_use", id: "tu_2", name: "get_line_status", input: { customer_id: "c1" } },
+    ];
+    const { sdk, calls } = fakeSdk(() => Promise.resolve(message({ content, stop_reason: "tool_use" })));
+    const result = await createAnthropicClient(sdk).converse(converseRequest);
+    expect(result).toMatchObject({
+      ok: true,
+      stopReason: "tool_use",
+      text: "",
+      toolUses: [
+        { id: "tu_1", name: "check_outages", input: { area: "Opava" } },
+        { id: "tu_2", name: "get_line_status", input: { customer_id: "c1" } },
+      ],
+      model: "claude-opus-5-5",
+      usage: { input_tokens: 100, output_tokens: 20, cache_read_input_tokens: 900 },
+    });
+    expect(result.ok && result.content).toBe(content);
+    expect(calls).toHaveLength(1);
+  });
+
+  it("returns the final answer's text when the model stops without tool calls", async () => {
+    const { sdk } = fakeSdk(() => Promise.resolve(message()));
+    expect(await createAnthropicClient(sdk).converse(converseRequest)).toMatchObject({
+      ok: true,
+      stopReason: "end_turn",
+      text: '{"s":"a"}',
+      toolUses: [],
+    });
+  });
+
+  it("reports a refusal, max tokens and an API error like complete()", async () => {
+    const refusal = fakeSdk(() =>
+      Promise.resolve(message({ stop_reason: "refusal", stop_details: { type: "refusal", category: "cyber" } })),
+    );
+    expect(await createAnthropicClient(refusal.sdk).converse(converseRequest)).toMatchObject({
+      ok: false,
+      failure: "refusal",
+    });
+    const truncated = fakeSdk(() => Promise.resolve(message({ stop_reason: "max_tokens" })));
+    expect(await createAnthropicClient(truncated.sdk).converse(converseRequest)).toMatchObject({
+      ok: false,
+      failure: "max_tokens",
+    });
+    const overloaded = fakeSdk(() =>
+      Promise.reject(new Anthropic.InternalServerError(529, { error: {} }, "overloaded", new Headers())),
+    );
+    expect(await createAnthropicClient(overloaded.sdk).converse(converseRequest)).toMatchObject({
+      ok: false,
+      failure: "api_error",
+      status: 529,
+      usage: { input_tokens: 0 },
+    });
+  });
+
+  it("counts a turn's tokens with the same tools, system prompt, messages and output config", async () => {
+    const { sdk, counted } = fakeSdk(() => Promise.resolve(message()));
+    expect(await createAnthropicClient(sdk).countConverseTokens(converseRequest)).toBe(1234);
+    const p = toConverseParams(converseRequest);
+    expect(counted[0]).toEqual({
+      model: p.model,
+      system: p.system,
+      messages: p.messages,
+      tools: p.tools,
+      output_config: p.output_config,
     });
   });
 });

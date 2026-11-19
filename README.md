@@ -83,18 +83,37 @@ npm run enrich -- msg-011   # customer, area and outages for the latest classifi
 
 `crm:seed` refuses to replace the CRM once enrichments point at its customers; to reseed, start from a fresh database (`docker compose down -v`, then `docker compose up -d --wait`).
 
+## Investigating technical faults
+
+For a message classified as a **technical fault**, a small agent looks for the likely cause before routing. It is the system's one agentic step: a hand-written loop in which the model calls three **read-only** tools and ends with a structured answer.
+
+- **Tools:** `check_outages` (outages in an area, ongoing or resolved in the last 7 days), `get_line_status` (the customer's services and the state of each line) and `get_recent_tickets` (the last 90 days). The customer tools only accept the case's own customer (or the ambiguous candidates), so a message can't point the agent at someone else's data. In PostgreSQL they run in a read-only transaction.
+- **Answer:** a likely cause (`area_outage`, `line_fault`, `customer_equipment`, `service_inactive` or `inconclusive`), a confidence, a short summary and evidence. Every piece of evidence must name a tool that answered in this loop; the answer is validated like the classifier's.
+- **Bounded:** at most 6 model calls and 12 tool calls. The agent sees the masked text only.
+- **It decides nothing.** An investigation that ends without a valid answer, finds no cause or is less than 70% confident sends the case to review (`investigation_inconclusive`); it never changes the team or removes another reason.
+
+Every attempt is stored in `investigations`, with each tool call, its input and what it returned. The mock CRM's line status and the cause each dataset fault is designed to have are described in [eval/data/crm/README.md](eval/data/crm/README.md).
+
+```sh
+npm run investigate -- msg-071 --dry-run   # the first request and its token count; no model call, nothing stored
+npm run investigate -- msg-071             # after classify and enrich; costs money (a few cents)
+```
+
+`INVESTIGATE_MODEL` and `INVESTIGATE_EFFORT` choose the agent's model; by default it uses the classifier's (`TRIAGE_MODEL`, `TRIAGE_EFFORT`). The design is in the [P10 spec](specs/phases/011-p10-investigating-agent/requirements.md).
+
 ## Routing and cases
 
-The routing step turns the classification and the enrichment into a **case**: the target team, whether a person must review it, and the reason codes. The rules are plain code (`route.v2` in [src/pipeline/route.ts](src/pipeline/route.ts)), no model, and free to run.
+The routing step turns the classification, the enrichment and, for a technical fault, the investigation into a **case**: the target team, whether a person must review it, and the reason codes. The rules are plain code (`route.v3` in [src/pipeline/route.ts](src/pipeline/route.ts)), no model, and free to run.
 
 - **Team** by intent (billing, technical support, sales, retention, complaints, general); `general` when the model's output was invalid or the call failed.
-- **Review** when any rule applies, with all the codes kept: invalid output or a failed call, a cancellation or complaint, confidence below 0.7, a customer not found or ambiguous, a technical fault with no account identifiers, or a CRM mismatch (a key that matched no one, or a service type the customer doesn't have). A message whose processing failed for good gets a case too, in `general` with `processing_failed` (see below).
+- **Review** when any rule applies, with all the codes kept: invalid output or a failed call, a cancellation or complaint, confidence below 0.7, a customer not found or ambiguous, a technical fault with no account identifiers, a CRM mismatch (a key that matched no one, or a service type the customer doesn't have), or an inconclusive investigation. A message whose processing failed for good gets a case too, in `general` with `processing_failed` (see below).
 
-Each interaction gets **one case**, written together with a **decision log**: one entry per step (mask, classify, enrich, route) with the IDs it read, what it produced and the version that decided. The log holds no message text and no identifier values.
+Each interaction gets **one case**, written together with a **decision log**: one entry per step (mask, classify, enrich, investigate, route) with the IDs it read, what it produced and the version that decided. The log holds no message text and no identifier values.
 
 ```sh
 npm run classify -- msg-011 # costs money
 npm run enrich -- msg-011   # free
+npm run investigate -- msg-011 # technical faults only; costs money
 npm run route -- msg-011    # team, review flag, reason codes and the decision log (free); a second run writes nothing
 ```
 
@@ -104,7 +123,7 @@ The review rate reflects the test set, not real traffic. The dataset gives every
 
 ## Background processing
 
-Intake queues every stored message (BullMQ on Redis, one job per message; the job holds only the message's ID). A **worker** runs the whole pipeline for each job: mask, classify, enrich, route. Every message ends as exactly one case.
+Intake queues every stored message (BullMQ on Redis, one job per message; the job holds only the message's ID). A **worker** runs the whole pipeline for each job: mask, classify, enrich, investigate (technical faults only), route. Every message ends as exactly one case.
 
 ```sh
 docker compose --profile worker up -d --wait   # the worker as a container (or: npm run worker, reads .env)
@@ -112,10 +131,10 @@ npm run queue:status                            # jobs by state, interactions by
 npm run process -- msg-011                      # the whole pipeline for one message, now (costs money unless classified)
 ```
 
-> **The worker costs money.** It processes every stored message that has no case yet, about $0.01 each: starting it after `dataset:load` classifies all 100 dataset messages. That's why plain `docker compose up` doesn't start it, and why it refuses to start without `ANTHROPIC_API_KEY`.
+> **The worker costs money.** It processes every stored message that has no case yet, about $0.01 each, plus a few cents for each technical fault's investigation: starting it after `dataset:load` classifies all 100 dataset messages. That's why plain `docker compose up` doesn't start it, and why it refuses to start without `ANTHROPIC_API_KEY`.
 
 - **Nothing is lost between the database and the queue.** If queueing fails (Redis down, or a crash right after saving), the worker's **sweep**, every 30 seconds, queues every message that has no case and is more than a minute old. Redis also keeps queued jobs on disk (append-only file), so they survive a restart.
-- **Retries.** Rate limits, overloads and connection errors are retried 5 times over about 2.5 minutes; after that the case goes to review (`classification_error`). Each attempt is stored, and a retry never pays again for a classification that already succeeded.
+- **Retries.** Rate limits, overloads and connection errors are retried 5 times over about 2.5 minutes; after that the case goes to review (`classification_error`, or `investigation_inconclusive` for the agent). Each attempt is stored, and a retry never pays again for a classification or an investigation that already succeeded.
 - **Failures end in review.** Any other error that lasts to the last attempt writes a case in `general` with `processing_failed`, naming the step that failed.
 
 The design and its reasons are in the [P08 spec](specs/phases/009-p08-asynchronous-processing/requirements.md).
@@ -130,7 +149,7 @@ npm run review -- --team billing --reason low_confidence   # narrow the queue
 npm run review -- --spot-check                         # auto-routed cases, to check what routing gets wrong
 ```
 
-Each case shows its team and reasons, the classification and summary, the **masked** message, what the CRM lookup found (customer, candidates, unmatched keys, outages) and the decision log. Then:
+Each case shows its team and reasons, the classification and summary, the **masked** message, what the CRM lookup found (customer, candidates, unmatched keys, outages), the investigation of a technical fault (cause, evidence and the tools it called) and the decision log. Then:
 
 | Key | Action |
 | --- | --- |
@@ -153,6 +172,13 @@ npm run eval                               # the full 100 messages, ~$0.90
 npm run eval:report -- <run-id>            # recompute a run's reports from its stored outputs (free)
 npm run eval:keep -- <run-id>              # move a run to eval/results/kept/ so it can be committed
 npm run eval:compare -- <run A> <run B>    # two runs side by side, with the change in each metric
+```
+
+For the investigating agent, `npm run eval:investigate` runs it over the dataset's 17 technical faults, using the classifications stored in the kept `classify.v2` run (so only the agent is paid for), and scores the cause it finds against the cause designed into the mock CRM: cause accuracy, per-cause precision and recall, the confusion matrix, turns, tool calls, cost and latency.
+
+```sh
+npm run eval:investigate -- --dry-run      # plan and cost estimate, no calls
+npm run eval:investigate                   # the 17 faults, ~$0.70 (cap $2)
 ```
 
 Each run lands in `eval/results/<run-id>/` with `report.md` and `report.html` (intent accuracy, per-intent precision and recall, confusion matrix, field accuracy, routing accuracy and must-review recall, summary scores, confidence, cost and latency, overall and per language). Routing is scored from the stored outputs against the mock CRM seed, without a model, so `eval:report` adds it to older runs too. The format is described in [eval/results/README.md](eval/results/README.md); kept runs, including the baseline, are in [eval/results/kept/](eval/results/kept/).

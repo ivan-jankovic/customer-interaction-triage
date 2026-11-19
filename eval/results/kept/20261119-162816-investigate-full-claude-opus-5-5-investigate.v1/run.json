@@ -1,0 +1,76 @@
+{
+  "kind": "investigate",
+  "runId": "20261119-162816-investigate-full-claude-opus-5-5-investigate.v1",
+  "set": "full",
+  "ids": [
+    "msg-007",
+    "msg-011",
+    "msg-012",
+    "msg-017",
+    "msg-018",
+    "msg-021",
+    "msg-029",
+    "msg-036",
+    "msg-037",
+    "msg-051",
+    "msg-056",
+    "msg-063",
+    "msg-069",
+    "msg-071",
+    "msg-078",
+    "msg-079",
+    "msg-084"
+  ],
+  "startedAt": "2026-11-19T16:28:16.062Z",
+  "finishedAt": "2026-11-19T16:28:46.997Z",
+  "complete": true,
+  "investigator": {
+    "model": "claude-opus-5-5",
+    "effort": "low",
+    "promptVersion": "investigate.v1",
+    "promptSha256": "a78a5415aa138befb2ed58b08fcc4ee9abd9bbd42c17958b7d4af7f2db4870fe",
+    "investigatorVersion": "investigate.v1",
+    "maxTurns": 6
+  },
+  "input": {
+    "runId": "20261119-010458-full-claude-opus-5-5-classify.v2",
+    "dir": "eval/results/kept/20261119-010458-full-claude-opus-5-5-classify.v2",
+    "classifierPromptVersion": "classify.v2"
+  },
+  "masker": {
+    "version": "mask.v1"
+  },
+  "enricherVersion": "enrich.v1",
+  "seed": {
+    "file": "eval/data/crm/seed.json",
+    "sha256": "97503b40f736c78697f2829eacb6118b165b652c0ba3d5d3ff4643e6c469d86a"
+  },
+  "dataset": {
+    "file": "eval/data/dataset.jsonl",
+    "sha256": "94ee3b2f479d1187005ce434d2e09fbd890447e7ba02ff25641d88261f6c77a9"
+  },
+  "git": {
+    "commit": "57a954f0aa11f63e4414eb1e6bb4505b7fb13d0c",
+    "dirty": false
+  },
+  "options": {
+    "maxCost": 2,
+    "concurrency": 4
+  },
+  "guard": {
+    "jobsPlanned": 17,
+    "estimatedUsd": 1.1536680000000004,
+    "jobsDone": 17,
+    "spentUsd": 0.35561600000000004,
+    "stoppedByBudget": false,
+    "totals": {
+      "claude-opus-5-5": {
+        "input_tokens": 33838,
+        "output_tokens": 7570,
+        "cache_creation_input_tokens": 8608,
+        "cache_read_input_tokens": 64560,
+        "calls": 34
+      }
+    }
+  }
+}

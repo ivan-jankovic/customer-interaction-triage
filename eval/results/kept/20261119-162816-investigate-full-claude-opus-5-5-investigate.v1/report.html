@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Investigation evaluation</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-1: #fcfcfb; --surface-2: #f3f2ef; --border: #e2e1dc;
+  --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #6f6e69;
+  --series-1: #2a78d6; --series-2: #eb6834; --grid: #e2e1dc;
+  --seq-0: #f0efec; --seq-1: #cde2fb; --seq-2: #86b6ef; --seq-3: #3987e5; --seq-4: #1c5cab; --seq-5: #0d366b;
+  --on-seq-dark: #ffffff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  color-scheme: dark;
+  --surface-1: #1a1a19; --surface-2: #232321; --border: #383835;
+  --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #a3a29a;
+  --series-1: #3987e5; --series-2: #d95926; --grid: #383835;
+  --seq-0: #262624; --seq-1: #104281; --seq-2: #1c5cab; --seq-3: #2a78d6; --seq-4: #5598e7; --seq-5: #9ec5f4;
+  --on-seq-dark: #0b0b0b; } }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-1: #1a1a19; --surface-2: #232321; --border: #383835;
+  --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #a3a29a;
+  --series-1: #3987e5; --series-2: #d95926; --grid: #383835;
+  --seq-0: #262624; --seq-1: #104281; --seq-2: #1c5cab; --seq-3: #2a78d6; --seq-4: #5598e7; --seq-5: #9ec5f4;
+  --on-seq-dark: #0b0b0b; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface-1); color: var(--text-primary);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 980px; margin: 0 auto; padding: 24px 16px 48px; min-width: 0; }
+h1 { font-size: 22px; margin: 0 0 4px; overflow-wrap: anywhere; }
+h2 { font-size: 18px; margin: 36px 0 12px; }
+p, li { color: var(--text-secondary); overflow-wrap: anywhere; }
+.muted { color: var(--text-muted); font-size: 13px; }
+.settings { display: grid; grid-template-columns: max-content 1fr; gap: 2px 16px; margin: 12px 0; font-size: 14px; }
+.settings dt { color: var(--text-muted); } .settings dd { margin: 0; overflow-wrap: anywhere; }
+.warn { color: var(--text-primary); background: var(--surface-2); border-left: 3px solid var(--series-2); padding: 8px 12px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.tile { background: var(--surface-2); border-radius: 8px; padding: 12px 14px; }
+.tile .label { color: var(--text-muted); font-size: 13px; }
+.tile .value { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tile .sub { color: var(--text-secondary); font-size: 12px; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { color: var(--text-muted); font-weight: 500; }
+td.n, th.n { text-align: right; }
+code { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; }
+svg { display: block; width: 100%; height: auto; }
+svg text { fill: var(--text-secondary); font: 12px system-ui, sans-serif; }
+.legend { display: flex; gap: 16px; font-size: 13px; color: var(--text-secondary); margin: 4px 0 8px; }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: baseline; }
+</style>
+</head>
+<body><main>
+<h1>Investigation evaluation</h1>
+<p class="muted">20261119-162816-investigate-full-claude-opus-5-5-investigate.v1</p>
+<div class="scroll"><table><thead><tr><th>Setting</th><th>Value</th></tr></thead><tbody>
+<tr><td>Set</td><td>full (17 labelled technical faults)</td></tr>
+<tr><td>Agent</td><td>claude-opus-5-5, effort low, prompt investigate.v1, investigate.v1, at most 6 turns</td></tr>
+<tr><td>Input</td><td>classify run 20261119-010458-full-claude-opus-5-5-classify.v2 (classify.v2)</td></tr>
+<tr><td>Masking, enrichment and tools</td><td>mask.v1, enrich.v1, CRM seed sha256 97503b40f736</td></tr>
+<tr><td>Labels</td><td>designed causes from CRM seed sha256 d08644869c58 (rescored: the run used another seed, see above)</td></tr>
+<tr><td>Dataset</td><td>eval/data/dataset.jsonl (sha256 94ee3b2f479d)</td></tr>
+<tr><td>Code</td><td>57a954f0aa11</td></tr>
+<tr><td>Started</td><td>2026-11-19T16:28:16.062Z</td></tr>
+<tr><td>Complete</td><td>yes</td></tr>
+</tbody></table></div>
+<p>The labels are the causes designed into the mock CRM (<code>expected_cause</code> in the seed). The scoring is deterministic: <code>npm run eval:report -- 20261119-162816-investigate-full-claude-opus-5-5-investigate.v1</code> recomputes this report from the stored outputs.</p>
+<p>With 17 faults, and one or two examples of some causes, the per-cause and per-language numbers are indicative only.</p>
+<h2>Overall</h2>
+<div class="scroll"><table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>
+<tr><td>Faults</td><td>17</td></tr>
+<tr><td>Investigated</td><td>17</td></tr>
+<tr><td>Cause accuracy</td><td>100.0%</td></tr>
+<tr><td>Sent to review by the investigation</td><td>47.1%</td></tr>
+<tr><td>Outcomes</td><td>valid 17, step_limit 0, invalid 0, error 0</td></tr>
+<tr><td>Turns per investigation</td><td>mean 2.00, max 3, step-limit hits 0</td></tr>
+<tr><td>Tool calls per investigation</td><td>mean 1.88, max 4, errors 0</td></tr>
+<tr><td>Tool calls by tool</td><td>check_outages 17, get_line_status 9, get_recent_tickets 6</td></tr>
+<tr><td>Cost</td><td>$0.3556 total, $0.0209 per fault</td></tr>
+<tr><td>Latency</td><td>mean 6.2 s, max 11.2 s</td></tr>
+</tbody></table></div>
+<h2>Per cause</h2>
+<div class="scroll"><table><thead><tr><th>Cause</th><th class="n">Labelled</th><th class="n">Predicted</th><th class="n">Precision</th><th class="n">Recall</th></tr></thead><tbody>
+<tr><td>area_outage</td><td class="n">8</td><td class="n">8</td><td class="n">100.0%</td><td class="n">100.0%</td></tr>
+<tr><td>line_fault</td><td class="n">1</td><td class="n">1</td><td class="n">100.0%</td><td class="n">100.0%</td></tr>
+<tr><td>customer_equipment</td><td class="n">0</td><td class="n">0</td><td class="n">–</td><td class="n">–</td></tr>
+<tr><td>service_inactive</td><td class="n">0</td><td class="n">0</td><td class="n">–</td><td class="n">–</td></tr>
+<tr><td>inconclusive</td><td class="n">8</td><td class="n">8</td><td class="n">100.0%</td><td class="n">100.0%</td></tr>
+</tbody></table></div>
+<h2>Confusion matrix</h2>
+<p>Rows: designed cause. Columns: the agent's answer.</p>
+<div class="scroll"><table><thead><tr><th>designed \ answer</th><th class="n">area_outage</th><th class="n">line_fault</th><th class="n">customer_equipment</th><th class="n">service_inactive</th><th class="n">inconclusive</th><th class="n">no answer</th><th class="n">not investigated</th></tr></thead><tbody>
+<tr><td>area_outage</td><td class="n">8</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>line_fault</td><td class="n">0</td><td class="n">1</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>customer_equipment</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>service_inactive</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>inconclusive</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">8</td><td class="n">0</td><td class="n">0</td></tr>
+</tbody></table></div>
+<h2>Per language</h2>
+<div class="scroll"><table><thead><tr><th>Language</th><th class="n">Faults</th><th class="n">Cause accuracy</th></tr></thead><tbody>
+<tr><td>cs</td><td class="n">10</td><td class="n">100.0%</td></tr>
+<tr><td>sk</td><td class="n">4</td><td class="n">100.0%</td></tr>
+<tr><td>en</td><td class="n">3</td><td class="n">100.0%</td></tr>
+</tbody></table></div>
+<h2>Per message</h2>
+<div class="scroll"><table><thead><tr><th>Message</th><th>Lang</th><th>Designed</th><th>Answer</th><th class="n">Confidence</th><th>Outcome</th><th>Review</th><th class="n">Turns</th><th>Tools</th><th class="n">Cost</th></tr></thead><tbody>
+<tr><td>msg-007</td><td>en</td><td>inconclusive</td><td>inconclusive</td><td class="n">0.20</td><td>valid</td><td>yes</td><td class="n">1</td><td>–</td><td class="n">$0.0147</td></tr>
+<tr><td>msg-011</td><td>cs</td><td>area_outage</td><td>area_outage</td><td class="n">0.70</td><td>valid</td><td>no</td><td class="n">2</td><td>check_outages, get_line_status, get_recent_tickets</td><td class="n">$0.0374</td></tr>
+<tr><td>msg-012</td><td>sk</td><td>area_outage</td><td>area_outage</td><td class="n">0.90</td><td>valid</td><td>no</td><td class="n">2</td><td>check_outages, get_line_status</td><td class="n">$0.0296</td></tr>
+<tr><td>msg-017</td><td>sk</td><td>inconclusive</td><td>inconclusive</td><td class="n">0.30</td><td>valid</td><td>yes</td><td class="n">2</td><td>check_outages</td><td class="n">$0.0205</td></tr>
+<tr><td>msg-018</td><td>cs</td><td>area_outage</td><td>area_outage</td><td class="n">0.93</td><td>valid</td><td>no</td><td class="n">2</td><td>get_line_status, check_outages, get_recent_tickets</td><td class="n">$0.0224</td></tr>
+<tr><td>msg-021</td><td>cs</td><td>inconclusive</td><td>inconclusive</td><td class="n">0.35</td><td>valid</td><td>yes</td><td class="n">2</td><td>check_outages</td><td class="n">$0.0152</td></tr>
+<tr><td>msg-029</td><td>cs</td><td>area_outage</td><td>area_outage</td><td class="n">0.75</td><td>valid</td><td>no</td><td class="n">2</td><td>check_outages</td><td class="n">$0.0153</td></tr>
+<tr><td>msg-036</td><td>cs</td><td>inconclusive</td><td>inconclusive</td><td class="n">0.30</td><td>valid</td><td>yes</td><td class="n">2</td><td>check_outages</td><td class="n">$0.0140</td></tr>
+<tr><td>msg-037</td><td>cs</td><td>area_outage</td><td>area_outage</td><td class="n">0.92</td><td>valid</td><td>no</td><td class="n">2</td><td>check_outages, get_line_status, get_recent_tickets</td><td class="n">$0.0233</td></tr>
+<tr><td>msg-051</td><td>sk</td><td>area_outage</td><td>area_outage</td><td class="n">0.95</td><td>valid</td><td>no</td><td class="n">2</td><td>check_outages, get_line_status, get_recent_tickets</td><td class="n">$0.0195</td></tr>
+<tr><td>msg-056</td><td>cs</td><td>area_outage</td><td>area_outage</td><td class="n">0.70</td><td>valid</td><td>no</td><td class="n">2</td><td>check_outages</td><td class="n">$0.0179</td></tr>
+<tr><td>msg-063</td><td>cs</td><td>inconclusive</td><td>inconclusive</td><td class="n">0.40</td><td>valid</td><td>yes</td><td class="n">2</td><td>check_outages</td><td class="n">$0.0149</td></tr>
+<tr><td>msg-069</td><td>cs</td><td>inconclusive</td><td>inconclusive</td><td class="n">0.30</td><td>valid</td><td>yes</td><td class="n">3</td><td>get_line_status, get_line_status, check_outages, check_outages</td><td class="n">$0.0381</td></tr>
+<tr><td>msg-071</td><td>sk</td><td>line_fault</td><td>line_fault</td><td class="n">0.75</td><td>valid</td><td>no</td><td class="n">2</td><td>get_line_status, check_outages, get_recent_tickets</td><td class="n">$0.0232</td></tr>
+<tr><td>msg-078</td><td>cs</td><td>inconclusive</td><td>inconclusive</td><td class="n">0.30</td><td>valid</td><td>yes</td><td class="n">2</td><td>check_outages</td><td class="n">$0.0126</td></tr>
+<tr><td>msg-079</td><td>en</td><td>inconclusive</td><td>inconclusive</td><td class="n">0.20</td><td>valid</td><td>yes</td><td class="n">2</td><td>check_outages</td><td class="n">$0.0117</td></tr>
+<tr><td>msg-084</td><td>en</td><td>area_outage</td><td>area_outage</td><td class="n">0.70</td><td>valid</td><td>no</td><td class="n">2</td><td>check_outages, get_line_status, get_recent_tickets</td><td class="n">$0.0256</td></tr>
+</tbody></table></div>
+</main></body>
+</html>

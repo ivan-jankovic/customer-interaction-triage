@@ -19,6 +19,7 @@ import {
   storeMessage,
   type Answer,
 } from "../support/pipeline.js";
+import { renderCase } from "../../src/review/screen.js";
 import { createTestDatabase, type TestDatabase } from "./support/test-database.js";
 
 let testDb: TestDatabase;
@@ -167,8 +168,29 @@ describe("case view", () => {
     expect(view.classification?.outcome).toBe("valid");
     expect(view.interaction.maskedText).toContain("[");
     expect(view.interaction).not.toHaveProperty("rawText");
-    expect(view.case.log.map((l) => l.step)).toEqual(["mask", "classify", "enrich", "route"]);
+    expect(view.case.log.map((l) => l.step)).toEqual(["mask", "classify", "enrich", "investigate", "route"]);
     noIdentifierValues("msg-011", view);
+  });
+
+  it("shows the investigation the case was routed with (P10), and no tool results", async () => {
+    const caseId = await makeCase("msg-011");
+    const view = await readCaseView(db, caseId);
+    expect(view.investigation).toMatchObject({
+      outcome: "valid",
+      likelyCause: "area_outage",
+      confidence: 0.9,
+      toolCalls: [{ turn: 1, tool: "check_outages", input: { area: "Opava" }, is_error: false }],
+    });
+    expect(view.investigation).not.toHaveProperty("rawOutput");
+    expect(JSON.stringify(view.investigation)).not.toContain("result");
+    noIdentifierValues("msg-011", view);
+    const text = renderCase(view, { index: 1, total: 1 }).join("\n");
+    expect(text).toContain("Investigation: likely cause area_outage (confidence 0.9), 2 turns, claude-opus-5-5");
+  });
+
+  it("says a case that isn't a technical fault wasn't investigated", async () => {
+    const view = await readCaseView(db, await makeCase("msg-022"));
+    expect(view.investigation).toEqual({ skipped: `intent ${labelsOf("msg-022").intent} is not a technical fault` });
   });
 
   it("shows the candidates of an ambiguous customer", async () => {

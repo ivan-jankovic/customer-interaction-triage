@@ -1,5 +1,6 @@
-// The pipeline runner (P08 requirements.md, "Pipeline runner"): mask → classify → enrich → route
-// for one interaction, used by the queue worker (src/worker.ts) and `npm run process`.
+// The pipeline runner (P08 requirements.md, "Pipeline runner"): mask → classify → enrich →
+// investigate (P10) → route for one interaction, used by the queue worker (src/worker.ts) and
+// `npm run process`.
 //
 // Resumable: each step first reuses what is stored, so a job retry (or a second job for the
 // same interaction) never pays twice for a classification that succeeded:
@@ -7,23 +8,33 @@
 // - classify: the latest valid attempt; else the latest attempt when it is `invalid` (it would
 //   go to review anyway, and a new call costs money); else a new model call;
 // - enrich: the latest enrichment made from that classification;
+// - investigate (valid technical faults only): the latest investigation of that enrichment,
+//   unless its outcome is `error` (then a new attempt; P10 requirements.md, "Retries");
 // - route: the existing case.
 //
 // Retries (requirements.md, "Retries and failures"): a transient model error on a non-final
 // attempt throws TransientModelError so the job is retried; on the final attempt it is routed
-// (classification_error, review). Any other error on the final attempt writes a failure case
+// (classification_error, review). The investigation follows the same rule: a transient error
+// retries the job, and on the final attempt its `error` attempt sends the case to review
+// (investigation_inconclusive). Any other error on the final attempt writes a failure case
 // (processing_failed) instead of throwing, so every interaction ends as exactly one case.
-// The investigating agent (P10) will run between enrich and route.
 
 import type { Kysely } from "kysely";
 import { errorClassName, readCase, recordFailureCase, routeInteraction, type RoutedCase } from "../db/cases.js";
 import { KyselyClassificationStore, type StoredClassification } from "../db/classifications.js";
 import type { Database, DecisionStep } from "../db/database.js";
 import { enrichInteraction, latestEnrichmentFor } from "../db/enrichments.js";
+import {
+  isInvestigated,
+  latestInvestigationFor,
+  runInvestigation,
+  type InvestigatorDeps,
+} from "../db/investigations.js";
 import { InteractionNotFound, maskInteraction } from "../db/masking.js";
-import { understand, type ClassificationAttempt, type UnderstandDeps } from "./understand.js";
+import { understand, type UnderstandDeps } from "./understand.js";
 
-export const PIPELINE_VERSION = "process.v1";
+/** process.v2 (P10) adds the investigate step between enrich and route. */
+export const PIPELINE_VERSION = "process.v2";
 
 /** A transient model error on a non-final attempt: the job should be retried. */
 export class TransientModelError extends Error {}
@@ -33,7 +44,7 @@ export class TransientModelError extends Error {}
  * 408, 409, 429 and every 5xx (including 529 overloaded). Other 4xx are permanent, and refusals,
  * max_tokens and invalid output are not errors at all (outcome `invalid`).
  */
-export function isTransient(attempt: Pick<ClassificationAttempt, "outcome" | "apiStatus">): boolean {
+export function isTransient(attempt: { outcome: string; apiStatus?: number | null }): boolean {
   if (attempt.outcome !== "error") return false;
   const status = attempt.apiStatus;
   // undefined: the attempt didn't come from the API client (unknown cause), so it isn't retried.
@@ -44,7 +55,7 @@ export function isTransient(attempt: Pick<ClassificationAttempt, "outcome" | "ap
 
 /** What to do after a classification attempt: retry the job, or go on to enrich and route. */
 export function afterClassify(
-  attempt: Pick<ClassificationAttempt, "outcome" | "apiStatus">,
+  attempt: { outcome: string; apiStatus?: number | null },
   { finalAttempt }: { finalAttempt: boolean },
 ): "retry" | "continue" {
   return isTransient(attempt) && !finalAttempt ? "retry" : "continue";
@@ -61,7 +72,8 @@ export interface ProcessResult {
   failure: { step: DecisionStep; errorClass: string } | null;
 }
 
-export type ProcessDeps = Omit<UnderstandDeps, "now">;
+/** The classifier's dependencies, plus the investigating agent's (P10). */
+export type ProcessDeps = Omit<UnderstandDeps, "now"> & { investigator: InvestigatorDeps };
 
 export interface ProcessOptions {
   /** The job's last attempt (always true for `npm run process`): never throws for a retry. */
@@ -87,10 +99,17 @@ export async function processInteraction(
   const existing = await readCase(db, interactionId);
   if (existing) return { case: { ...existing, created: false }, steps: null, failure: null };
 
-  const steps: StepResults = { mask: "skipped", classify: "skipped", enrich: "skipped", route: "skipped" };
+  const steps: StepResults = {
+    mask: "skipped",
+    classify: "skipped",
+    enrich: "skipped",
+    investigate: "skipped",
+    route: "skipped",
+  };
   let step: DecisionStep = "mask";
   let classificationId: string | null = null;
   let enrichmentId: string | null = null;
+  let investigationId: string | null = null;
   try {
     const interaction = await db
       .selectFrom("interactions")
@@ -122,11 +141,31 @@ export async function processInteraction(
     classificationId = classification.id;
 
     step = "enrich";
+    let enrichment = null;
     if (classification.outcome === "valid") {
       const earlier = await latestEnrichmentFor(db, interactionId, classification.id);
-      const enrichment = earlier ?? (await enrichInteraction(db, interactionId));
+      enrichment = earlier ?? (await enrichInteraction(db, interactionId));
       steps.enrich = earlier ? "reused" : "ran";
       enrichmentId = enrichment.id;
+    }
+
+    step = "investigate";
+    if (enrichment && isInvestigated(classification)) {
+      const earlier = await latestInvestigationFor(db, enrichment.id);
+      if (earlier && earlier.outcome !== "error") {
+        steps.investigate = "reused";
+        investigationId = earlier.id;
+      } else {
+        // Stored whatever its outcome, before a retry, so every paid call is counted.
+        const investigation = await runInvestigation(db, deps.investigator, interactionId, classification, enrichment);
+        steps.investigate = "ran";
+        investigationId = investigation.id;
+        if (afterClassify(investigation, { finalAttempt }) === "retry") {
+          throw new TransientModelError(
+            `Transient model error in the investigation (${investigation.errors.join("; ")}); the job will retry.`,
+          );
+        }
+      }
     }
 
     step = "route";
@@ -142,6 +181,7 @@ export async function processInteraction(
       error,
       classificationId,
       enrichmentId,
+      investigationId,
     });
     return { case: failed, steps, failure: { step, errorClass: errorClassName(error) } };
   }

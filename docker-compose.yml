@@ -97,6 +97,9 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       TRIAGE_MODEL: ${TRIAGE_MODEL:-claude-opus-5-5}
       TRIAGE_EFFORT: ${TRIAGE_EFFORT:-low}
+      # The investigating agent (P10); empty means the same as TRIAGE_MODEL / TRIAGE_EFFORT.
+      INVESTIGATE_MODEL: ${INVESTIGATE_MODEL:-}
+      INVESTIGATE_EFFORT: ${INVESTIGATE_EFFORT:-}
       WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-4}
     depends_on:
       migrate:

@@ -8,6 +8,7 @@ import { PATHS } from "../../eval/lib/paths.js";
 import { makeMessageRouter, type MessageRoute } from "../../eval/lib/route-message.js";
 import type { OutputLine } from "../../eval/metrics/types.js";
 import type { DatasetRecord } from "../../eval/schema/dataset-record.schema.js";
+import type { InvestigationSummary } from "../../src/pipeline/route.js";
 
 const KEPT_RUN = join(PATHS.results, "kept", "20261119-010458-full-claude-opus-5-5-classify.v2");
 
@@ -18,10 +19,10 @@ const labelsOf = (id: string) => {
   return r.final ?? r.chosen;
 };
 
-const routeAll = async () => {
+const routeAll = async (investigation: InvestigationSummary | null = null) => {
   const router = makeMessageRouter();
   const routes = new Map<string, MessageRoute>();
-  for (const line of outputs) routes.set(line.id, await router(dataset.get(line.id)!, line.attempt));
+  for (const line of outputs) routes.set(line.id, await router(dataset.get(line.id)!, line.attempt, investigation));
   return routes;
 };
 
@@ -69,5 +70,24 @@ describe("routing the kept classify.v2 outputs", () => {
         1,
       ),
     );
+  });
+
+  // P10 (route.v3): an investigation can only add a review, never remove one or change a team.
+  it.each([
+    ["every fault's investigation inconclusive", { outcome: "valid", likelyCause: "inconclusive", confidence: 0.9 }],
+    ["every fault's investigation failed", { outcome: "error", likelyCause: null, confidence: null }],
+    ["every fault's investigation conclusive", { outcome: "valid", likelyCause: "area_outage", confidence: 0.95 }],
+  ] as const)("with %s, still reviews every must-review message and keeps every team", async (_, inv) => {
+    const without = await routeAll();
+    const routes = await routeAll(inv);
+    for (const [id, r] of routes) {
+      expect(r.targetTeam, id).toBe(without.get(id)!.targetTeam);
+      for (const code of without.get(id)!.reasonCodes) expect(r.reasonCodes, id).toContain(code);
+      if (labelsOf(id).must_review) expect(r.needsReview, id).toBe(true);
+      // Classified as a technical fault: the only intent routed to technical_support.
+      const fault = r.targetTeam === "technical_support";
+      const added = r.reasonCodes.filter((c) => !without.get(id)!.reasonCodes.includes(c));
+      expect(added, id).toEqual(fault && inv.likelyCause !== "area_outage" ? ["investigation_inconclusive"] : []);
+    }
   });
 });

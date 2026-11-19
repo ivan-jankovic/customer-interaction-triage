@@ -23,3 +23,7 @@ A new `npm run eval` calls the model again; its numbers can differ slightly from
 ## Incomplete runs
 
 A run stopped by the cost cap keeps the messages it finished. `run.json` says `"complete": false`, and the report says how many messages finished.
+
+## Investigation runs (P10)
+
+`npm run eval:investigate` writes the same kind of folder, named `<time>-investigate-<set>-<model>-investigate.v1`, with `"kind": "investigate"` in `run.json`. Its `run.json` also names the classify run whose stored classifications were the input, and the CRM seed (the labels are the seed's designed causes). Each line of `outputs.jsonl` is one labelled technical fault: the agent's attempt (cause, evidence, every tool call with its result, usage, cost), or why it wasn't investigated. `npm run eval:report` recognises the kind and recomputes the investigation report.

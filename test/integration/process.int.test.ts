@@ -15,10 +15,12 @@ import {
   byMaskedText,
   labelsOf,
   processDeps,
+  scriptedAgent,
   scriptedLlm,
   seed,
   storeMessage,
   type Answer,
+  type Investigation,
 } from "../support/pipeline.js";
 import { createTestDatabase, type TestDatabase } from "./support/test-database.js";
 
@@ -27,10 +29,13 @@ let db: Kysely<Database>;
 
 const MSG = "msg-011"; // a technical fault, customer found, outage in its area: auto-routed
 const llmFor = (script: Answer[], messageId = MSG) => scriptedLlm(script, byMaskedText([messageId]));
-const run = (id: string, llm: ReturnType<typeof llmFor>, finalAttempt = true) =>
-  processInteraction(db, processDeps(llm), id, { finalAttempt });
+const run = (id: string, llm: ReturnType<typeof llmFor>, finalAttempt = true, agent = scriptedAgent()) =>
+  processInteraction(db, processDeps(llm, agent), id, { finalAttempt });
 
-const rows = async (table: "classifications" | "enrichments" | "cases" | "decision_log", id: string) => {
+const rows = async (
+  table: "classifications" | "enrichments" | "investigations" | "cases" | "decision_log",
+  id: string,
+) => {
   const r =
     table === "decision_log"
       ? await sql<{ n: string }>`select count(*) as n from decision_log d join cases c on c.id = d.case_id
@@ -67,8 +72,11 @@ describe("processInteraction", () => {
   it("runs every step for a fresh interaction and ends with one processed case", async () => {
     const id = await storeMessage(db, MSG);
     const llm = llmFor(["valid"]);
-    const r = await run(id, llm, false);
-    expect(r.steps).toEqual({ mask: "ran", classify: "ran", enrich: "ran", route: "ran" });
+    const agent = scriptedAgent();
+    const r = await run(id, llm, false, agent);
+    expect(r.steps).toEqual({ mask: "ran", classify: "ran", enrich: "ran", investigate: "ran", route: "ran" });
+    expect(agent.investigations).toBe(1);
+    expect(agent.calls).toHaveLength(2);
     expect(r.failure).toBeNull();
     expect(r.case).toMatchObject({
       created: true,
@@ -78,21 +86,26 @@ describe("processInteraction", () => {
     });
     expect(llm.calls).toHaveLength(1);
     expect(await statusOf(id)).toBe("processed");
-    expect(await rows("decision_log", id)).toBe(4);
+    expect(await rows("investigations", id)).toBe(1);
+    expect(await rows("decision_log", id)).toBe(5);
   });
 
   it("reuses everything on a second run: no model call and no new rows", async () => {
     const id = await storeMessage(db, MSG);
     await run(id, llmFor(["valid"]));
-    const before = [await rows("classifications", id), await rows("enrichments", id), await rows("decision_log", id)];
+    const count = async () =>
+      Promise.all(
+        (["classifications", "enrichments", "investigations", "decision_log"] as const).map((t) => rows(t, id)),
+      );
+    const before = await count();
     const llm = llmFor(["valid"]);
-    const r = await run(id, llm);
+    const agent = scriptedAgent();
+    const r = await run(id, llm, true, agent);
     expect(r.steps).toBeNull();
     expect(r.case.created).toBe(false);
     expect(llm.calls).toHaveLength(0);
-    expect([await rows("classifications", id), await rows("enrichments", id), await rows("decision_log", id)]).toEqual(
-      before,
-    );
+    expect(agent.calls).toHaveLength(0);
+    expect(await count()).toEqual(before);
   });
 
   it("resumes from enrich when a valid classification is stored, with no model call", async () => {
@@ -112,7 +125,7 @@ describe("processInteraction", () => {
     const llm = llmFor(["valid"]);
     const r = await run(id, llm);
     expect(llm.calls).toHaveLength(0);
-    expect(r.steps).toEqual({ mask: "ran", classify: "reused", enrich: "ran", route: "ran" });
+    expect(r.steps).toEqual({ mask: "ran", classify: "reused", enrich: "ran", investigate: "ran", route: "ran" });
   });
 
   it("stores a transient error and throws for a retry; the next run succeeds with one case", async () => {
@@ -137,7 +150,7 @@ describe("processInteraction", () => {
     const id = await storeMessage(db, MSG);
     const r = await run(id, llmFor([{ status }]), true);
     expect(r.case).toMatchObject({ targetTeam: "general", needsReview: true, reasonCodes: ["classification_error"] });
-    expect(r.steps).toMatchObject({ classify: "ran", enrich: "skipped", route: "ran" });
+    expect(r.steps).toMatchObject({ classify: "ran", enrich: "skipped", investigate: "skipped", route: "ran" });
     expect(await rows("decision_log", id)).toBe(3);
   });
 
@@ -167,6 +180,89 @@ describe("processInteraction", () => {
   });
 });
 
+describe("the investigate step (P10)", () => {
+  const runAgent = (id: string, plan: Investigation[], finalAttempt = true) => {
+    const agent = scriptedAgent(plan);
+    return { agent, result: run(id, llmFor(["valid"]), finalAttempt, agent) };
+  };
+
+  it("skips a case that isn't a technical fault, without calling the agent", async () => {
+    const id = await storeMessage(db, "msg-022");
+    const agent = scriptedAgent();
+    const r = await run(id, llmFor(["valid"], "msg-022"), true, agent);
+    expect(r.steps).toMatchObject({ enrich: "ran", investigate: "skipped", route: "ran" });
+    expect(agent.calls).toHaveLength(0);
+    expect(r.case.log.find((l) => l.step === "investigate")!.output).toEqual({
+      skipped: `intent ${labelsOf("msg-022").intent} is not a technical fault`,
+    });
+  });
+
+  it("reuses a stored investigation on a retry, without calling the agent again", async () => {
+    const id = await storeMessage(db, MSG);
+    await withSchemaChange(
+      "alter table cases add constraint t_fail check (reason_codes ? 'processing_failed') not valid",
+      "alter table cases drop constraint t_fail",
+      () => expect(runAgent(id, ["conclusive"], false).result).rejects.toThrow(/t_fail/),
+    );
+    const { agent, result } = runAgent(id, ["conclusive"]);
+    const r = await result;
+    expect(agent.calls).toHaveLength(0);
+    expect(r.steps).toMatchObject({ classify: "reused", enrich: "reused", investigate: "reused", route: "ran" });
+    expect(await rows("investigations", id)).toBe(1);
+  });
+
+  it("stores a transient agent error and throws for a retry; the retry investigates again", async () => {
+    const id = await storeMessage(db, MSG);
+    await expect(runAgent(id, [{ status: 529 }], false).result).rejects.toThrow(TransientModelError);
+    expect(await rows("investigations", id)).toBe(1);
+    expect(await readCase(db, id)).toBeNull();
+
+    const r = await runAgent(id, ["conclusive"], false).result;
+    expect(r.steps).toMatchObject({ investigate: "ran" });
+    expect(r.case.reasonCodes).toEqual([]);
+    expect(await rows("investigations", id)).toBe(2);
+  });
+
+  it.each<[string, Investigation, boolean]>([
+    ["a transient error on the final attempt", { status: 529 }, true],
+    ["a 400 error, on any attempt", { status: 400 }, false],
+    ["the step limit", "loop", false],
+    ["an inconclusive answer", "inconclusive", false],
+  ])("sends %s to review (investigation_inconclusive), keeping the team", async (_name, plan, finalAttempt) => {
+    const id = await storeMessage(db, MSG);
+    const r = await runAgent(id, [plan], finalAttempt).result;
+    expect(r.case).toMatchObject({
+      targetTeam: "technical_support",
+      needsReview: true,
+      reasonCodes: ["investigation_inconclusive"],
+    });
+    expect(r.case.log.map((l) => l.step)).toEqual(["mask", "classify", "enrich", "investigate", "route"]);
+  });
+
+  it("ends at the step limit after 6 model calls", async () => {
+    const id = await storeMessage(db, MSG);
+    const { agent, result } = runAgent(id, ["loop"]);
+    await result;
+    expect(agent.calls).toHaveLength(6);
+    const row = await db
+      .selectFrom("investigations")
+      .selectAll()
+      .where("interaction_id", "=", id)
+      .executeTakeFirstOrThrow();
+    expect(row).toMatchObject({ outcome: "step_limit", steps: 6, likely_cause: null });
+    expect(row.tool_calls).toHaveLength(5);
+  });
+
+  it("writes a processing_failed case when the agent client throws a non-API error on the final attempt", async () => {
+    const id = await storeMessage(db, MSG);
+    const r = await runAgent(id, ["throw"]).result;
+    expect(r.failure).toEqual({ step: "investigate", errorClass: "Error" });
+    expect(r.case.reasonCodes).toEqual(["processing_failed"]);
+    expect(r.case.log.map((l) => l.step)).toEqual(["mask", "classify", "enrich", "investigate", "route"]);
+    expect(r.case.log[3]!.output).toEqual({ skipped: "the investigation didn't finish" });
+  });
+});
+
 describe("failure cases", () => {
   // Each change makes one step fail with a database error; the failure-case insert still works.
   const failures = [
@@ -187,12 +283,20 @@ describe("failure cases", () => {
       logSteps: ["mask", "classify", "route"],
     },
     {
+      step: "investigate",
+      apply: "alter table investigations add constraint t_fail check (false) not valid",
+      undo: "alter table investigations drop constraint t_fail",
+      classification: true,
+      enrichment: true,
+      logSteps: ["mask", "classify", "enrich", "investigate", "route"],
+    },
+    {
       step: "route",
       apply: "alter table cases add constraint t_fail check (reason_codes ? 'processing_failed') not valid",
       undo: "alter table cases drop constraint t_fail",
       classification: true,
       enrichment: true,
-      logSteps: ["mask", "classify", "enrich", "route"],
+      logSteps: ["mask", "classify", "enrich", "investigate", "route"],
     },
   ] as const;
 

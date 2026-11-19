@@ -1,0 +1,435 @@
+{
+  "n": 17,
+  "investigated": 17,
+  "notInvestigated": [],
+  "accuracy": 1,
+  "byLanguage": {
+    "cs": {
+      "n": 10,
+      "accuracy": 1
+    },
+    "sk": {
+      "n": 4,
+      "accuracy": 1
+    },
+    "en": {
+      "n": 3,
+      "accuracy": 1
+    }
+  },
+  "byCause": {
+    "area_outage": {
+      "support": 8,
+      "predicted": 8,
+      "precision": 1,
+      "recall": 1
+    },
+    "line_fault": {
+      "support": 1,
+      "predicted": 1,
+      "precision": 1,
+      "recall": 1
+    },
+    "customer_equipment": {
+      "support": 0,
+      "predicted": 0,
+      "precision": null,
+      "recall": null
+    },
+    "service_inactive": {
+      "support": 0,
+      "predicted": 0,
+      "precision": null,
+      "recall": null
+    },
+    "inconclusive": {
+      "support": 8,
+      "predicted": 8,
+      "precision": 1,
+      "recall": 1
+    }
+  },
+  "confusion": {
+    "area_outage": {
+      "area_outage": 8,
+      "line_fault": 0,
+      "customer_equipment": 0,
+      "service_inactive": 0,
+      "inconclusive": 0,
+      "no answer": 0,
+      "not investigated": 0
+    },
+    "line_fault": {
+      "area_outage": 0,
+      "line_fault": 1,
+      "customer_equipment": 0,
+      "service_inactive": 0,
+      "inconclusive": 0,
+      "no answer": 0,
+      "not investigated": 0
+    },
+    "customer_equipment": {
+      "area_outage": 0,
+      "line_fault": 0,
+      "customer_equipment": 0,
+      "service_inactive": 0,
+      "inconclusive": 0,
+      "no answer": 0,
+      "not investigated": 0
+    },
+    "service_inactive": {
+      "area_outage": 0,
+      "line_fault": 0,
+      "customer_equipment": 0,
+      "service_inactive": 0,
+      "inconclusive": 0,
+      "no answer": 0,
+      "not investigated": 0
+    },
+    "inconclusive": {
+      "area_outage": 0,
+      "line_fault": 0,
+      "customer_equipment": 0,
+      "service_inactive": 0,
+      "inconclusive": 8,
+      "no answer": 0,
+      "not investigated": 0
+    }
+  },
+  "outcomes": {
+    "valid": 17,
+    "step_limit": 0,
+    "invalid": 0,
+    "error": 0
+  },
+  "reviewRate": 0.470588,
+  "turns": {
+    "mean": 2,
+    "max": 3,
+    "stepLimitHits": 0
+  },
+  "toolCalls": {
+    "mean": 1.882,
+    "max": 4,
+    "byTool": {
+      "check_outages": 17,
+      "get_line_status": 9,
+      "get_recent_tickets": 6
+    },
+    "errors": 0
+  },
+  "cost": {
+    "totalUsd": 0.355616,
+    "meanUsd": 0.020919,
+    "unknown": 0
+  },
+  "latency": {
+    "meanMs": 6157,
+    "maxMs": 11203
+  },
+  "messages": [
+    {
+      "id": "msg-007",
+      "language": "en",
+      "expected": "inconclusive",
+      "predicted": "inconclusive",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.2,
+      "toReview": true,
+      "turns": 1,
+      "tools": [],
+      "toolErrors": 0,
+      "costUsd": 0.014704,
+      "latencyMs": 5350
+    },
+    {
+      "id": "msg-011",
+      "language": "cs",
+      "expected": "area_outage",
+      "predicted": "area_outage",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.7,
+      "toReview": false,
+      "turns": 2,
+      "tools": [
+        "check_outages",
+        "get_line_status",
+        "get_recent_tickets"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.037412799999999996,
+      "latencyMs": 11203
+    },
+    {
+      "id": "msg-012",
+      "language": "sk",
+      "expected": "area_outage",
+      "predicted": "area_outage",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.9,
+      "toReview": false,
+      "turns": 2,
+      "tools": [
+        "check_outages",
+        "get_line_status"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.0296328,
+      "latencyMs": 9520
+    },
+    {
+      "id": "msg-017",
+      "language": "sk",
+      "expected": "inconclusive",
+      "predicted": "inconclusive",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.3,
+      "toReview": true,
+      "turns": 2,
+      "tools": [
+        "check_outages"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.0204888,
+      "latencyMs": 6581
+    },
+    {
+      "id": "msg-018",
+      "language": "cs",
+      "expected": "area_outage",
+      "predicted": "area_outage",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.93,
+      "toReview": false,
+      "turns": 2,
+      "tools": [
+        "get_line_status",
+        "check_outages",
+        "get_recent_tickets"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.022397599999999997,
+      "latencyMs": 6288
+    },
+    {
+      "id": "msg-021",
+      "language": "cs",
+      "expected": "inconclusive",
+      "predicted": "inconclusive",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.35,
+      "toReview": true,
+      "turns": 2,
+      "tools": [
+        "check_outages"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.0152176,
+      "latencyMs": 4413
+    },
+    {
+      "id": "msg-029",
+      "language": "cs",
+      "expected": "area_outage",
+      "predicted": "area_outage",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.75,
+      "toReview": false,
+      "turns": 2,
+      "tools": [
+        "check_outages"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.0152936,
+      "latencyMs": 5003
+    },
+    {
+      "id": "msg-036",
+      "language": "cs",
+      "expected": "inconclusive",
+      "predicted": "inconclusive",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.3,
+      "toReview": true,
+      "turns": 2,
+      "tools": [
+        "check_outages"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.0139816,
+      "latencyMs": 4808
+    },
+    {
+      "id": "msg-037",
+      "language": "cs",
+      "expected": "area_outage",
+      "predicted": "area_outage",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.92,
+      "toReview": false,
+      "turns": 2,
+      "tools": [
+        "check_outages",
+        "get_line_status",
+        "get_recent_tickets"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.023257599999999996,
+      "latencyMs": 5904
+    },
+    {
+      "id": "msg-051",
+      "language": "sk",
+      "expected": "area_outage",
+      "predicted": "area_outage",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.95,
+      "toReview": false,
+      "turns": 2,
+      "tools": [
+        "check_outages",
+        "get_line_status",
+        "get_recent_tickets"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.0194896,
+      "latencyMs": 5019
+    },
+    {
+      "id": "msg-056",
+      "language": "cs",
+      "expected": "area_outage",
+      "predicted": "area_outage",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.7,
+      "toReview": false,
+      "turns": 2,
+      "tools": [
+        "check_outages"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.0178576,
+      "latencyMs": 5619
+    },
+    {
+      "id": "msg-063",
+      "language": "cs",
+      "expected": "inconclusive",
+      "predicted": "inconclusive",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.4,
+      "toReview": true,
+      "turns": 2,
+      "tools": [
+        "check_outages"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.0148696,
+      "latencyMs": 6030
+    },
+    {
+      "id": "msg-069",
+      "language": "cs",
+      "expected": "inconclusive",
+      "predicted": "inconclusive",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.3,
+      "toReview": true,
+      "turns": 3,
+      "tools": [
+        "get_line_status",
+        "get_line_status",
+        "check_outages",
+        "check_outages"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.0380584,
+      "latencyMs": 7812
+    },
+    {
+      "id": "msg-071",
+      "language": "sk",
+      "expected": "line_fault",
+      "predicted": "line_fault",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.75,
+      "toReview": false,
+      "turns": 2,
+      "tools": [
+        "get_line_status",
+        "check_outages",
+        "get_recent_tickets"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.023189599999999998,
+      "latencyMs": 6404
+    },
+    {
+      "id": "msg-078",
+      "language": "cs",
+      "expected": "inconclusive",
+      "predicted": "inconclusive",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.3,
+      "toReview": true,
+      "turns": 2,
+      "tools": [
+        "check_outages"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.0125536,
+      "latencyMs": 3999
+    },
+    {
+      "id": "msg-079",
+      "language": "en",
+      "expected": "inconclusive",
+      "predicted": "inconclusive",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.2,
+      "toReview": true,
+      "turns": 2,
+      "tools": [
+        "check_outages"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.0116576,
+      "latencyMs": 3443
+    },
+    {
+      "id": "msg-084",
+      "language": "en",
+      "expected": "area_outage",
+      "predicted": "area_outage",
+      "correct": true,
+      "outcome": "valid",
+      "confidence": 0.7,
+      "toReview": false,
+      "turns": 2,
+      "tools": [
+        "check_outages",
+        "get_line_status",
+        "get_recent_tickets"
+      ],
+      "toolErrors": 0,
+      "costUsd": 0.0255536,
+      "latencyMs": 7273
+    }
+  ]
+}

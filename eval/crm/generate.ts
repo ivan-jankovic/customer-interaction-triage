@@ -7,6 +7,10 @@
 // src/pipeline/enrich.ts, so the dataset-wide test (test/pipeline/enrich-dataset.test.ts)
 // checks the rules against an independent statement of what should happen.
 //
+// P10 (crm-generate.v2) adds line status per service and the likely cause each technical fault
+// is designed to have ("expected_cause"), in a last step with its own RNG, so everything
+// crm-generate.v1 wrote stays byte for byte the same (and the expected enrichments with it).
+//
 // Usage: npm run crm:generate   (rewrites eval/data/crm/seed.json; then npm run crm:seed)
 
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -17,6 +21,7 @@ import {
   CRM_SEED_PATH,
   type CrmSeed,
   type SeedCustomer,
+  type SeedLineStatus,
   type SeedMessage,
   type SeedOutage,
   type SeedService,
@@ -29,7 +34,7 @@ import {
   type CrmServiceType,
   type LookupKeyType,
 } from "../../src/pipeline/enrich.js";
-import type { Intent, Language } from "../../src/taxonomy.js";
+import type { Intent, Language, LikelyCause } from "../../src/taxonomy.js";
 import * as ids from "../dataset/identifiers.js";
 import { sha256File } from "../lib/hash.js";
 import { readJsonl } from "../lib/jsonl.js";
@@ -37,8 +42,10 @@ import { PATHS } from "../lib/paths.js";
 import { createRng, type Rng } from "../lib/rng.js";
 import type { DatasetRecord } from "../schema/dataset-record.schema.js";
 
-export const GENERATOR = "crm-generate.v1";
+export const GENERATOR = "crm-generate.v2";
 export const SEED = 20261102;
+/** The RNG seed of the line-status step (P10), separate so the v1 part of the seed is unchanged. */
+export const LINE_STATUS_SEED = 20261119;
 
 // ---------------------------------------------------------------------------------------------
 // The design: which messages exercise which path. Reviewed by hand; everything else is "found"
@@ -97,6 +104,26 @@ export const OUTAGE_ELSEWHERE: readonly { area: string; service_type: CrmService
 
 export const FILLER_CUSTOMERS = 20;
 
+/**
+ * P10: technical faults whose found customer's line is down with no outage to explain it. The
+ * service gets an open fault ticket too. Faults in OUTAGE_MATCH are `area_outage`.
+ */
+export const LINE_FAULT = ["msg-071"] as const;
+
+/**
+ * P10: technical faults about a found customer's service that isn't active. None in this
+ * dataset. msg-069 (the phone number moved to another customer) was first designed as
+ * service_inactive, then relabelled inconclusive during review: the number matches two
+ * customers, so the tools can't tell who is calling or which service the message is about.
+ */
+export const SERVICE_INACTIVE: readonly string[] = [];
+
+/**
+ * P10: technical faults whose found customer's line is up with no outage. None in this dataset:
+ * the only found fault without an outage (msg-071) is a line fault (requirements.md, Notes).
+ */
+export const CUSTOMER_EQUIPMENT: readonly string[] = [];
+
 /** Monday 2026-11-02, Prague time (UTC+1 in November). Messages arrive Mon–Fri, 08:00–19:59. */
 const WEEK_START_UTC = Date.parse("2026-11-02T00:00:00+01:00");
 const MINUTE = 60_000;
@@ -139,6 +166,23 @@ const TICKET_SUMMARIES: Readonly<Record<Intent, readonly string[]>> = {
 };
 
 const FAULT_TICKET = "Customer reported the service not working; ticket open while investigated.";
+
+const LINE_UP: Readonly<Record<CrmServiceType, string>> = {
+  internet: "In sync; no errors on the access port.",
+  mobile: "Registered on the network; no errors.",
+  tv: "Set-top box online; streams delivered.",
+};
+const LINE_TERMINATED = "Service terminated; line deprovisioned.";
+const LINE_DOWN_OUTAGE: Readonly<Record<CrmServiceType, string>> = {
+  internet: "No sync on the access port; the access node is unreachable.",
+  mobile: "SIM not registered; the serving cell is unreachable.",
+  tv: "Set-top box offline; the headend is unreachable.",
+};
+const LINE_DOWN_FAULT: Readonly<Record<CrmServiceType, string>> = {
+  internet: "No sync on the access port; the access node is reachable and other lines on it are up.",
+  mobile: "SIM not registered on the network; the serving cell is up and other subscribers are connected.",
+  tv: "Set-top box offline; the headend is up and other boxes are connected.",
+};
 
 // ---------------------------------------------------------------------------------------------
 
@@ -274,6 +318,16 @@ interface Planned {
   receivedAt: number;
   design: string;
   expected: SeedMessage["expected"];
+}
+
+/** P10: the cause a technical fault is designed to have; null for every other intent. */
+export function designedCause(id: string, intent: Intent): LikelyCause | null {
+  if (intent !== "technical_fault") return null;
+  if ((OUTAGE_MATCH as readonly string[]).includes(id)) return "area_outage";
+  if ((LINE_FAULT as readonly string[]).includes(id)) return "line_fault";
+  if (SERVICE_INACTIVE.includes(id)) return "service_inactive";
+  if (CUSTOMER_EQUIPMENT.includes(id)) return "customer_equipment";
+  return "inconclusive";
 }
 
 export function generateSeed(
@@ -555,6 +609,73 @@ export function generateSeed(
     });
   }
 
+  // 6. Line status and designed causes (P10), with their own RNG.
+  const lrng = createRng(LINE_STATUS_SEED);
+  const lineStatus = new Map<string, SeedLineStatus>();
+  for (const s of ctx.services) {
+    const started = Date.parse(s.started_at);
+    lineStatus.set(
+      s.id,
+      s.status === "terminated"
+        ? {
+            service_id: s.id,
+            state: "down",
+            state_since: iso(Math.min(started + lrng.int(60, 900) * DAY, WEEK_START_UTC - 30 * DAY)),
+            diagnostic: LINE_TERMINATED,
+          }
+        : { service_id: s.id, state: "up", state_since: s.started_at, diagnostic: LINE_UP[s.service_type] },
+    );
+  }
+  const causes = new Map<string, LikelyCause | null>();
+  for (const p of planned) {
+    const l = labels(p.record);
+    const cause = designedCause(p.record.id, l.intent);
+    causes.set(p.record.id, cause);
+    if (cause === null) continue;
+    const customer = p.expected.outcome === "found" ? customerOf.get(p.record.id) : undefined;
+    if (customer && cause === "inconclusive") {
+      throw new Error(`${p.record.id}: a technical fault with a found customer needs a designed cause`);
+    }
+    if (!customer || (cause !== "area_outage" && cause !== "line_fault")) {
+      p.design += `; designed cause ${cause}`;
+      continue;
+    }
+    const service = ctx.services.find(
+      (s) => s.customer_id === customer.id && s.status === "active" && s.service_type === l.fields.service_type,
+    );
+    if (!service) throw new Error(`${p.record.id}: no active ${l.fields.service_type} service to fail`);
+    if (cause === "area_outage") {
+      const outage = ctx.outages.find((o) => o.id === p.expected.outage_ids[0])!;
+      lineStatus.set(service.id, {
+        service_id: service.id,
+        state: "down",
+        state_since: iso(Date.parse(outage.started_at) + lrng.int(2, 15) * MINUTE),
+        diagnostic: LINE_DOWN_OUTAGE[service.service_type],
+      });
+      p.design += "; designed cause area_outage: its line went down when the outage started";
+    } else {
+      lineStatus.set(service.id, {
+        service_id: service.id,
+        state: "down",
+        state_since: iso(p.receivedAt - lrng.int(12 * 60, 36 * 60) * MINUTE),
+        diagnostic: LINE_DOWN_FAULT[service.service_type],
+      });
+      const open = ctx.tickets.some((t) => t.service_id === service.id && t.closed_at === null);
+      if (!open) {
+        ctx.tickets.push({
+          id: uuid(lrng),
+          customer_id: customer.id,
+          service_id: service.id,
+          category: "technical_fault",
+          summary: FAULT_TICKET,
+          opened_at: iso(p.receivedAt - lrng.int(2, 10) * HOUR),
+          closed_at: null,
+        });
+      }
+      p.design += "; designed cause line_fault: its line is down with no outage, and a fault ticket is open";
+    }
+  }
+
   return {
     generator: GENERATOR,
     dataset_hash: datasetHash,
@@ -562,11 +683,13 @@ export function generateSeed(
     services: ctx.services,
     tickets: ctx.tickets,
     outages: ctx.outages,
+    line_status: ctx.services.map((s) => lineStatus.get(s.id)!),
     messages: planned.map((p) => ({
       message_id: p.record.id,
       received_at: iso(p.receivedAt),
       design: p.design,
       expected: p.expected,
+      expected_cause: causes.get(p.record.id) ?? null,
     })),
   };
 }
@@ -590,7 +713,7 @@ function main(): void {
   const count = (o: string) => seed.messages.filter((m) => m.expected.outcome === o).length;
   console.log(
     `Wrote ${CRM_SEED_PATH}: ${seed.customers.length} customers, ${seed.services.length} services, ` +
-      `${seed.tickets.length} tickets, ${seed.outages.length} outages; messages: ${count("found")} found, ` +
+      `${seed.tickets.length} tickets, ${seed.outages.length} outages, ${seed.line_status.length} line states; messages: ${count("found")} found, ` +
       `${count("not_found")} not found, ${count("ambiguous")} ambiguous, ${count("no_identifiers")} no identifiers.`,
   );
 }

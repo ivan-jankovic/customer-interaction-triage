@@ -334,6 +334,10 @@ export const FIXTURE_SEED: CrmSeed = {
   ],
   tickets: [],
   outages: [],
+  line_status: [
+    { service_id: fixtureId(11), state: "up", state_since: "2020-01-01T00:00:00.000Z", diagnostic: "In sync." },
+    { service_id: fixtureId(12), state: "up", state_since: "2020-01-01T00:00:00.000Z", diagnostic: "Registered." },
+  ],
   // Expectations are the enrichment with the labelled area and service type; the eval tests
   // don't check them, but they keep the fixture a valid seed.
   messages: FIXTURE.map((m) => ({
@@ -356,5 +360,7 @@ export const FIXTURE_SEED: CrmSeed = {
             area_source: m.labels.fields.area ? ("message" as const) : null,
             outage_ids: [],
           },
+    // P10: m1's line is up with no outage; m7 has no customer and no outage.
+    expected_cause: m.id === "m1" ? "customer_equipment" : m.id === "m7" ? "inconclusive" : null,
   })),
 };

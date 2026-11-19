@@ -80,10 +80,33 @@ export function renderCase(view: CaseView, position: { index: number; total: num
     }
   }
 
+  const inv = view.investigation;
+  if (inv) {
+    lines.push("");
+    if ("skipped" in inv) {
+      lines.push(`Investigation: not run (${inv.skipped})`);
+    } else {
+      const turns = `${inv.steps} turn${inv.steps === 1 ? "" : "s"}`;
+      if (inv.outcome === "valid") {
+        lines.push(
+          `Investigation: likely cause ${inv.likelyCause} (confidence ${inv.confidence}), ${turns}, ${inv.servedModel}`,
+        );
+        lines.push(`  ${inv.summary}`);
+        for (const e of inv.evidence) lines.push(`  - [${e.tool}] ${e.finding}`);
+      } else {
+        lines.push(`Investigation: ${inv.outcome}, ${turns}, ${inv.servedModel}: ${inv.errors.join("; ")}`);
+      }
+      lines.push(inv.toolCalls.length === 0 ? "  Tools called: none" : "  Tools called:");
+      for (const t of inv.toolCalls) {
+        lines.push(`    ${t.turn}. ${t.tool} ${JSON.stringify(t.input)}${t.is_error ? "  (error)" : ""}`);
+      }
+    }
+  }
+
   lines.push("");
   lines.push("Decision log:");
   for (const entry of c.log)
-    lines.push(`  ${entry.seq}. ${entry.step.padEnd(8)} (${entry.ruleApplied}) ${describeStep(entry)}`);
+    lines.push(`  ${entry.seq}. ${entry.step.padEnd(11)} (${entry.ruleApplied}) ${describeStep(entry)}`);
 
   if (view.unmaskings.length > 0) {
     lines.push("");

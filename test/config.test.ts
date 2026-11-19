@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   loadApiConfig,
   loadClassifierConfig,
+  loadInvestigatorConfig,
   loadDatabaseUrl,
   loadServiceConfig,
   loadWorkerConfig,
@@ -84,6 +85,28 @@ describe("loadApiConfig", () => {
   });
 });
 
+describe("loadInvestigatorConfig (P10)", () => {
+  it("follows TRIAGE_MODEL and TRIAGE_EFFORT by default", () => {
+    expect(loadInvestigatorConfig({})).toEqual({ model: "claude-opus-5-5", effort: "low" });
+    expect(loadInvestigatorConfig({ TRIAGE_MODEL: "claude-sonnet-5-5", TRIAGE_EFFORT: "medium" })).toEqual({
+      model: "claude-sonnet-5-5",
+      effort: "medium",
+    });
+  });
+
+  it("uses INVESTIGATE_MODEL and INVESTIGATE_EFFORT when set", () => {
+    expect(loadInvestigatorConfig({ INVESTIGATE_MODEL: "claude-sonnet-5-5", INVESTIGATE_EFFORT: "high" })).toEqual({
+      model: "claude-sonnet-5-5",
+      effort: "high",
+    });
+  });
+
+  it("rejects an unpriced model and an unknown effort", () => {
+    expect(() => loadInvestigatorConfig({ INVESTIGATE_MODEL: "gpt-x" })).toThrow(/no price/);
+    expect(() => loadInvestigatorConfig({ INVESTIGATE_EFFORT: "extreme" })).toThrow(/INVESTIGATE_EFFORT/);
+  });
+});
+
 describe("loadClassifierConfig", () => {
   it("defaults to claude-opus-5-5 at effort low", () => {
     expect(loadClassifierConfig({})).toEqual({ model: "claude-opus-5-5", effort: "low" });
@@ -117,6 +140,7 @@ describe("loadWorkerConfig", () => {
       concurrency: 4,
       model: "claude-opus-5-5",
       effort: "low",
+      investigator: { model: "claude-opus-5-5", effort: "low" },
     });
     expect(loadWorkerConfig({ ...ENV, WORKER_CONCURRENCY: "2" }).concurrency).toBe(2);
   });

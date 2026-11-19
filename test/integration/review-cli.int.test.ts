@@ -203,7 +203,7 @@ describe("npm run review", () => {
       const code = await runReview(ME, { db: old.db, env: {}, input: new PassThrough(), output });
       expect(code).toBe(1);
       expect(out.join("")).toContain(
-        "The database is behind the code: migration 0008_reviews is not applied. Run `npm run db:migrate`",
+        "The database is behind the code: migrations 0008_reviews, 0009_investigations are not applied. Run `npm run db:migrate`",
       );
       expect(out.join("")).not.toContain("does not exist");
     } finally {

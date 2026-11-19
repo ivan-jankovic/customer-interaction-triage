@@ -9,6 +9,8 @@ import { KyselyClassificationStore, type StoredClassification } from "../db/clas
 import { outagesByIds } from "../db/crm.js";
 import type { Database } from "../db/database.js";
 import { listEnrichments, type StoredEnrichment } from "../db/enrichments.js";
+import { investigationById } from "../db/investigations.js";
+import type { StoredToolCall } from "../db/database.js";
 import type { Channel, Intent, Language, Team } from "../taxonomy.js";
 import type { ReviewDecision } from "./rules.js";
 
@@ -54,6 +56,12 @@ export interface CaseView {
     services: { service_type: string; tariff: string; area: string; status: string }[];
   } | null;
   outages: Awaited<ReturnType<typeof outagesByIds>>;
+  /**
+   * P10: the investigation the case was routed with (named by its decision log), or why there is
+   * none; null when the case has no investigate entry (cases written before P10, or an invalid
+   * classification).
+   */
+  investigation: InvestigationView | { skipped: string } | null;
   review: StoredReview | null;
   unmaskings: Unmasking[];
 }
@@ -86,6 +94,44 @@ function summarize(c: StoredClassification): ClassificationSummary {
     errors: c.errors,
     promptVersion: c.promptVersion,
     servedModel: c.servedModel,
+  };
+}
+
+/** An investigation as the reviewer sees it: tool names, inputs and error flags, not the results. */
+export interface InvestigationView {
+  id: string;
+  outcome: string;
+  likelyCause: string | null;
+  confidence: number | null;
+  summary: string | null;
+  evidence: { tool: string; finding: string }[];
+  errors: string[];
+  steps: number;
+  toolCalls: Pick<StoredToolCall, "turn" | "tool" | "input" | "is_error">[];
+  servedModel: string;
+}
+
+async function readInvestigation(db: Kysely<Database>, c: StoredCase): Promise<CaseView["investigation"]> {
+  const entry = c.log.find((l) => l.step === "investigate");
+  if (!entry) return null;
+  const id = entry.inputSummary.investigation_id;
+  if (typeof id !== "string") {
+    const skipped = entry.output.skipped;
+    return { skipped: typeof skipped === "string" ? skipped : "not investigated" };
+  }
+  const i = await investigationById(db, id);
+  if (!i) return { skipped: `investigation ${id} not found` };
+  return {
+    id: i.id,
+    outcome: i.outcome,
+    likelyCause: i.likelyCause,
+    confidence: i.confidence,
+    summary: i.summary,
+    evidence: i.evidence,
+    errors: i.errors,
+    steps: i.steps,
+    toolCalls: i.toolCalls.map(({ turn, tool, input, is_error }) => ({ turn, tool, input, is_error })),
+    servedModel: i.servedModel,
   };
 }
 
@@ -163,6 +209,7 @@ export async function readCaseView(db: Kysely<Database>, caseId: string): Promis
     enrichment,
     customer,
     outages: await outagesByIds(db, enrichment?.outageIds ?? []),
+    investigation: await readInvestigation(db, c),
     review: await readReview(db, caseId),
     unmaskings: unmaskings.map((u) => ({ reviewer: u.reviewer, reason: u.reason, unmaskedAt: u.unmasked_at })),
   };

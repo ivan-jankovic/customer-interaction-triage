@@ -31,7 +31,7 @@ export function printCase(c: RoutedCase, out: (line: string) => void): void {
 
   out("\nDecision log:");
   for (const entry of c.log)
-    out(`  ${entry.seq}. ${entry.step.padEnd(8)} (${entry.ruleApplied}) ${describeStep(entry)}`);
+    out(`  ${entry.seq}. ${entry.step.padEnd(11)} (${entry.ruleApplied}) ${describeStep(entry)}`);
 }
 
 export async function runRoute(

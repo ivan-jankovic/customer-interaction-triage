@@ -11,11 +11,89 @@ import {
   type LookupKeyType,
   type ServiceSummary,
 } from "../pipeline/enrich.js";
+import {
+  daysBefore,
+  type InvestigationCrm,
+  type LineStatusEntry,
+  type OutageEntry,
+  type TicketEntry,
+} from "../pipeline/investigation-crm.js";
 import type { CrmSeed } from "./crm-seed.js";
 import type { Database } from "./database.js";
 
-export class KyselyCrm implements CrmLookup {
+export class KyselyCrm implements CrmLookup, InvestigationCrm {
   constructor(private readonly db: Kysely<Database>) {}
+
+  // The investigation reads (P10). The agent's tools call them through readOnlyCrm(), inside a
+  // READ ONLY transaction (src/db/investigations.ts).
+
+  async lineStatusOfCustomer(customerId: string): Promise<LineStatusEntry[]> {
+    const rows = await this.db
+      .selectFrom("crm_services as s")
+      .leftJoin("crm_line_status as l", "l.service_id", "s.id")
+      .select(["s.id", "s.service_type", "s.tariff", "s.area", "s.status", "l.state", "l.state_since", "l.diagnostic"])
+      .where("s.customer_id", "=", customerId)
+      .orderBy("s.started_at")
+      .orderBy("s.id")
+      .execute();
+    return rows.map((r) => ({
+      serviceId: r.id,
+      serviceType: r.service_type,
+      tariff: r.tariff,
+      area: r.area,
+      status: r.status,
+      state: r.state,
+      stateSince: r.state_since,
+      diagnostic: r.diagnostic,
+    }));
+  }
+
+  async recentTickets(customerId: string, at: Date, days: number, limit: number): Promise<TicketEntry[]> {
+    const rows = await this.db
+      .selectFrom("crm_tickets")
+      .select(["id", "service_id", "category", "summary", "opened_at", "closed_at"])
+      .where("customer_id", "=", customerId)
+      .where("opened_at", ">=", daysBefore(at, days))
+      .where("opened_at", "<=", at)
+      .orderBy("opened_at", "desc")
+      .orderBy("id", "desc")
+      .limit(limit)
+      .execute();
+    return rows.map((r) => ({
+      id: r.id,
+      serviceId: r.service_id,
+      category: r.category,
+      summary: r.summary,
+      openedAt: r.opened_at,
+      closedAt: r.closed_at,
+    }));
+  }
+
+  async outagesInArea(
+    area: string,
+    serviceType: CrmServiceType | null,
+    at: Date,
+    resolvedWithinDays: number,
+  ): Promise<OutageEntry[]> {
+    let query = this.db
+      .selectFrom("outages")
+      .select(["id", "area", "service_type", "description", "started_at", "resolved_at"])
+      .where("area_key", "=", normalizeArea(area))
+      .where("started_at", "<=", at)
+      .where((eb) =>
+        eb.or([eb("resolved_at", "is", null), eb("resolved_at", ">", daysBefore(at, resolvedWithinDays))]),
+      );
+    if (serviceType) query = query.where("service_type", "=", serviceType);
+    const rows = await query.orderBy("started_at").orderBy("id").execute();
+    return rows.map((r) => ({
+      id: r.id,
+      area: r.area,
+      serviceType: r.service_type,
+      description: r.description,
+      startedAt: r.started_at,
+      resolvedAt: r.resolved_at,
+    }));
+  }
 
   async customersByKey(type: LookupKeyType, key: string): Promise<string[]> {
     let rows: { id: string }[];
@@ -65,11 +143,32 @@ export class KyselyCrm implements CrmLookup {
   }
 }
 
+/**
+ * Runs `fn` in a READ ONLY transaction: PostgreSQL refuses any write inside it, whatever the
+ * code does. The agent's tools read the CRM only through this (P10 requirements.md, "Tools").
+ */
+export function inReadOnlyTransaction<T>(db: Kysely<Database>, fn: (trx: Kysely<Database>) => Promise<T>): Promise<T> {
+  return db.transaction().setAccessMode("read only").execute(fn);
+}
+
+/** The investigation reads, each in its own read-only transaction. */
+export function readOnlyCrm(db: Kysely<Database>): InvestigationCrm {
+  return {
+    lineStatusOfCustomer: (customerId) =>
+      inReadOnlyTransaction(db, (trx) => new KyselyCrm(trx).lineStatusOfCustomer(customerId)),
+    recentTickets: (customerId, at, days, limit) =>
+      inReadOnlyTransaction(db, (trx) => new KyselyCrm(trx).recentTickets(customerId, at, days, limit)),
+    outagesInArea: (area, serviceType, at, resolvedWithinDays) =>
+      inReadOnlyTransaction(db, (trx) => new KyselyCrm(trx).outagesInArea(area, serviceType, at, resolvedWithinDays)),
+  };
+}
+
 export interface SeedCounts {
   customers: number;
   services: number;
   tickets: number;
   outages: number;
+  lineStatus: number;
 }
 
 /** Thrown when enrichments still point at the CRM rows a reseed would delete. */
@@ -93,6 +192,7 @@ export async function seedCrm(db: Kysely<Database>, seed: CrmSeed): Promise<Seed
           "Reseed a fresh database (docker compose down -v, then db:migrate and crm:seed).",
       );
     }
+    await trx.deleteFrom("crm_line_status").execute();
     await trx.deleteFrom("crm_tickets").execute();
     await trx.deleteFrom("crm_services").execute();
     await trx.deleteFrom("crm_customers").execute();
@@ -110,24 +210,27 @@ export async function seedCrm(db: Kysely<Database>, seed: CrmSeed): Promise<Seed
         .values(rows.map((o) => ({ ...o, area_key: normalizeArea(o.area) })))
         .execute();
     }
+    for (const rows of chunks(seed.line_status)) await trx.insertInto("crm_line_status").values(rows).execute();
     return {
       customers: seed.customers.length,
       services: seed.services.length,
       tickets: seed.tickets.length,
       outages: seed.outages.length,
+      lineStatus: seed.line_status.length,
     };
   });
 }
 
-/** Row counts of the four mock tables. */
+/** Row counts of the mock tables. */
 export async function countCrm(db: Kysely<Database>): Promise<SeedCounts> {
-  const count = async (table: "crm_customers" | "crm_services" | "crm_tickets" | "outages") =>
+  const count = async (table: "crm_customers" | "crm_services" | "crm_tickets" | "outages" | "crm_line_status") =>
     Number((await sql<{ n: string }>`select count(*) as n from ${sql.table(table)}`.execute(db)).rows[0]!.n);
   return {
     customers: await count("crm_customers"),
     services: await count("crm_services"),
     tickets: await count("crm_tickets"),
     outages: await count("outages"),
+    lineStatus: await count("crm_line_status"),
   };
 }
 

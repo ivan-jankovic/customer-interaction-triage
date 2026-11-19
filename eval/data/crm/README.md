@@ -2,7 +2,7 @@
 
 `seed.json` is the mock CRM and outage list for Merelo (P06), built to match the [dataset](../README.md). Everything in it is fictional: customer numbers, contract numbers, phone numbers (national numbers starting with `0`) and e-mail addresses (RFC 2606 domains) follow the dataset's formats ([labelling guide](../../labelling-guide.md#identifier-formats-why-they-cannot-be-real)). It holds no names, street addresses, birth numbers, bank accounts or IBANs.
 
-**Don't edit it by hand.** It is written by `npm run crm:generate` ([`eval/crm/generate.ts`](../../crm/generate.ts), generator `crm-generate.v1`, RNG seed `20261102`), which reads the dataset's final labels and uses no model. A unit test fails if the committed file differs from a fresh generation. Load it into PostgreSQL with `npm run crm:seed`. The schema is in [`src/db/crm-seed.ts`](../../../src/db/crm-seed.ts).
+**Don't edit it by hand.** It is written by `npm run crm:generate` ([`eval/crm/generate.ts`](../../crm/generate.ts), generator `crm-generate.v2`, RNG seeds `20261102` and, for line status, `20261119`), which reads the dataset's final labels and uses no model. A unit test fails if the committed file differs from a fresh generation. Load it into PostgreSQL with `npm run crm:seed`. The schema is in [`src/db/crm-seed.ts`](../../../src/db/crm-seed.ts).
 
 ## Contents
 
@@ -10,8 +10,9 @@
 | --- | --- | --- |
 | Customers | 77 | 64 residential, 13 business; 54 with an e-mail. Includes 20 filler customers with no message, and 5 second customers that make messages ambiguous. |
 | Services | 121 | 50 mobile, 45 internet, 26 TV; 13 terminated. Phones only on mobile services. |
-| Tickets | 82 | 77 closed older tickets; 5 open, recent `technical_fault` tickets for customers of technical-fault messages (read by P10). |
+| Tickets | 83 | 77 closed older tickets; 6 open, recent `technical_fault` tickets for customers of technical-fault messages (read by P10's agent; one added by `crm-generate.v2` for msg-071). |
 | Outages | 15 | 8 match a technical fault, 4 are near misses, 3 are in areas no message names; 1 still ongoing. |
+| Line status | 121 | One per service (P10): `up` unless designed otherwise; every terminated service is `down`. |
 | Messages | 100 | A fixed `received_at` in Mon 2026-11-02 to Fri 2026-11-06, 08:00–19:59 Prague time, sent by `dataset:load`, and the expected enrichment. |
 
 ## Designed enrichment
@@ -34,6 +35,20 @@ The design lists are at the top of the generator, so they are easy to review. Ea
 - 3 have no outage at all (msg-017, msg-071, msg-078).
 
 An outage window never covers another message in the same area; the generator redraws it until that holds.
+
+## Designed likely causes (P10)
+
+`crm-generate.v2` adds line status and, for each of the 17 technical faults, the likely cause the investigating agent should find (`expected_cause`; null for other intents). It runs as a last step with its own RNG, so everything `crm-generate.v1` wrote is unchanged, and so are the expected enrichments. The design lists (`LINE_FAULT`, `SERVICE_INACTIVE`, `CUSTOMER_EQUIPMENT`; the last two empty) are at the top of the generator.
+
+| Cause | Messages | How |
+| --- | --- | --- |
+| `area_outage` | 8 | The faults in `OUTAGE_MATCH`. For the 6 with a found customer, that service's line went down a few minutes after the outage started. |
+| `line_fault` | 1 | msg-071: its mobile line is down since the day before, with no outage, and a fault ticket is open. |
+| `service_inactive` | 0 | No found customer's service is inactive. msg-069 (the phone number moved to another customer; the old service is terminated) was first designed as `service_inactive` and relabelled `inconclusive` during review: the number matches two customers, so nobody can tell who is writing or which service they mean. |
+| `customer_equipment` | 0 | No fault has a found customer with a working line and no outage. Covered by tests with fixtures only. |
+| `inconclusive` | 8 | No customer to check and no ongoing outage (msg-007, 017, 021, 036, 063, 078, 079), or two candidate customers with nothing to tell them apart (msg-069). |
+
+`test/pipeline/investigate-dataset.test.ts` checks the list and runs a simple reference check over the seed that must find each designed cause.
 
 ## Regenerating
 
