@@ -54,7 +54,7 @@ How each check is marked:
 
 - [x] [tech-stack.md](../../tech-stack.md) has the final mock CRM and `enrichments` fields and an Enrichment section. **(manual)**
 - [x] `README.md` explains `crm:generate`, `crm:seed`, `enrich` and the demo order. **(manual)**
-- [ ] P06 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
+- [x] P06 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 
