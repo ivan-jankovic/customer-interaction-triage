@@ -25,8 +25,7 @@ const idOf = (text: string) => starts.find(([, s]) => text.includes(s))![0];
  * Classifies every message as labelled (or with `override` for some IDs), lets the agent check
  * outages and answer inconclusive, and grades every summary as faithful with no personal data.
  */
-function scripted(override: Record<string, object> = {}, judgeInvalidOnce: readonly string[] = []) {
-  const judgedOnce = new Set<string>();
+function scripted(override: Record<string, object> = {}, judgeInvalid: readonly string[] = []) {
   const complete: LlmRequest[] = [];
   const converse: ConverseRequest[] = [];
   const llm: InjectionLlm = {
@@ -35,8 +34,7 @@ function scripted(override: Record<string, object> = {}, judgeInvalidOnce: reado
       const isJudge = "faithful" in (req.schema as { properties: object }).properties;
       if (isJudge) {
         const jid = idOf(req.user);
-        if (judgeInvalidOnce.includes(jid) && !judgedOnce.has(jid)) {
-          judgedOnce.add(jid);
+        if (judgeInvalid.includes(jid)) {
           const text = JSON.stringify({
             faithful: 5,
             complete: 5,
@@ -97,9 +95,9 @@ function scripted(override: Record<string, object> = {}, judgeInvalidOnce: reado
   return { llm, complete, converse };
 }
 
-function setup(override: Record<string, object> = {}, judgeInvalidOnce: readonly string[] = []) {
+function setup(override: Record<string, object> = {}, judgeInvalid: readonly string[] = []) {
   const resultsDir = mkdtempSync(join(tmpdir(), "eval-injection-"));
-  const client = scripted(override, judgeInvalidOnce);
+  const client = scripted(override, judgeInvalid);
   const log: string[] = [];
   let t = Date.parse("2026-11-20T10:00:00Z");
   const deps = {
@@ -182,17 +180,21 @@ describe("npm run eval:injection", () => {
     expect(s.failedChecks.map((f) => f.name)).toEqual(["review_held", "goal"]);
   });
 
-  it("retries the judge once when its own output is invalid, and keeps the first answer", async () => {
+  it("lists a summary the judge couldn't grade under needs a look, without failing the scenario", async () => {
     const { deps } = setup({}, ["inj-011"]);
     const dir = (await runInjectionEval(["--yes"], deps))!;
     const line = readJsonl<InjectionOutputLine>(join(dir, "outputs.jsonl")).find((l) => l.id === "inj-011")!;
-    expect(line.judgeRetried?.outcome).toBe("invalid");
-    expect(line.judgeRetried?.errors).toEqual(["/reason must NOT have more than 300 characters"]);
-    expect(line.judge?.outcome).toBe("graded");
+    expect(line.judge?.outcome).toBe("invalid");
     const m = metricsOf(dir);
     expect(m.overall.passed).toBe(15);
-    expect(m.judge.retried).toBe(1);
-    expect(readJsonl<InjectionOutputLine>(join(dir, "outputs.jsonl")).filter((l) => l.judgeRetried)).toHaveLength(1);
+    expect(m.needsLook).toBe(1);
+    expect(m.scenarios.find((x) => x.id === "inj-011")!.needsLook).toEqual([
+      {
+        repeat: 1,
+        why: "the judge didn't grade the summary (invalid: /reason must NOT have more than 300 characters)",
+      },
+    ]);
+    expect(readFileSync(join(dir, "report.md"), "utf8")).toContain("## Needs a look");
   });
 
   it("--repeat 2 stores two outputs per message, and the report recomputes byte for byte", async () => {

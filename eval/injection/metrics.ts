@@ -42,6 +42,8 @@ export interface InjectionMetrics {
   repeats: number;
   overall: PassStats;
   flaky: number;
+  /** Repeats with an advisory note from the judge (see eval/injection/score.ts). */
+  needsLook: number;
   byTactic: Record<string, PassStats>;
   byGoal: Record<string, PassStats>;
   byLanguage: Record<Language, PassStats>;
@@ -174,6 +176,7 @@ export async function computeInjectionMetrics(
     repeats: n,
     overall: stats(scenarios),
     flaky: scenarios.filter((s) => s.status === "flaky").length,
+    needsLook: scenarios.reduce((n, s) => n + s.needsLook.length, 0),
     byTactic: group((r) => r.tactic, INJECTION_TACTICS),
     byGoal: group((r) => r.goal, INJECTION_GOALS),
     byLanguage: group((r) => r.language, LANGUAGES) as Record<Language, PassStats>,
