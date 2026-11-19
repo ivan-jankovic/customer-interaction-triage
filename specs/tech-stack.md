@@ -46,7 +46,8 @@ Saving a message (PostgreSQL) and enqueueing its job (Redis) are two separate wr
 - `enrichments` (from P06): one row per attempt, never updated: id, interaction id, classification id (whose area and service type were used), enricher version, outcome (`found` | `not_found` | `ambiguous` | `no_identifiers`), customer id (set exactly when found), candidates (jsonb: customer id and the placeholders that matched it), unmatched placeholders, area, area source (`message` | `customer`), outage ids, created at. The current enrichment is the latest row.
 - `cases` (from P07): one per interaction (unique), written once: id, interaction id, classification id (the attempt used; null only on a `processing_failed` case that failed before classifying, from P08), enrichment id (null exactly when the classification isn't valid), customer id (nullable), target team, needs review (true exactly when there are reason codes), reason codes (jsonb), router version, created at
 - `decision_log` (from P07): one entry per pipeline step of a case, written in the same transaction: id, case id, seq (1–4), step (`mask` | `classify` | `enrich` | `route`), input summary (jsonb), output (jsonb), rule applied (the version that decided), created at. IDs, versions, outcomes and placeholders only: no message text, summary or identifier value.
-- `reviews`: case id, reviewer decision, corrected intent/team, note, reviewed at
+- `reviews` (from P09): at most one per case (unique), written once: id, case id, reviewer (a handle such as `reviewer-1`, checked), decision (`confirmed` | `corrected`), corrected intent and corrected team (both set exactly when corrected: the final values), note (required when corrected), spot check (the case didn't need review), reviewed at. A case is never changed: the decision that counts is the case's own, or the correction's.
+- `unmask_log` (from P09): one row each time a reviewer views a message's raw text, append-only: id, case id, reviewer, reason (required), unmasked at.
 - Mock data (from P06), loaded from `eval/data/crm/seed.json` by `npm run crm:seed`:
   - `crm_customers`: id, customer number (unique), e-mail (lower case, not unique), segment (`residential` | `business`), created at. No names or addresses.
   - `crm_services`: id, customer id, service type (`internet` | `mobile` | `tv`), tariff, contract number (unique), phone (mobile only, `+420…`/`+421…`) and its generated last-9-digit key, area, status (`active` | `terminated`), started at.
@@ -143,8 +144,10 @@ Deterministic code (no model), in `src/pipeline/enrich.ts`, versioned (`enrich.v
 
 ## Review queue
 
-- **CLI first:** list cases needing review, show details and evidence, confirm or correct.
-- **Later, a minimal web page:** server-rendered by Fastify, no frontend framework; same actions as the CLI.
+- **CLI first (P09):** `npm run review` is an interactive loop over unreviewed cases that need review, oldest first (`--team` and `--reason` narrow it; `--spot-check` goes through auto-routed cases instead). Each case is shown with its reasons, classification, **masked** text, enrichment evidence and decision log, then: confirm (optional note), correct (intent and team, the team defaulting to the intent's; a note is required), skip (this session only), unmask or quit. One review per case, final; a second is refused with who reviewed it and when.
+- **Unmasking:** the raw text is shown only on request, with a reason, and every view is written to `unmask_log` first and listed on the case. Masking protects the model boundary; this makes staff access visible. It is an audit trail, not access control: the reviewer handle is recorded, not verified.
+- **Shared logic:** the queue, the case view and the actions live in `src/review/`, independent of the terminal, so the web page reuses them.
+- **Later, a minimal web page (P13):** server-rendered by Fastify, no frontend framework; same actions as the CLI.
 
 ## Optional later
 

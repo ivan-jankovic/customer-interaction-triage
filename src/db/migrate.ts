@@ -20,6 +20,28 @@ export function createMigrator<DB>(db: Kysely<DB>): Migrator {
   });
 }
 
+/** Names of the migrations in the code that the database hasn't applied, in order. Reads only. */
+export async function pendingMigrations<DB>(db: Kysely<DB>): Promise<string[]> {
+  const migrations = await createMigrator(db).getMigrations();
+  return migrations.filter((m) => m.executedAt === undefined).map((m) => m.name);
+}
+
+/**
+ * A readable error for a database that is behind the code, or null when it is current. Commands
+ * call this first, so an unapplied migration reads "run npm run db:migrate", not "relation ...
+ * does not exist" (P09).
+ */
+export async function schemaBehindMessage<DB>(db: Kysely<DB>): Promise<string | null> {
+  const pending = await pendingMigrations(db);
+  if (pending.length === 0) return null;
+  const list = pending.join(", ");
+  return (
+    `The database is behind the code: migration${pending.length > 1 ? "s" : ""} ${list} ` +
+    `${pending.length > 1 ? "are" : "is"} not applied. ` +
+    "Run `npm run db:migrate` (or `docker compose up -d --wait --build`), then try again."
+  );
+}
+
 /** Prints one line per migration; returns false if the run failed. */
 export function report(result: MigrationResultSet, log: (line: string) => void = console.log): boolean {
   for (const r of result.results ?? [])

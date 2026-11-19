@@ -95,7 +95,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** loading the dataset processes all messages in the background; a message stored while the worker or Redis is down is processed once they are back.
 **Done when:** every interaction ends as exactly one case; failure paths (including a crash between storing and enqueueing) are tested.
 
-## P09: Review queue (CLI)
+## ✅ P09: Review queue (CLI)
 
 - List cases needing review, show details, evidence and reasons, confirm or correct.
 - Corrections stored in `reviews`.

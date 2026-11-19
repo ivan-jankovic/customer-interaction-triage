@@ -8,7 +8,7 @@ import type { Database } from "../../src/db/database.js";
 import { createMigrator } from "../../src/db/migrate.js";
 import { createTestDatabase, type TestDatabase } from "./support/test-database.js";
 
-const P06_P07_TABLES = [
+const P06_TO_P09_TABLES = [
   "crm_customers",
   "crm_services",
   "crm_tickets",
@@ -16,6 +16,8 @@ const P06_P07_TABLES = [
   "enrichments",
   "cases",
   "decision_log",
+  "reviews",
+  "unmask_log",
 ];
 
 let testDb: TestDatabase;
@@ -53,6 +55,7 @@ describe("migrations", () => {
       ["0005_enrichments", "Success"],
       ["0006_cases", "Success"],
       ["0007_processing", "Success"],
+      ["0008_reviews", "Success"],
     ]);
     expect(await appliedMigrations()).toEqual([
       "0000_baseline",
@@ -63,6 +66,7 @@ describe("migrations", () => {
       "0005_enrichments",
       "0006_cases",
       "0007_processing",
+      "0008_reviews",
     ]);
   });
 
@@ -220,7 +224,7 @@ describe("migrations", () => {
     expect(await tableExists("interactions")).toBe(false);
     expect(await tableExists("classifications")).toBe(false);
     expect(await tableExists("masked_identifiers")).toBe(false);
-    for (const table of P06_P07_TABLES) expect(await tableExists(table), table).toBe(false);
+    for (const table of P06_TO_P09_TABLES) expect(await tableExists(table), table).toBe(false);
   });
 
   it("migrates to latest again", async () => {
@@ -230,6 +234,6 @@ describe("migrations", () => {
     expect(await tableExists("interactions")).toBe(true);
     expect(await tableExists("classifications")).toBe(true);
     expect(await tableExists("masked_identifiers")).toBe(true);
-    for (const table of P06_P07_TABLES) expect(await tableExists(table), table).toBe(true);
+    for (const table of P06_TO_P09_TABLES) expect(await tableExists(table), table).toBe(true);
   });
 });
