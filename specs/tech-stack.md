@@ -25,7 +25,7 @@ intake (API) → store → queue → mask → understand (LLM) → enrich (CRM, 
    → review queue (if required)
 ```
 
-Each step is a separate module with its own tests. Steps after "understand" never see raw personal data.
+Each step is a separate module with its own tests. Nothing after "mask" sees raw personal data: every model call (the classifier, and the evaluation's judge) gets masked text only (from P05).
 
 ## Queue consistency
 
@@ -33,7 +33,8 @@ Saving a message (PostgreSQL) and enqueueing its job (Redis) are two separate wr
 
 ## Data model (initial)
 
-- `interactions`: id (uuidv7), external id (the caller's own id, unique when set), channel (`email` | `chat` | `call`), language (`cs` | `sk` | `en`, nullable when unknown), raw text, received at, status, created at (from P02); masked text (P05)
+- `interactions`: id (uuidv7), external id (the caller's own id, unique when set), channel (`email` | `chat` | `call`), language (`cs` | `sk` | `en`, nullable when unknown), raw text, received at, status, created at (from P02); masked text, masker version, masked at (P05, set together once)
+- `masked_identifiers` (from P05): id, interaction id, placeholder, type, value, normalised value, start and end offset, created at; unique per interaction and placeholder, indexed by type and normalised value
 - `classifications` (from P03): one row per attempt, never updated: id, interaction id, outcome (`valid` | `invalid` | `error`), intent, urgency, language, fields (jsonb), summary, confidence (0–1), raw output, errors, prompt version, requested and served model, fell back, effort, tokens (input, output, cache write, cache read), cost, latency, created at. The current classification is the latest valid row.
 - `investigations`: interaction id, steps taken, tools called, likely cause, evidence, confidence
 - `cases`: id, interaction id, customer id (nullable), target team, needs review, reason codes, created at
@@ -70,7 +71,12 @@ Defined in code in `src/taxonomy.ts`, with definitions, examples and borderline 
 
 ## Masking
 
-Deterministic, rule-based (no model): phone numbers, e-mail addresses, Czech birth numbers, bank account numbers, IBANs, customer and contract numbers. Formats are Czech and Slovak (e.g. +420 and +421 phone numbers, CZ and SK IBANs; birth numbers share one format); other countries are out of scope. Placeholders are typed (e.g. `[PHONE_1]`) so the model can still refer to them; the mapping stays in the database and is used for CRM lookups.
+Deterministic, rule-based (no model), in `src/pipeline/mask.ts`, versioned (`mask.v1` from P05): phone numbers, e-mail addresses, Czech birth numbers, bank account numbers, IBANs, customer and contract numbers. Formats are Czech and Slovak; other countries are out of scope.
+
+- **Recognised by format, never by checksum** (the dataset's values are built to fail checksums, and real input has typos). Phones: `+420`/`+421`/`00420`/`00421` and 9-digit national numbers. A birth number is told from a bank account by a plausible `YYMMDD`. Merelo's own `merelo.example` addresses are not masked. The full rules are in the P05 spec.
+- **Placeholders are typed and numbered per type** (`[PHONE_1]`, `[CUSTOMER_NUMBER_1]`, …); the same value (ignoring spaces) gets the same placeholder, so the model can still refer to it.
+- **Masking runs once per interaction**, as the first processing step: it stores `masked_text` and the mapping (`masked_identifiers`: placeholder, type, value, normalised value, offsets). The mapping is used for CRM lookups (P06) and is where a classification's identifiers come from: the model doesn't extract them (`classify.v2`).
+- **Not masked: personal names and street addresses.** Rules can't find them reliably, and they aren't used for lookups. This is a known limitation; the summary rules ask the model not to repeat them.
 
 ## Languages
 
