@@ -224,3 +224,37 @@ As for classification (P08): every attempt is stored before anything else happen
 - **The seed hash changes** (`crm-generate.v2`). The kept runs record the old hash. Plan 3.4 checks that `eval:report` still reproduces them; if it doesn't, implementation stops and raises it.
 - **Earlier tests that change:** the decision-log tests (four steps become five), `route.v2` → `route.v3`, `process.v1` → `process.v2`, the crm generator and seed tests, and the review screen tests.
 - **Docs consulted:** the Claude API structured-outputs page (JSON outputs combined with strict tool use), through Context7.
+
+## Implementation notes
+
+- **The designed cause is `messages[].expected_cause`, not `expected.likely_cause`.** The dataset-wide enrichment test compares `expected` with the enrichment result as a whole, so the cause sits next to it (null for other intents).
+- **`crm-generate.v2` adds line status in a last step with its own RNG** (`LINE_STATUS_SEED`). Everything `crm-generate.v1` wrote is byte for byte the same; the one new row is msg-071's open fault ticket. A test compares the reference check over the seed with each designed cause.
+- **The tools read through a separate `InvestigationCrm` interface** (`src/pipeline/investigation-crm.ts`), implemented by both CRMs, instead of new `CrmLookup` methods (plan 2.4): enrichment's interface stays as it was.
+- **`isInconclusive` lives in `src/pipeline/route.ts`**, not `investigate.ts` (plan 5.3): the review decision belongs with the routing rules, and it avoids an import cycle over the confidence threshold.
+- **A case names its investigation through the decision log** (`investigate` entry, `investigation_id`); `cases` has no new column. A later `npm run investigate` stores a new attempt but can't change what a case shows. The `investigate` entry is written whenever an `enrich` one is, so a case with an invalid classification still has three entries.
+- **`route()` takes an optional investigation.** Absent or null gives `route.v2`'s result, which the classify-only eval scoring uses; `routeInteraction` refuses a valid technical fault without one ("investigate first").
+- **`apiStatus` is carried over from the attempt** by `runInvestigation`: it isn't stored (as for classifications), and an integration test caught that the runner otherwise never retried a transient agent error.
+- **Assistant turns are passed back unchanged** (`converse` returns the raw content blocks): with thinking on, they carry signatures the API checks.
+- **The kept classify reports were recomputed** (`eval:report`): only the router version (`route.v3`) and the seed hash changed; every number is the same (plan 8.4).
+- **The step-name column of the decision log** is 11 characters wide now (`investigate`), in `npm run route`, `npm run process` and the review screen.
+
+## Results (recorded during implementation)
+
+- **Tests:** 864 unit tests and 204 integration tests pass locally.
+- **Evaluation** (kept: `eval/results/kept/20261119-162816-investigate-full-claude-opus-5-5-investigate.v1/`), `claude-opus-5-5` at effort low, from the kept `classify.v2` run. Cost **$0.36** for 17 faults (estimate $1.15 before caching; the spec guessed ~$0.70).
+
+  | Metric | Value |
+  | --- | --- |
+  | Cause accuracy | **16 / 17 (94.1%)** |
+  | `area_outage` | 8 / 8 |
+  | `line_fault` | 1 / 1 (msg-071) |
+  | `inconclusive` | 7 / 7 |
+  | `service_inactive` | 0 / 1 (msg-069 answered `inconclusive`) |
+  | Outcomes | 17 valid; no step limit, invalid output or API error |
+  | Turns | mean 2.0, max 3 |
+  | Tool calls | mean 1.9, max 4; `check_outages` 17, `get_line_status` 9, `get_recent_tickets` 6; no tool errors |
+  | Sent to review by the investigation | 8 of 17 (the 7 inconclusive and msg-069) |
+  | Cost and latency | $0.021 and 6.2 s per fault |
+
+  **msg-069, the one miss**, is arguably the safer answer. The phone number matched two customers; the agent looked up both, saw an active line for one and a terminated service for the other, and answered `inconclusive` (0.3): "a person should confirm which account it is". The designed label assumes the caller is the customer whose service was terminated. The case goes to review anyway (`customer_ambiguous`). Per-cause numbers are indicative only: two causes have one example each, and `customer_equipment` has none.
+- **Demo** on a separate `triage_demo` database (Redis database 1, API on port 3001), after `crm:seed`; dropped and flushed afterwards. msg-071 posted through the API and processed with `npm run process` for **$0.044** ($0.020 classification, $0.024 investigation): `line_fault` at 0.8 in 2 turns, calling `get_line_status`, `check_outages` and `get_recent_tickets` in the first turn; the case was auto-routed to `technical_support` with five decision-log entries, and the review screen (`--spot-check`) showed the cause, evidence and tool calls.

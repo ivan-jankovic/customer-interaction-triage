@@ -200,7 +200,7 @@ describe("renderCase: the investigation (P10)", () => {
         "  The customer's mobile line is down with no outage in Žilina.\n" +
         "  - [get_line_status] Mobile line down since 2026-11-04 18:00.\n" +
         "  - [check_outages] No outage in Žilina.\n" +
-        "  Tools called: \n" +
+        "  Tools called:\n" +
         '    1. check_outages {"area":"Žilina","service_type":"mobile"}\n' +
         `    1. get_line_status {"customer_id":"${CUSTOMER}"}\n` +
         '    1. get_recent_tickets {"customer_id":"someone-else"}  (error)',

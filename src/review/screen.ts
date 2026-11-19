@@ -96,7 +96,7 @@ export function renderCase(view: CaseView, position: { index: number; total: num
       } else {
         lines.push(`Investigation: ${inv.outcome}, ${turns}, ${inv.servedModel}: ${inv.errors.join("; ")}`);
       }
-      lines.push(`  Tools called: ${inv.toolCalls.length === 0 ? "none" : ""}`);
+      lines.push(inv.toolCalls.length === 0 ? "  Tools called: none" : "  Tools called:");
       for (const t of inv.toolCalls) {
         lines.push(`    ${t.turn}. ${t.tool} ${JSON.stringify(t.input)}${t.is_error ? "  (error)" : ""}`);
       }
