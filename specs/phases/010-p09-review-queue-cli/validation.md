@@ -56,7 +56,7 @@ How each check is marked:
 
 - [x] [tech-stack.md](../../tech-stack.md) has the final `reviews` and `unmask_log` fields and the review queue's behaviour. **(manual)**
 - [x] `README.md` explains `npm run review`, its actions, `REVIEWER`, spot checks and unmasking. **(manual)**
-- [ ] P09 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
+- [x] P09 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 
