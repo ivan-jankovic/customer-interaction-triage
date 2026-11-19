@@ -13,6 +13,7 @@ npm ci
 cp .env.example .env                 # then set INTAKE_API_KEY (below); ANTHROPIC_API_KEY only for the dataset scripts
 openssl rand -hex 32                 # a key for INTAKE_API_KEY in .env (at least 32 characters)
 docker compose up -d --wait          # PostgreSQL, Redis, migrations, and the intake API on http://localhost:3000
+npm run crm:seed                     # load the mock CRM and outage list (safe to repeat, see "Enrichment")
 npm run dataset:load                 # import the 100 dataset messages through the API (safe to repeat)
 ```
 
@@ -37,11 +38,11 @@ curl -X POST http://localhost:3000/interactions \
   -d '{"channel": "email", "language": "cs", "text": "Dobrý den, od rána mi nejde internet."}'
 ```
 
-`npm run dataset:load -- --file eval/data/injection.jsonl` loads the prompt-injection set the same way. The loader sends only the message, its channel, language and dataset id, never the labels. Field rules and limits are in the [P02 requirements](specs/phases/003-p02-intake-and-storage/requirements.md).
+`npm run dataset:load -- --file eval/data/injection.jsonl` loads the prompt-injection set the same way. The loader sends only the message, its channel, language and dataset id, never the labels, plus each dataset message's fixed `received_at` from the mock CRM seed, so outage checks give the same answer on every reload. Field rules and limits are in the [P02 requirements](specs/phases/003-p02-intake-and-storage/requirements.md).
 
 ## Classifying a message
 
-The understanding step makes one model call per message with structured output (prompt `classify.v1` in [src/llm/prompts/](src/llm/prompts/)). It needs `ANTHROPIC_API_KEY` in `.env`, and **each run costs money** (about $0.01 per message with the defaults).
+The understanding step makes one model call per message with structured output (prompt `classify.v2` in [src/llm/prompts/](src/llm/prompts/)). It needs `ANTHROPIC_API_KEY` in `.env`, and **each run costs money** (about $0.01 per message with the defaults).
 
 ```sh
 npm run classify -- msg-001 --dry-run   # show the prompt and its token count (free), store nothing
@@ -59,6 +60,26 @@ Before anything goes to a model, personal identifiers are replaced with typed pl
 ```sh
 npm run mask -- msg-001     # show the raw text, the masked text and the placeholders (free, no model)
 ```
+
+## Enrichment
+
+After a message is classified, the enrichment step looks up the customer in a **mock CRM** and checks a **mock list of known outages**. It is plain code, no model, and free to run.
+
+- **Customer:** found by the masked customer number, contract number, phone or e-mail (never by birth number, bank account or IBAN). The outcome is `found`, `not_found`, `ambiguous` (the keys point at more than one customer) or `no_identifiers`.
+- **Outages:** in the message's area, or the found customer's area when the message names none; of the message's service type; covering the time the message was received.
+
+Every attempt is stored in `enrichments` with the candidates and the placeholders that matched them, the area and where it came from, and the matching outages. Deciding what an ambiguous or unknown customer means for routing comes in P07.
+
+The mock CRM is generated from the dataset by code, so it matches the messages, including some deliberately not-found and ambiguous ones; see [eval/data/crm/README.md](eval/data/crm/README.md).
+
+```sh
+npm run crm:generate        # rebuild eval/data/crm/seed.json from the dataset (deterministic, no model)
+npm run crm:seed            # load it into PostgreSQL, replacing the mock tables
+npm run classify -- msg-011 # classify first (costs money)
+npm run enrich -- msg-011   # customer, area and outages for the latest classification (free)
+```
+
+`crm:seed` refuses to replace the CRM once enrichments point at its customers; to reseed, start from a fresh database (`docker compose down -v`, then `docker compose up -d --wait`).
 
 ## Evaluating
 
@@ -80,7 +101,7 @@ Each run lands in `eval/results/<run-id>/` with `report.md` and `report.html` (i
 | Command | What it does |
 | --- | --- |
 | `npm test` | Unit tests. No Docker, no network, never calls a model. |
-| `npm run test:integration` | Tests against the Compose services (migrations, API with PostgreSQL, loader, Redis). |
+| `npm run test:integration` | Tests against the Compose services (migrations, API with PostgreSQL, loader, masking, mock CRM and enrichment, Redis). |
 | `npm run lint` | ESLint with type-aware rules. |
 | `npm run format` / `format:check` | Prettier. |
 | `npm run typecheck` | TypeScript 7 type check. |

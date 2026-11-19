@@ -37,10 +37,15 @@ Saving a message (PostgreSQL) and enqueueing its job (Redis) are two separate wr
 - `masked_identifiers` (from P05): id, interaction id, placeholder, type, value, normalised value, start and end offset, created at; unique per interaction and placeholder, indexed by type and normalised value
 - `classifications` (from P03): one row per attempt, never updated: id, interaction id, outcome (`valid` | `invalid` | `error`), intent, urgency, language, fields (jsonb), summary, confidence (0–1), raw output, errors, prompt version, requested and served model, fell back, effort, tokens (input, output, cache write, cache read), cost, latency, created at. The current classification is the latest valid row.
 - `investigations`: interaction id, steps taken, tools called, likely cause, evidence, confidence
+- `enrichments` (from P06): one row per attempt, never updated: id, interaction id, classification id (whose area and service type were used), enricher version, outcome (`found` | `not_found` | `ambiguous` | `no_identifiers`), customer id (set exactly when found), candidates (jsonb: customer id and the placeholders that matched it), unmatched placeholders, area, area source (`message` | `customer`), outage ids, created at. The current enrichment is the latest row.
 - `cases`: id, interaction id, customer id (nullable), target team, needs review, reason codes, created at
 - `decision_log`: case id, step, input summary, output, rule applied, timestamp
 - `reviews`: case id, reviewer decision, corrected intent/team, note, reviewed at
-- Mock data: `crm_customers`, `crm_services`, `crm_tickets`, `outages`
+- Mock data (from P06), loaded from `eval/data/crm/seed.json` by `npm run crm:seed`:
+  - `crm_customers`: id, customer number (unique), e-mail (lower case, not unique), segment (`residential` | `business`), created at. No names or addresses.
+  - `crm_services`: id, customer id, service type (`internet` | `mobile` | `tv`), tariff, contract number (unique), phone (mobile only, `+420…`/`+421…`) and its generated last-9-digit key, area, status (`active` | `terminated`), started at.
+  - `crm_tickets`: id, customer id, service id (nullable), category (an intent), summary, opened at, closed at (nullable).
+  - `outages`: id, area and its key (no case or diacritics), service type, description, started at, resolved at (nullable).
 
 Final fields are fixed in the phase specs.
 
@@ -77,6 +82,15 @@ Deterministic, rule-based (no model), in `src/pipeline/mask.ts`, versioned (`mas
 - **Placeholders are typed and numbered per type** (`[PHONE_1]`, `[CUSTOMER_NUMBER_1]`, …); the same value (ignoring spaces) gets the same placeholder, so the model can still refer to it.
 - **Masking runs once per interaction**, as the first processing step: it stores `masked_text` and the mapping (`masked_identifiers`: placeholder, type, value, normalised value, offsets). The mapping is used for CRM lookups (P06) and is where a classification's identifiers come from: the model doesn't extract them (`classify.v2`).
 - **Not masked: personal names and street addresses.** Rules can't find them reliably, and they aren't used for lookups. This is a known limitation; the summary rules ask the model not to repeat them.
+
+## Enrichment
+
+Deterministic code (no model), in `src/pipeline/enrich.ts`, versioned (`enrich.v1` from P06). The full rules are in the P06 spec.
+
+- **Customer lookup** from the masking map's account keys only: customer number, contract number, phone (compared by its last 9 digits) and e-mail. One distinct customer is `found`; none is `not_found`; more than one is `ambiguous`; no key is `no_identifiers`. Keys that match nothing are recorded; P07 decides what they mean.
+- **Outage check:** the classification's area, or the found customer's service area when the message names none; areas compare ignoring case and diacritics; the classified service type must match when known; the outage must cover the interaction's `received_at`.
+- **The mock CRM** is generated from the dataset by `npm run crm:generate` (deterministic, no model), with the expected enrichment of every dataset message, which a unit test checks. The CRM is reached through a small `CrmLookup` interface with a PostgreSQL and an in-memory implementation.
+- **Runs** with `npm run enrich -- <id>` after classification; from P08 in the worker.
 
 ## Languages
 
