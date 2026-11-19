@@ -53,12 +53,21 @@ describe("loadFile", () => {
     }
   });
 
-  it("sends no received_at for a record the seed doesn't know (e.g. an injection message)", async () => {
+  it("sends no received_at for a record the seed doesn't know", async () => {
+    const { calls, fetch } = fakeFetch([201]);
+    const record = { id: "other-001", channel: "chat", language: "cs", text: "x" };
+    await loadFile({ file: tempFile([record]), apiUrl: "http://api.test", apiKey: KEY, fetch, log: () => {} });
+    const body = JSON.parse(calls[0]?.init.body as string) as Record<string, unknown>;
+    expect(Object.keys(body).sort()).toEqual(["channel", "external_id", "language", "text"]);
+  });
+
+  it("sends the seed's received_at for an injection message (P11, crm-generate.v3)", async () => {
     const { calls, fetch } = fakeFetch([201]);
     const record = { id: "inj-001", channel: "chat", language: "cs", text: "x" };
     await loadFile({ file: tempFile([record]), apiUrl: "http://api.test", apiKey: KEY, fetch, log: () => {} });
     const body = JSON.parse(calls[0]?.init.body as string) as Record<string, unknown>;
-    expect(Object.keys(body).sort()).toEqual(["channel", "external_id", "language", "text"]);
+    expect(body.received_at).toBe(seedReceivedAt().get("inj-001"));
+    expect(body.received_at).toMatch(/^2026-11-0[2-6]T/);
   });
 
   it("counts created, existing and failed records and reports each failure", async () => {

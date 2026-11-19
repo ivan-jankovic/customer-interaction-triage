@@ -40,7 +40,7 @@ curl -X POST http://localhost:3000/interactions \
   -d '{"channel": "email", "language": "cs", "text": "Dobrý den, od rána mi nejde internet."}'
 ```
 
-`npm run dataset:load -- --file eval/data/injection.jsonl` loads the prompt-injection set the same way. The loader sends only the message, its channel, language and dataset id, never the labels, plus each dataset message's fixed `received_at` from the mock CRM seed, so outage checks give the same answer on every reload. Field rules and limits are in the [P02 requirements](specs/phases/003-p02-intake-and-storage/requirements.md).
+`npm run dataset:load -- --file eval/data/injection.jsonl` loads the prompt-injection set the same way. The loader sends only the message, its channel, language and dataset id, never the labels, plus each dataset or injection message's fixed `received_at` from the mock CRM seed, so outage checks give the same answer on every reload. Field rules and limits are in the [P02 requirements](specs/phases/003-p02-intake-and-storage/requirements.md).
 
 ## Classifying a message
 

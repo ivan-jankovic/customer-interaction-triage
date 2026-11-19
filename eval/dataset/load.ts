@@ -39,9 +39,10 @@ export interface LoadReport {
   failed: { id: string; reason: string }[];
 }
 
-/** The seed's fixed received_at per dataset message (P06). */
+/** The seed's fixed received_at per dataset message (P06) and injection message (P11). */
 export function seedReceivedAt(): Map<string, string> {
-  return new Map(readCrmSeed().messages.map((m) => [m.message_id, m.received_at]));
+  const seed = readCrmSeed();
+  return new Map([...seed.messages, ...seed.injection].map((m) => [m.message_id, m.received_at]));
 }
 
 /** The request body for one record: these four fields, and received_at when one is fixed for it. */
