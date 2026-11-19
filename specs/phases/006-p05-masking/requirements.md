@@ -51,7 +51,7 @@ Values are recognised by **format only**. The dataset's identifiers have deliber
 | `customer_number` | `[CUSTOMER_NUMBER_n]` | `MR` + 8 digits |
 | `contract_number` | `[CONTRACT_NUMBER_n]` | `SML-` + 4-digit year + `-` + 5 digits |
 | `birth_number` | `[BIRTH_NUMBER_n]` | 6 digits forming a plausible `YYMMDD` (month 01–12, 21–32, 51–62 or 71–82; day 01–31), then `/` and 3 or 4 digits |
-| `bank_account` | `[BANK_ACCOUNT_n]` | An optional prefix of up to 6 digits and `-`, then 2–10 digits, `/` and a 4-digit bank code (anything in this shape that isn't a birth number) |
+| `bank_account` | `[BANK_ACCOUNT_n]` | An optional prefix of up to 6 digits and `-`, then 5–10 digits, `/` and a 4-digit bank code (anything in this shape that isn't a birth number) |
 | `phone` | `[PHONE_n]` | `+420`, `+421`, `00420` or `00421` followed by 9 digits, spaces allowed; or a national 9-digit number written as one block or in groups of 3 |
 
 Further rules:
@@ -114,3 +114,24 @@ Migration `0003`:
   - Prompt-caching savings stay similar: the system prompt is the cached part, and masking changes only the user turn.
 - **Spans the masker might over-mask** (for example a 9-digit reference number). These are counted by the dataset-wide test as unexpected mappings. In the dataset there should be none; if there are, each is examined and either accepted (recorded here) or fixed with a narrower rule.
 - **The pipeline's raw text is still stored** in `interactions.raw_text`, by design: intake must keep the original. Only model calls and later steps are restricted to masked text.
+
+## Results (recorded during implementation)
+
+The masked run is `eval/results/kept/20261119-010458-full-claude-opus-5-5-classify.v2` (`claude-opus-5-5`, effort `low`, `classify.v2`, `mask.v1`, judge `summary-judge.v1`). The comparison with the P04 baseline is in [`eval/results/kept/comparisons/p04-baseline-vs-p05-masking.md`](../../../eval/results/kept/comparisons/p04-baseline-vs-p05-masking.md).
+
+- **Masking costs no accuracy on this dataset.**
+  - Intent stays at 100%, urgency at 89%, language at 100%, area at 99%, and the per-language numbers are the same.
+  - Only three messages changed: msg-031's urgency became wrong, msg-058's became right, and msg-057's service type went from `mobile` to `unknown`.
+  - msg-057 is an address change labelled `other`, and the guide allows `unknown` for account-wide requests. The masked text still names the tariff, so masking didn't hide the context.
+- **Identifiers are now exact by construction:** 100% precision and recall, coming from the masker instead of the model. The dataset-wide unit test proves the same for all 115 messages for free.
+- **No raw identifier reached any model.** The runner test checks every classifier and judge request, and the masked run's summaries contain no placeholders and no personal data (0%).
+- **Cheaper and slightly faster.** The model no longer writes identifiers out, so classifier output tokens fell 18% (16,901 → 13,879), cost per message fell 10% ($0.0067 → $0.0060), and latency p50 was 2.1 s and p95 2.9 s.
+- **Summaries:** faithful 4.86 (was 4.90), complete 4.49 (was 4.41). All 100 were graded this time; the 300-character judge limit didn't trigger.
+- **Paid runs in P05:** classify demo $0.02, subset $0.11, full run $0.60.
+
+### Implementation notes
+
+- **Bank-account rule.** The spec as approved said 2–10 digits for the base number; it is **5–10** (the rules table now says so). With 2, a month and year such as "10/2025" (common in Czech billing messages) would be masked as an account. Real Czech account numbers with fewer than 5 digits are rare. Checked by a unit test.
+- **Placeholders and escaping.** Placeholders use square brackets, which the message escape (`<`, `>`) leaves untouched, so the model sees them as written.
+- **Stored field order.** The `fields` object read back from `classifications` has its keys in jsonb order (`area`, `identifiers`, `service_type`); the values are unchanged.
+
