@@ -14,6 +14,7 @@ import { fileURLToPath } from "node:url";
 import type { Kysely } from "kysely";
 import { loadDatabaseUrl } from "../config.js";
 import { createDb, type Database } from "../db/database.js";
+import { schemaBehindMessage } from "../db/migrate.js";
 import { INTENTS, REASON_CODES, TEAMS, type Intent, type ReasonCode, type Team } from "../taxonomy.js";
 import { confirmCase, correctCase, InvalidReview, unmaskCase, type ReviewResult } from "./actions.js";
 import { readCaseView } from "./case-view.js";
@@ -45,7 +46,7 @@ function lineReader(input: NodeJS.ReadableStream) {
   };
 }
 
-/** Returns the exit code: 0 after a session, 2 for usage errors. */
+/** Returns the exit code: 0 after a session, 1 when the database is behind the code, 2 for usage errors. */
 export async function runReview(argv: string[], deps: ReviewCliDeps): Promise<number> {
   const write = (text: string) => void deps.output.write(text);
   const say = (line = "") => write(`${line}\n`);
@@ -80,6 +81,13 @@ export async function runReview(argv: string[], deps: ReviewCliDeps): Promise<nu
   if (values.reason && !(REASON_CODES as readonly string[]).includes(values.reason)) {
     say(`--reason must be one of ${REASON_CODES.join(", ")}.`);
     return 2;
+  }
+
+  // Before anything else reads a table this phase added.
+  const behind = await schemaBehindMessage(deps.db);
+  if (behind) {
+    say(behind);
+    return 1;
   }
 
   const who = reviewer.value;

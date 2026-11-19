@@ -8,6 +8,7 @@ import { sql, type Kysely } from "kysely";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { seedCrm } from "../../src/db/crm.js";
 import type { Database } from "../../src/db/database.js";
+import { createMigrator } from "../../src/db/migrate.js";
 import { processInteraction } from "../../src/pipeline/process.js";
 import { confirmCase } from "../../src/review/actions.js";
 import { runReview } from "../../src/review/cli.js";
@@ -186,6 +187,28 @@ describe("npm run review", () => {
     expect(await reviewOf(auto)).toMatchObject({ spot_check: true });
     expect((await drive([...ME, "--team", "billing"], ["q"])).out).toContain(`Case 1 of 1  ${ambiguous}`);
     expect((await drive([...ME, "--reason", "customer_ambiguous"], ["q"])).out).toContain(`Case 1 of 1  ${ambiguous}`);
+  });
+
+  it("asks for a migration when the database is behind the code", async () => {
+    const old = await createTestDatabase({ migrate: false });
+    try {
+      await createMigrator(old.db).migrateTo("0007_processing");
+      const out: string[] = [];
+      const output = new Writable({
+        write(chunk: Buffer, _enc, done) {
+          out.push(chunk.toString());
+          done();
+        },
+      });
+      const code = await runReview(ME, { db: old.db, env: {}, input: new PassThrough(), output });
+      expect(code).toBe(1);
+      expect(out.join("")).toContain(
+        "The database is behind the code: migration 0008_reviews is not applied. Run `npm run db:migrate`",
+      );
+      expect(out.join("")).not.toContain("does not exist");
+    } finally {
+      await old.drop();
+    }
   });
 
   it("handles usage errors, an empty queue and end of input", async () => {

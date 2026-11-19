@@ -173,6 +173,8 @@ Indexes: `reviews(reviewer)`, `unmask_log(case_id)`, `unmask_log(reviewer)`.
 - **The loop reads lines with `node:readline`'s async iterator** and writes its own prompts, so end of input is a plain "no more lines" (quit) instead of a rejected question. With piped input the answers aren't echoed, which is why the demo output shows prompts run together.
 - **A correction whose only problem is a missing note asks for the note again**; any other refusal (for example a correction that changes nothing) goes back to the action prompt.
 
+- **A clear message when the database is behind the code** (added after review). Trying the loop on a development database without `0008` gave "relation \"reviews\" does not exist". `npm run review` now checks for unapplied migrations first (`schemaBehindMessage` in `src/db/migrate.ts`, which reads Kysely's migration list) and exits with code 1: "The database is behind the code: migration 0008_reviews is not applied. Run `npm run db:migrate` …". Other commands could call the same check; only the review loop does for now.
+
 ## Results (recorded during implementation)
 
 - **Tests:** 752 unit tests and 168 integration tests pass locally, including 11 tests that drive the loop with scripted input.
