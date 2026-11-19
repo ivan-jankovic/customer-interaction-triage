@@ -1,0 +1,24 @@
+{
+  "seed": 20261119,
+  "rule": "3 messages per intent; every language (cs, sk, en) and channel (email, chat, call) present; at least 2 designed-ambiguous messages. Labels are the final labels.",
+  "ids": [
+    "msg-015",
+    "msg-018",
+    "msg-020",
+    "msg-025",
+    "msg-030",
+    "msg-032",
+    "msg-035",
+    "msg-036",
+    "msg-039",
+    "msg-048",
+    "msg-053",
+    "msg-070",
+    "msg-079",
+    "msg-086",
+    "msg-087",
+    "msg-088",
+    "msg-095",
+    "msg-098"
+  ]
+}

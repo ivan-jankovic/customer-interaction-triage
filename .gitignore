@@ -6,3 +6,8 @@ eval/data/.work/*.lock
 coverage/
 .DS_Store
 dist/
+
+# Evaluation runs: only kept runs (eval:keep) and the README are committed.
+eval/results/*
+!eval/results/kept/
+!eval/results/README.md

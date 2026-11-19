@@ -12,6 +12,10 @@
     "grade.v1": {
       "file": "eval/prompts/grade.v1.md",
       "sha256": "22abf7685dd961dea790e42c974905ff95f2a373ba3e8bd4967b4f68c4891acf"
+    },
+    "summary-judge.v1": {
+      "file": "eval/prompts/summary-judge.v1.md",
+      "sha256": "84168ebd849a278d0d7f5d0f96ca5edfb52c0a4e6e66a662066a9a38e9d9d6ca"
     }
   }
 }

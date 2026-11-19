@@ -33,7 +33,11 @@
     "start": "node dist/api/server.js",
     "db:migrate:dist": "node dist/db/migrate.js latest",
     "dataset:load": "tsx --env-file-if-exists=.env eval/dataset/load.ts",
-    "classify": "tsx --env-file-if-exists=.env src/cli/classify.ts"
+    "classify": "tsx --env-file-if-exists=.env src/cli/classify.ts",
+    "dataset:subset": "tsx eval/subsets.ts",
+    "eval": "tsx --env-file-if-exists=.env eval/run.ts",
+    "eval:report": "tsx eval/report/cli.ts",
+    "eval:keep": "tsx eval/report/keep.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",
