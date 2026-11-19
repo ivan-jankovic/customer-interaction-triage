@@ -2,6 +2,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const evalDir = join(dirname(fileURLToPath(import.meta.url)), "..");
+export const REPO_ROOT = join(evalDir, "..");
 
 // Intermediate files are committed: generation and grading cost money, so their
 // outputs are kept for reproducibility and audit, not regenerated.
@@ -17,4 +18,6 @@ export const PATHS = {
   dataReadme: join(evalDir, "data", "README.md"),
   guide: join(evalDir, "labelling-guide.md"),
   prompts: join(evalDir, "prompts"),
+  results: join(evalDir, "results"),
+  promptRegistry: join(evalDir, "..", "src", "llm", "prompts", "versions.json"),
 } as const;
