@@ -9,7 +9,7 @@
 
 import type { Classification } from "../llm/schemas/classification.schema.js";
 import { INTENT_TO_TEAM, REASON_CODES, type Intent, type ReasonCode, type Team } from "../taxonomy.js";
-import type { CrmServiceType, EnrichmentResult } from "./enrich.js";
+import type { CrmLookup, CrmServiceType, EnrichmentResult } from "./enrich.js";
 import type { Outcome } from "./understand.js";
 
 export const ROUTER_VERSION = "route.v1";
@@ -53,6 +53,16 @@ export interface RouteResult {
   /** In REASON_CODES order. */
   reasonCodes: ReasonCode[];
   firedRules: FiredRule[];
+}
+
+/**
+ * The service types of a found customer, active or terminated (input for the service-type
+ * mismatch rule). Shared by the routing step (src/db/cases.ts) and the evaluation.
+ */
+export async function customerServiceTypes(crm: CrmLookup, customerId: string | null): Promise<CrmServiceType[]> {
+  if (!customerId) return [];
+  const services = await crm.servicesOfCustomer(customerId);
+  return [...new Set(services.map((s) => s.serviceType))].sort();
 }
 
 export function route(input: RouteInput): RouteResult {
