@@ -11,6 +11,10 @@
 // is designed to have ("expected_cause"), in a last step with its own RNG, so everything
 // crm-generate.v1 wrote stays byte for byte the same (and the expected enrichments with it).
 //
+// P11 (crm-generate.v3) adds one customer per injection message with an account key, so the
+// injection set's review comes from the real rules and not from customer_not_found. Also a last
+// step with its own RNG: everything crm-generate.v2 wrote stays byte for byte the same.
+//
 // Usage: npm run crm:generate   (rewrites eval/data/crm/seed.json; then npm run crm:seed)
 
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -42,10 +46,12 @@ import { PATHS } from "../lib/paths.js";
 import { createRng, type Rng } from "../lib/rng.js";
 import type { DatasetRecord } from "../schema/dataset-record.schema.js";
 
-export const GENERATOR = "crm-generate.v2";
+export const GENERATOR = "crm-generate.v3";
 export const SEED = 20261102;
 /** The RNG seed of the line-status step (P10), separate so the v1 part of the seed is unchanged. */
 export const LINE_STATUS_SEED = 20261119;
+/** The RNG seed of the injection step (P11), separate so the v2 part of the seed is unchanged. */
+export const INJECTION_SEED = 20261120;
 
 // ---------------------------------------------------------------------------------------------
 // The design: which messages exercise which path. Reviewed by hand; everything else is "found"
@@ -676,6 +682,84 @@ export function generateSeed(
     }
   }
 
+  // 7. Injection messages (P11), with their own RNG: one customer per message with an account
+  // key, holding exactly the message's keys and an active service of its service type. No new
+  // outage; received_at is redrawn until no outage covers the message's area at that time.
+  const irng = createRng(INJECTION_SEED);
+  const ictx: Context = { ...ctx, rng: irng };
+  const injectionMessages: SeedMessage[] = [];
+  const startOfInjection = ctx.customers.length;
+  for (const r of [...injection].sort((a, b) => a.id.localeCompare(b.id))) {
+    const l = labels(r);
+    const keys = keysOf(r);
+    const lang = r.language;
+    const keyOf = (type: LookupKeyType) => keys.find((k) => k.type === type)?.value;
+    let customerId: string | null = null;
+    let area = l.fields.area;
+    let areaSource: SeedMessage["expected"]["area_source"] = area ? "message" : null;
+    if (keys.length > 0) {
+      area ??= irng.pick(quiet(countryOf(lang)));
+      areaSource = l.fields.area ? "message" : "customer";
+      const mainType: CrmServiceType = l.fields.service_type === "unknown" ? "internet" : l.fields.service_type;
+      const customer = addCustomer(ictx, {
+        customerNumber: keyOf("customer_number"),
+        email: keyOf("email") ?? null,
+        language: lang,
+      });
+      const phone = keyOf("phone");
+      addService(ictx, customer.id, mainType, area, lang, {
+        contract: keyOf("contract_number"),
+        phone: mainType === "mobile" && phone ? canonicalPhone(phone, lang) : undefined,
+      });
+      if (phone && mainType !== "mobile") {
+        addService(ictx, customer.id, "mobile", area, lang, { phone: canonicalPhone(phone, lang) });
+      }
+      customerId = customer.id;
+    }
+    let at: number;
+    do {
+      at = WEEK_START_UTC + irng.int(0, 4) * DAY + irng.int(8 * 60, 20 * 60 - 1) * MINUTE;
+    } while (
+      area !== null &&
+      ctx.outages.some(
+        (o) =>
+          normalizeArea(o.area) === normalizeArea(area) &&
+          Date.parse(o.started_at) <= at &&
+          (o.resolved_at === null || at < Date.parse(o.resolved_at)),
+      )
+    );
+    injectionMessages.push({
+      message_id: r.id,
+      received_at: iso(at),
+      design:
+        customerId === null
+          ? "no_identifiers: no account key in the message (injection set)"
+          : "found: one customer holds every key in the message (injection set); line up, no outage",
+      expected: {
+        outcome: customerId === null ? "no_identifiers" : "found",
+        customer_id: customerId,
+        area,
+        area_source: areaSource,
+        outage_ids: [],
+      },
+      expected_cause: null,
+    });
+  }
+  for (const c of ctx.customers.slice(startOfInjection)) {
+    const starts = ctx.services.filter((s) => s.customer_id === c.id).map((s) => Date.parse(s.started_at));
+    c.created_at = iso(Math.min(...starts) - DAY);
+  }
+  for (const s of ctx.services) {
+    if (!lineStatus.has(s.id)) {
+      lineStatus.set(s.id, {
+        service_id: s.id,
+        state: "up",
+        state_since: s.started_at,
+        diagnostic: LINE_UP[s.service_type],
+      });
+    }
+  }
+
   return {
     generator: GENERATOR,
     dataset_hash: datasetHash,
@@ -691,6 +775,7 @@ export function generateSeed(
       expected: p.expected,
       expected_cause: causes.get(p.record.id) ?? null,
     })),
+    injection: injectionMessages,
   };
 }
 

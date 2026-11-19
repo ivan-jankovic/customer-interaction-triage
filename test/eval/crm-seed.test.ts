@@ -78,19 +78,37 @@ describe("the CRM seed", () => {
       }
     }
     for (const [k, ids] of owners) expect(ids, k).toHaveLength(1);
-    // Injection messages' keys are never in the CRM.
-    const crmKeys = new Set([
-      ...seed.customers.map((c) => `customer_number:${lookupKey("customer_number", c.customer_number)}`),
-      ...seed.customers.filter((c) => c.email).map((c) => `email:${lookupKey("email", c.email!)}`),
-      ...seed.services.map((s) => `contract_number:${lookupKey("contract_number", s.contract_number)}`),
-      ...seed.services.filter((s) => s.phone).map((s) => `phone:${lookupKey("phone", s.phone!)}`),
-    ]);
-    const injectionKeys = [...owners].filter(([, ids]) => ids[0]!.startsWith("inj-")).map(([k]) => k);
-    expect(injectionKeys.filter((k) => crmKeys.has(k))).toEqual([]);
+    // Injection messages' keys (P11, crm-generate.v3) are held only by that message's own
+    // injection customer, never by a dataset or filler customer.
+    const keysOfCustomer = (id: string) => [
+      ...seed.customers
+        .filter((c) => c.id === id)
+        .flatMap((c) => [
+          `customer_number:${lookupKey("customer_number", c.customer_number)}`,
+          ...(c.email ? [`email:${lookupKey("email", c.email)}`] : []),
+        ]),
+      ...seed.services
+        .filter((s) => s.customer_id === id)
+        .flatMap((s) => [
+          `contract_number:${lookupKey("contract_number", s.contract_number)}`,
+          ...(s.phone ? [`phone:${lookupKey("phone", s.phone)}`] : []),
+        ]),
+    ];
+    const crmKeys = new Set(seed.customers.flatMap((c) => keysOfCustomer(c.id)));
+    const injectionOwner = new Map<string, string>();
+    for (const m of seed.injection) {
+      if (m.expected.customer_id)
+        for (const k of keysOfCustomer(m.expected.customer_id)) injectionOwner.set(k, m.message_id);
+    }
+    const injectionKeys = [...owners].filter(([, ids]) => ids[0]!.startsWith("inj-"));
+    for (const [k, ids] of injectionKeys) {
+      if (crmKeys.has(k)) expect(injectionOwner.get(k), k).toBe(ids[0]);
+    }
+    expect(injectionKeys.filter(([k]) => crmKeys.has(k))).toHaveLength(injectionKeys.length);
   });
 
   it("places every message in the demo week, Monday to Friday", () => {
-    for (const m of seed.messages) {
+    for (const m of [...seed.messages, ...seed.injection]) {
       expect(m.received_at >= "2026-11-01T23:00:00.000Z" && m.received_at < "2026-11-06T23:00:00.000Z").toBe(true);
     }
   });

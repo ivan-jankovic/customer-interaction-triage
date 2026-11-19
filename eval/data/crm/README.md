@@ -2,18 +2,19 @@
 
 `seed.json` is the mock CRM and outage list for Merelo (P06), built to match the [dataset](../README.md). Everything in it is fictional: customer numbers, contract numbers, phone numbers (national numbers starting with `0`) and e-mail addresses (RFC 2606 domains) follow the dataset's formats ([labelling guide](../../labelling-guide.md#identifier-formats-why-they-cannot-be-real)). It holds no names, street addresses, birth numbers, bank accounts or IBANs.
 
-**Don't edit it by hand.** It is written by `npm run crm:generate` ([`eval/crm/generate.ts`](../../crm/generate.ts), generator `crm-generate.v2`, RNG seeds `20261102` and, for line status, `20261119`), which reads the dataset's final labels and uses no model. A unit test fails if the committed file differs from a fresh generation. Load it into PostgreSQL with `npm run crm:seed`. The schema is in [`src/db/crm-seed.ts`](../../../src/db/crm-seed.ts).
+**Don't edit it by hand.** It is written by `npm run crm:generate` ([`eval/crm/generate.ts`](../../crm/generate.ts), generator `crm-generate.v3`, RNG seeds `20261102`, for line status `20261119` and for the injection set `20261120`), which reads the dataset's final labels and uses no model. A unit test fails if the committed file differs from a fresh generation. Load it into PostgreSQL with `npm run crm:seed`. The schema is in [`src/db/crm-seed.ts`](../../../src/db/crm-seed.ts).
 
 ## Contents
 
 | Part | Count | Notes |
 | --- | --- | --- |
-| Customers | 77 | 64 residential, 13 business; 54 with an e-mail. Includes 20 filler customers with no message, and 5 second customers that make messages ambiguous. |
-| Services | 121 | 50 mobile, 45 internet, 26 TV; 13 terminated. Phones only on mobile services. |
+| Customers | 86 | 72 residential, 14 business; 57 with an e-mail. Includes 20 filler customers with no message, 5 second customers that make messages ambiguous, and 9 customers for the injection set (P11). |
+| Services | 132 | 56 mobile, 49 internet, 27 TV; 13 terminated. Phones only on mobile services. |
 | Tickets | 83 | 77 closed older tickets; 6 open, recent `technical_fault` tickets for customers of technical-fault messages (read by P10's agent; one added by `crm-generate.v2` for msg-071). |
 | Outages | 15 | 8 match a technical fault, 4 are near misses, 3 are in areas no message names; 1 still ongoing. |
-| Line status | 121 | One per service (P10): `up` unless designed otherwise; every terminated service is `down`. |
+| Line status | 132 | One per service (P10): `up` unless designed otherwise; every terminated service is `down`. |
 | Messages | 100 | A fixed `received_at` in Mon 2026-11-02 to Fri 2026-11-06, 08:00–19:59 Prague time, sent by `dataset:load`, and the expected enrichment. |
+| Injection | 15 | The injection set's messages (P11), in the same form as `messages`, with no designed cause. |
 
 ## Designed enrichment
 
@@ -53,3 +54,14 @@ An outage window never covers another message in the same area; the generator re
 ## Regenerating
 
 Run `npm run crm:generate` after the dataset changes, then `npm test`. `test/pipeline/enrich-dataset.test.ts` enriches every message against the new seed and must match the expectations; if it doesn't, fix the design lists, not the expectations.
+
+## The injection set's customers (P11)
+
+`crm-generate.v3` adds one customer for each injection message with an account key, in a last step with its own RNG, so everything `crm-generate.v2` wrote is unchanged. Without them, `customer_not_found` would send most injection messages to review whatever the model does, and the injection eval would pass for free.
+
+| Outcome | Messages | How |
+| --- | --- | --- |
+| `found` | 9 | inj-001, 002, 003, 005, 007, 010, 011, 013, 014: one customer holds exactly the message's keys, with an active service of the labelled service type (plus a mobile service when the message has a phone), line `up`. No key is shared with any other customer. |
+| `no_identifiers` | 6 | inj-004, 006, 008, 009, 012, 015. |
+
+No outage is added, and each message's `received_at` is drawn so that no existing outage covers its area at that time. None of them has a designed cause: the injection eval checks the agent for safety only.

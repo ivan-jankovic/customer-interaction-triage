@@ -28,6 +28,32 @@ const timestamp = { type: "string", format: "date-time" } as const;
 const nullableUuid = { anyOf: [uuid, { type: "null" }] } as const;
 const nullableTimestamp = { anyOf: [timestamp, { type: "null" }] } as const;
 
+const seedMessageSchema = {
+  type: "object",
+  properties: {
+    message_id: { type: "string" },
+    received_at: timestamp,
+    /** Why the generator set the message up this way, for readers of the seed. */
+    design: { type: "string" },
+    expected: {
+      type: "object",
+      properties: {
+        outcome: { type: "string", enum: ENRICHMENT_OUTCOMES },
+        customer_id: nullableUuid,
+        area: { anyOf: [{ type: "string" }, { type: "null" }] },
+        area_source: { anyOf: [{ type: "string", enum: AREA_SOURCES }, { type: "null" }] },
+        outage_ids: { type: "array", items: uuid },
+      },
+      required: ["outcome", "customer_id", "area", "area_source", "outage_ids"],
+      additionalProperties: false,
+    },
+    /** P10: the likely cause a technical fault is designed to have; null for other intents. */
+    expected_cause: { anyOf: [{ type: "string", enum: LIKELY_CAUSES }, { type: "null" }] },
+  },
+  required: ["message_id", "received_at", "design", "expected", "expected_cause"],
+  additionalProperties: false,
+} as const;
+
 export const crmSeedSchema = {
   type: "object",
   properties: {
@@ -125,36 +151,21 @@ export const crmSeedSchema = {
         additionalProperties: false,
       },
     },
-    messages: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          message_id: { type: "string" },
-          received_at: timestamp,
-          /** Why the generator set the message up this way, for readers of the seed. */
-          design: { type: "string" },
-          expected: {
-            type: "object",
-            properties: {
-              outcome: { type: "string", enum: ENRICHMENT_OUTCOMES },
-              customer_id: nullableUuid,
-              area: { anyOf: [{ type: "string" }, { type: "null" }] },
-              area_source: { anyOf: [{ type: "string", enum: AREA_SOURCES }, { type: "null" }] },
-              outage_ids: { type: "array", items: uuid },
-            },
-            required: ["outcome", "customer_id", "area", "area_source", "outage_ids"],
-            additionalProperties: false,
-          },
-          /** P10: the likely cause a technical fault is designed to have; null for other intents. */
-          expected_cause: { anyOf: [{ type: "string", enum: LIKELY_CAUSES }, { type: "null" }] },
-        },
-        required: ["message_id", "received_at", "design", "expected", "expected_cause"],
-        additionalProperties: false,
-      },
-    },
+    messages: { type: "array", items: seedMessageSchema },
+    /** P11 (crm-generate.v3): the injection set's messages, with no designed cause. */
+    injection: { type: "array", items: seedMessageSchema },
   },
-  required: ["generator", "dataset_hash", "customers", "services", "tickets", "outages", "line_status", "messages"],
+  required: [
+    "generator",
+    "dataset_hash",
+    "customers",
+    "services",
+    "tickets",
+    "outages",
+    "line_status",
+    "messages",
+    "injection",
+  ],
   additionalProperties: false,
 } as const;
 

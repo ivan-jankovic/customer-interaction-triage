@@ -41,6 +41,13 @@ describe("crm:seed", () => {
     expect(lines.join("\n")).toContain(`${seed.customers.length} customers`);
   });
 
+  it("loads the injection set's customers (P11, crm-generate.v3)", async () => {
+    const ids = seed.injection.map((m) => m.expected.customer_id).filter((id): id is string => id !== null);
+    expect(ids).toHaveLength(9);
+    const rows = await testDb.db.selectFrom("crm_customers").select("id").where("id", "in", ids).execute();
+    expect(rows).toHaveLength(9);
+  });
+
   it("leaves the same rows when run twice", async () => {
     const snapshot = async () => ({
       customers: await testDb.db.selectFrom("crm_customers").selectAll().orderBy("id").execute(),

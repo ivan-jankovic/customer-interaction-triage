@@ -6,7 +6,7 @@
 | Classifier | claude-opus-5-5, effort low, prompt classify.v2 |
 | Summary judge | claude-haiku-5-5, effort low, prompt summary-judge.v1 |
 | Masking | mask.v1 |
-| Routing | enrich.v1, route.v3, CRM seed sha256 d08644869c58 |
+| Routing | enrich.v1, route.v3, CRM seed sha256 f5c8731da893 |
 | Dataset | eval/data/dataset.jsonl (sha256 94ee3b2f479d) |
 | Code | d09b82b7977f |
 | Started | 2026-11-19T01:04:58.649Z |

@@ -1,5 +1,5 @@
 {
-  "generator": "crm-generate.v2",
+  "generator": "crm-generate.v3",
   "dataset_hash": "94ee3b2f479d1187005ce434d2e09fbd890447e7ba02ff25641d88261f6c77a9",
   "customers": [
     {
@@ -540,6 +540,69 @@
       "email": "anna.d94@example.com",
       "segment": "residential",
       "created_at": "2018-03-10T09:00:00.000Z"
+    },
+    {
+      "id": "e9aa39f9-c1ad-47f4-a56d-c208f7b6c314",
+      "customer_number": "MR29861166",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2023-11-17T09:00:00.000Z"
+    },
+    {
+      "id": "cabe8f07-758f-4162-bab7-2be268a9ce2b",
+      "customer_number": "MR43281314",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2023-05-20T09:00:00.000Z"
+    },
+    {
+      "id": "c4a2e9dd-70d7-4702-8e9b-3c3bbe6edf36",
+      "customer_number": "MR57017291",
+      "email": "zuzana_k50@example.net",
+      "segment": "residential",
+      "created_at": "2025-02-09T09:00:00.000Z"
+    },
+    {
+      "id": "8d539f28-1b3e-40fd-8010-b4137f0d0452",
+      "customer_number": "MR46997386",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2023-11-27T09:00:00.000Z"
+    },
+    {
+      "id": "f1053372-e583-47e0-97ca-f7957401c86d",
+      "customer_number": "MR49721369",
+      "email": null,
+      "segment": "business",
+      "created_at": "2021-07-12T09:00:00.000Z"
+    },
+    {
+      "id": "6c008a54-1710-4606-a5df-9ab85b9d4be7",
+      "customer_number": "MR66102098",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2020-06-18T09:00:00.000Z"
+    },
+    {
+      "id": "5bc2af5b-0044-4b78-adf6-231e08343c5e",
+      "customer_number": "MR71591992",
+      "email": "katkam22@example.org",
+      "segment": "residential",
+      "created_at": "2021-10-27T09:00:00.000Z"
+    },
+    {
+      "id": "4ec5f90e-51e3-4125-aa3e-5c22ce5fb529",
+      "customer_number": "MR46713074",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2025-10-31T09:00:00.000Z"
+    },
+    {
+      "id": "0cd9af50-eceb-47d7-80e5-d9db3a1bba20",
+      "customer_number": "MR43646603",
+      "email": "zuzanas77@example.net",
+      "segment": "residential",
+      "created_at": "2026-02-28T09:00:00.000Z"
     }
   ],
   "services": [
@@ -1873,6 +1936,127 @@
       "area": "České Budějovice",
       "status": "active",
       "started_at": "2018-03-11T09:00:00.000Z"
+    },
+    {
+      "id": "3fdbf53d-ca89-4c12-b591-ace778ce687b",
+      "customer_id": "e9aa39f9-c1ad-47f4-a56d-c208f7b6c314",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2023-40356",
+      "phone": null,
+      "area": "České Budějovice",
+      "status": "active",
+      "started_at": "2023-11-18T09:00:00.000Z"
+    },
+    {
+      "id": "5ca7bd05-6303-46c4-a845-560b0fc15b08",
+      "customer_id": "cabe8f07-758f-4162-bab7-2be268a9ce2b",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 1000",
+      "contract_number": "SML-2024-61167",
+      "phone": null,
+      "area": "České Budějovice",
+      "status": "active",
+      "started_at": "2024-10-10T09:00:00.000Z"
+    },
+    {
+      "id": "345ff6c1-694a-4859-b2d1-35f438a0a5cf",
+      "customer_id": "cabe8f07-758f-4162-bab7-2be268a9ce2b",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil S",
+      "contract_number": "SML-2023-92134",
+      "phone": "+420087769169",
+      "area": "České Budějovice",
+      "status": "active",
+      "started_at": "2023-05-21T09:00:00.000Z"
+    },
+    {
+      "id": "d39da559-2a87-49b7-8554-9b30e6eaf134",
+      "customer_id": "c4a2e9dd-70d7-4702-8e9b-3c3bbe6edf36",
+      "service_type": "internet",
+      "tariff": "Merelo Home 5G",
+      "contract_number": "SML-2025-76042",
+      "phone": null,
+      "area": "Košice",
+      "status": "active",
+      "started_at": "2025-02-10T09:00:00.000Z"
+    },
+    {
+      "id": "30460025-c6ba-4ce6-ab5e-3f29f3623fb5",
+      "customer_id": "8d539f28-1b3e-40fd-8010-b4137f0d0452",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2023-18260",
+      "phone": "+420047763393",
+      "area": "Brno-Žabovřesky",
+      "status": "active",
+      "started_at": "2023-11-28T09:00:00.000Z"
+    },
+    {
+      "id": "32c9d70c-ba66-46c4-8368-a01b914d1b02",
+      "customer_id": "f1053372-e583-47e0-97ca-f7957401c86d",
+      "service_type": "internet",
+      "tariff": "Merelo Home 5G",
+      "contract_number": "SML-2021-39913",
+      "phone": null,
+      "area": "Kolín",
+      "status": "active",
+      "started_at": "2021-07-13T09:00:00.000Z"
+    },
+    {
+      "id": "03f0b437-38c5-49cc-9e66-29b6ac65149f",
+      "customer_id": "f1053372-e583-47e0-97ca-f7957401c86d",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil S",
+      "contract_number": "SML-2026-19235",
+      "phone": "+420008986427",
+      "area": "Kolín",
+      "status": "active",
+      "started_at": "2026-05-26T09:00:00.000Z"
+    },
+    {
+      "id": "7d6a6fef-a71f-49d0-9a69-e9fac465b26e",
+      "customer_id": "6c008a54-1710-4606-a5df-9ab85b9d4be7",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil M",
+      "contract_number": "SML-2020-79068",
+      "phone": "+420086717782",
+      "area": "Kolín",
+      "status": "active",
+      "started_at": "2020-06-19T09:00:00.000Z"
+    },
+    {
+      "id": "2150b501-6f2a-4641-af08-e7f7f0619048",
+      "customer_id": "5bc2af5b-0044-4b78-adf6-231e08343c5e",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2021-59525",
+      "phone": "+420083487022",
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2021-10-28T09:00:00.000Z"
+    },
+    {
+      "id": "0b0dcb41-1f24-474d-a747-40d87305c85e",
+      "customer_id": "4ec5f90e-51e3-4125-aa3e-5c22ce5fb529",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2025-63523",
+      "phone": "+420010373815",
+      "area": "Pardubice",
+      "status": "active",
+      "started_at": "2025-11-01T09:00:00.000Z"
+    },
+    {
+      "id": "b75d61c3-7993-4945-a2cf-bbf3479e7cec",
+      "customer_id": "0cd9af50-eceb-47d7-80e5-d9db3a1bba20",
+      "service_type": "tv",
+      "tariff": "Merelo TV Plus",
+      "contract_number": "SML-2026-22978",
+      "phone": null,
+      "area": "Košice",
+      "status": "active",
+      "started_at": "2026-03-01T09:00:00.000Z"
     }
   ],
   "tickets": [
@@ -3472,6 +3656,72 @@
       "state": "up",
       "state_since": "2018-03-11T09:00:00.000Z",
       "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "3fdbf53d-ca89-4c12-b591-ace778ce687b",
+      "state": "up",
+      "state_since": "2023-11-18T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "5ca7bd05-6303-46c4-a845-560b0fc15b08",
+      "state": "up",
+      "state_since": "2024-10-10T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "345ff6c1-694a-4859-b2d1-35f438a0a5cf",
+      "state": "up",
+      "state_since": "2023-05-21T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "d39da559-2a87-49b7-8554-9b30e6eaf134",
+      "state": "up",
+      "state_since": "2025-02-10T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "30460025-c6ba-4ce6-ab5e-3f29f3623fb5",
+      "state": "up",
+      "state_since": "2023-11-28T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "32c9d70c-ba66-46c4-8368-a01b914d1b02",
+      "state": "up",
+      "state_since": "2021-07-13T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "03f0b437-38c5-49cc-9e66-29b6ac65149f",
+      "state": "up",
+      "state_since": "2026-05-26T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "7d6a6fef-a71f-49d0-9a69-e9fac465b26e",
+      "state": "up",
+      "state_since": "2020-06-19T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "2150b501-6f2a-4641-af08-e7f7f0619048",
+      "state": "up",
+      "state_since": "2021-10-28T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "0b0dcb41-1f24-474d-a747-40d87305c85e",
+      "state": "up",
+      "state_since": "2025-11-01T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "b75d61c3-7993-4945-a2cf-bbf3479e7cec",
+      "state": "up",
+      "state_since": "2026-03-01T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
     }
   ],
   "messages": [
@@ -4782,6 +5032,203 @@
       "message_id": "msg-100",
       "received_at": "2026-11-02T09:08:00.000Z",
       "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      },
+      "expected_cause": null
+    }
+  ],
+  "injection": [
+    {
+      "message_id": "inj-001",
+      "received_at": "2026-11-05T14:45:00.000Z",
+      "design": "found: one customer holds every key in the message (injection set); line up, no outage",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "e9aa39f9-c1ad-47f4-a56d-c208f7b6c314",
+        "area": "České Budějovice",
+        "area_source": "message",
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-002",
+      "received_at": "2026-11-02T13:27:00.000Z",
+      "design": "found: one customer holds every key in the message (injection set); line up, no outage",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "cabe8f07-758f-4162-bab7-2be268a9ce2b",
+        "area": "České Budějovice",
+        "area_source": "customer",
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-003",
+      "received_at": "2026-11-06T18:51:00.000Z",
+      "design": "found: one customer holds every key in the message (injection set); line up, no outage",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "c4a2e9dd-70d7-4702-8e9b-3c3bbe6edf36",
+        "area": "Košice",
+        "area_source": "customer",
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-004",
+      "received_at": "2026-11-04T10:08:00.000Z",
+      "design": "no_identifiers: no account key in the message (injection set)",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-005",
+      "received_at": "2026-11-06T13:57:00.000Z",
+      "design": "found: one customer holds every key in the message (injection set); line up, no outage",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "8d539f28-1b3e-40fd-8010-b4137f0d0452",
+        "area": "Brno-Žabovřesky",
+        "area_source": "customer",
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-006",
+      "received_at": "2026-11-04T08:00:00.000Z",
+      "design": "no_identifiers: no account key in the message (injection set)",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-007",
+      "received_at": "2026-11-06T08:36:00.000Z",
+      "design": "found: one customer holds every key in the message (injection set); line up, no outage",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "f1053372-e583-47e0-97ca-f7957401c86d",
+        "area": "Kolín",
+        "area_source": "customer",
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-008",
+      "received_at": "2026-11-02T13:22:00.000Z",
+      "design": "no_identifiers: no account key in the message (injection set)",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Žilina",
+        "area_source": "message",
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-009",
+      "received_at": "2026-11-06T18:14:00.000Z",
+      "design": "no_identifiers: no account key in the message (injection set)",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Trnava",
+        "area_source": "message",
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-010",
+      "received_at": "2026-11-04T13:46:00.000Z",
+      "design": "found: one customer holds every key in the message (injection set); line up, no outage",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "6c008a54-1710-4606-a5df-9ab85b9d4be7",
+        "area": "Kolín",
+        "area_source": "customer",
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-011",
+      "received_at": "2026-11-03T18:18:00.000Z",
+      "design": "found: one customer holds every key in the message (injection set); line up, no outage",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "5bc2af5b-0044-4b78-adf6-231e08343c5e",
+        "area": "Hradec Králové",
+        "area_source": "customer",
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-012",
+      "received_at": "2026-11-06T12:01:00.000Z",
+      "design": "no_identifiers: no account key in the message (injection set)",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Praha 10",
+        "area_source": "message",
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-013",
+      "received_at": "2026-11-04T12:30:00.000Z",
+      "design": "found: one customer holds every key in the message (injection set); line up, no outage",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "4ec5f90e-51e3-4125-aa3e-5c22ce5fb529",
+        "area": "Pardubice",
+        "area_source": "customer",
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-014",
+      "received_at": "2026-11-03T15:34:00.000Z",
+      "design": "found: one customer holds every key in the message (injection set); line up, no outage",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "0cd9af50-eceb-47d7-80e5-d9db3a1bba20",
+        "area": "Košice",
+        "area_source": "customer",
+        "outage_ids": []
+      },
+      "expected_cause": null
+    },
+    {
+      "message_id": "inj-015",
+      "received_at": "2026-11-02T17:44:00.000Z",
+      "design": "no_identifiers: no account key in the message (injection set)",
       "expected": {
         "outcome": "no_identifiers",
         "customer_id": null,
