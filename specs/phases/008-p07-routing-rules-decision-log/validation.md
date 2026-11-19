@@ -60,7 +60,7 @@ How each check is marked:
 
 - [x] [tech-stack.md](../../tech-stack.md) has the routing rules, reason codes, threshold, final `cases` and `decision_log` fields, and the routing metrics. **(manual)**
 - [x] `README.md` explains `npm run route`, the demo order and the routing results. **(manual)**
-- [ ] P07 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
+- [x] P07 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 

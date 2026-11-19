@@ -76,7 +76,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** a classified message enriched with the customer and any matching outage.
 **Done when:** enrichment tests pass, including "not found" and "ambiguous".
 
-## P07: Routing rules and decision log
+## ✅ P07: Routing rules and decision log
 
 - Routing rules in code: target team, must-review conditions, reason codes.
 - Case record and decision log written for every interaction.
