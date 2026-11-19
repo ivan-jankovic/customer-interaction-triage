@@ -65,7 +65,7 @@ How each check is marked:
 
 - [x] [tech-stack.md](../../tech-stack.md) has `investigations`, `crm_line_status`, the five-step decision log, the agent's causes, tools, guard and limit, `route.v3`, `process.v2` and `eval:investigate`. **(manual)**
 - [x] `README.md` has an "Investigation" section. **(manual)**
-- [ ] P10 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
+- [x] P10 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 

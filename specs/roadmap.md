@@ -103,7 +103,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** reviewing a few cases from the dataset.
 **Done when:** the review flow works end to end.
 
-## P10: Investigating agent
+## ✅ P10: Investigating agent
 
 - Bounded agent loop for `technical_fault` with read-only tools (outages, line status, recent tickets).
 - Validated output; inconclusive or invalid → review.
