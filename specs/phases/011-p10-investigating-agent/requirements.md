@@ -169,10 +169,10 @@ As for classification (P08): every attempt is stored before anything else happen
   - found customer + an ongoing outage of its service type in its area → `area_outage` (line `down` since the outage started);
   - no identifiers + an ongoing outage in the message's area → `area_outage`;
   - msg-071 (found, no outage) → `line_fault` (line `down`, plus an open ticket on that service);
-  - msg-069 (the number moved, the old service terminated) → `service_inactive`;
-  - no identifiers and no ongoing outage (including a resolved one, or one of another service type) → `inconclusive`.
+  - no identifiers and no ongoing outage (including a resolved one, or one of another service type) → `inconclusive`;
+  - msg-069 (the number moved to another customer, the old service terminated) → `inconclusive`. First designed as `service_inactive`; relabelled during the review of the causes, because the number matches two customers and nobody can tell who is writing or what they want (decided during review).
 
-  That gives 8 `area_outage`, 1 `line_fault`, 1 `service_inactive` and 7 `inconclusive`. The list is reviewed by hand during implementation (decided during spec review).
+  That gives 8 `area_outage`, 1 `line_fault` and 8 `inconclusive`. The list was reviewed by hand during implementation (decided during spec review).
 - The expected enrichments don't change; a unit test checks it.
 
 ## Evaluation
@@ -195,6 +195,7 @@ As for classification (P08): every attempt is stored before anything else happen
 | When it runs | Every valid `technical_fault`, with or without a found customer | Outage evidence still helps the reviewer when the customer is unknown. Decided during spec review. |
 | Inconclusive | Outcome not `valid`, cause `inconclusive`, or confidence below 0.7 | The same caution as for classification. Decided during spec review. |
 | Expected causes | Designed in the seed by the generator, reviewed by hand | Deterministic and checked by a test, like the expected enrichments. Decided during spec review. |
+| msg-069's cause | `inconclusive` (not `service_inactive`) | Two customers hold the number; the tools can't tell which one is writing. Decided during review of the causes, after the evaluation answered `inconclusive` for it. |
 | Customer-ID guard | Tools accept only the case's found or candidate customer IDs | Untrusted input mustn't be able to point the agent at other customers' data. |
 | Evidence check | Every evidence item must name a tool that was called successfully | Evidence must come from the tools, not from the message or the model's guess. |
 
@@ -219,7 +220,7 @@ As for classification (P08): every attempt is stored before anything else happen
 
 ## Notes
 
-- **`customer_equipment` has no dataset example.** Only one fault message (msg-071) has a found customer and no outage, and it is designed as `line_fault`. `customer_equipment` is covered by loop and tool tests with fixtures only. With 17 messages and 1 example each of `line_fault` and `service_inactive`, per-cause numbers are indicative, and the report says so. New messages would need the P00 procedure (paid generation and grading), so they are not part of this phase.
+- **`customer_equipment` and `service_inactive` have no dataset example.** Only one fault message (msg-071) has a found customer and no outage, and it is designed as `line_fault`; msg-069 was relabelled `inconclusive`. Both causes are covered by loop and tool tests with fixtures only. With 17 messages and one `line_fault`, per-cause numbers are indicative, and the report says so. New messages would need the P00 procedure (paid generation and grading), so they are not part of this phase.
 - **Overlap with `customer_unidentified`.** The 9 faults with no identifiers already go to review (P07). The investigation adds evidence for the reviewer, and for some of them a second reason.
 - **The seed hash changes** (`crm-generate.v2`). The kept runs record the old hash. Plan 3.4 checks that `eval:report` still reproduces them; if it doesn't, implementation stops and raises it.
 - **Earlier tests that change:** the decision-log tests (four steps become five), `route.v2` → `route.v3`, `process.v1` → `process.v2`, the crm generator and seed tests, and the review screen tests.
@@ -245,16 +246,15 @@ As for classification (P08): every attempt is stored before anything else happen
 
   | Metric | Value |
   | --- | --- |
-  | Cause accuracy | **16 / 17 (94.1%)** |
+  | Cause accuracy | **17 / 17** (16 / 17 against the first labels, see msg-069 below) |
   | `area_outage` | 8 / 8 |
   | `line_fault` | 1 / 1 (msg-071) |
-  | `inconclusive` | 7 / 7 |
-  | `service_inactive` | 0 / 1 (msg-069 answered `inconclusive`) |
+  | `inconclusive` | 8 / 8 |
   | Outcomes | 17 valid; no step limit, invalid output or API error |
   | Turns | mean 2.0, max 3 |
   | Tool calls | mean 1.9, max 4; `check_outages` 17, `get_line_status` 9, `get_recent_tickets` 6; no tool errors |
-  | Sent to review by the investigation | 8 of 17 (the 7 inconclusive and msg-069) |
+  | Sent to review by the investigation | 8 of 17 (the 8 inconclusive) |
   | Cost and latency | $0.021 and 6.2 s per fault |
 
-  **msg-069, the one miss**, is arguably the safer answer. The phone number matched two customers; the agent looked up both, saw an active line for one and a terminated service for the other, and answered `inconclusive` (0.3): "a person should confirm which account it is". The designed label assumes the caller is the customer whose service was terminated. The case goes to review anyway (`customer_ambiguous`). Per-cause numbers are indicative only: two causes have one example each, and `customer_equipment` has none.
+  **msg-069 was relabelled after the run.** Against the first labels it was the one miss: the phone number matched two customers; the agent looked up both, saw an active line for one and a terminated service for the other, and answered `inconclusive` (0.3): "a person should confirm which account it is". The label `service_inactive` assumed the writer was the customer whose service was terminated. In review the label was changed to `inconclusive` (we can't tell who is writing or what they want), the seed regenerated (only that label changed) and the kept run rescored with `eval:report`, without a new model call; its report names both seeds. The case goes to review anyway (`customer_ambiguous`). Per-cause numbers are indicative only: `line_fault` has one example, `customer_equipment` and `service_inactive` none.
 - **Demo** on a separate `triage_demo` database (Redis database 1, API on port 3001), after `crm:seed`; dropped and flushed afterwards. msg-071 posted through the API and processed with `npm run process` for **$0.044** ($0.020 classification, $0.024 investigation): `line_fault` at 0.8 in 2 turns, calling `get_line_status`, `check_outages` and `get_recent_tickets` in the first turn; the case was auto-routed to `technical_support` with five decision-log entries, and the review screen (`--spot-check`) showed the cause, evidence and tool calls.

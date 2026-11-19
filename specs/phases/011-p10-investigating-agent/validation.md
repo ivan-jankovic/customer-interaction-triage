@@ -19,9 +19,9 @@ How each check is marked:
 ## Storage and seed
 
 - [x] Migration `0009` creates `crm_line_status` and `investigations` with their checks, and lets `decision_log` hold `investigate` and seq 1–5; rolling back restores the earlier state. **(test)**
-- [x] `crm-generate.v2` gives every service a line-status row, and the 17 technical faults the designed causes in requirements.md (8 `area_outage`, 1 `line_fault`, 1 `service_inactive`, 7 `inconclusive`). **(test)**
+- [x] `crm-generate.v2` gives every service a line-status row, and the 17 technical faults the designed causes in requirements.md (8 `area_outage`, 1 `line_fault`, 8 `inconclusive`). **(test)**
 - [x] The reference check over the seed gives each fault's designed cause, and the expected enrichments are unchanged. **(test)**
-- [ ] The 17 designed causes were reviewed by hand. **(manual)**
+- [x] The 17 designed causes were reviewed by hand. **(manual)** msg-069 relabelled `inconclusive` in review.
 
 ## Tools
 
@@ -55,7 +55,7 @@ How each check is marked:
 
 - [x] Metrics from fixture outputs: cause accuracy, per-cause precision and recall, confusion matrix, outcomes, turns, tool calls, "not investigated"; `eval:report` recomputes the report byte for byte. **(test)**
 - [x] `npm run eval:report` still reproduces the kept classify runs. **(manual)**
-- [x] After the user's go-ahead (~$0.70), a kept `eval:investigate` run on all 17 faults reports cause accuracy, steps and tool calls, with the per-cause numbers marked as indicative. Results recorded in requirements.md. **(manual)** It cost $0.36: 16 of 17 right.
+- [x] After the user's go-ahead (~$0.70), a kept `eval:investigate` run on all 17 faults reports cause accuracy, steps and tool calls, with the per-cause numbers marked as indicative. Results recorded in requirements.md. **(manual)** It cost $0.36: 16 of 17 right, 17 of 17 after msg-069 was relabelled (rescored, no new call).
 
 ## Demo
 

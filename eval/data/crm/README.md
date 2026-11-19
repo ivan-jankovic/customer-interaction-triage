@@ -38,15 +38,15 @@ An outage window never covers another message in the same area; the generator re
 
 ## Designed likely causes (P10)
 
-`crm-generate.v2` adds line status and, for each of the 17 technical faults, the likely cause the investigating agent should find (`expected_cause`; null for other intents). It runs as a last step with its own RNG, so everything `crm-generate.v1` wrote is unchanged, and so are the expected enrichments. The design lists (`LINE_FAULT`, `SERVICE_INACTIVE`, `CUSTOMER_EQUIPMENT`) are at the top of the generator.
+`crm-generate.v2` adds line status and, for each of the 17 technical faults, the likely cause the investigating agent should find (`expected_cause`; null for other intents). It runs as a last step with its own RNG, so everything `crm-generate.v1` wrote is unchanged, and so are the expected enrichments. The design lists (`LINE_FAULT`, `SERVICE_INACTIVE`, `CUSTOMER_EQUIPMENT`; the last two empty) are at the top of the generator.
 
 | Cause | Messages | How |
 | --- | --- | --- |
 | `area_outage` | 8 | The faults in `OUTAGE_MATCH`. For the 6 with a found customer, that service's line went down a few minutes after the outage started. |
 | `line_fault` | 1 | msg-071: its mobile line is down since the day before, with no outage, and a fault ticket is open. |
-| `service_inactive` | 1 | msg-069: the phone number moved to another customer; the old service is terminated. |
+| `service_inactive` | 0 | No found customer's service is inactive. msg-069 (the phone number moved to another customer; the old service is terminated) was first designed as `service_inactive` and relabelled `inconclusive` during review: the number matches two customers, so nobody can tell who is writing or which service they mean. |
 | `customer_equipment` | 0 | No fault has a found customer with a working line and no outage. Covered by tests with fixtures only. |
-| `inconclusive` | 7 | No customer to check and no ongoing outage (msg-007, 017, 021, 036, 063, 078, 079). |
+| `inconclusive` | 8 | No customer to check and no ongoing outage (msg-007, 017, 021, 036, 063, 078, 079), or two candidate customers with nothing to tell them apart (msg-069). |
 
 `test/pipeline/investigate-dataset.test.ts` checks the list and runs a simple reference check over the seed that must find each designed cause.
 

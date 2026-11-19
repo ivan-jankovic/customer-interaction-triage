@@ -34,7 +34,8 @@ const DESIGNED: Record<string, LikelyCause> = {
   "msg-051": "area_outage",
   "msg-056": "area_outage",
   "msg-063": "inconclusive",
-  "msg-069": "service_inactive",
+  // Relabelled from service_inactive during review: the number matches two customers.
+  "msg-069": "inconclusive",
   "msg-071": "line_fault",
   "msg-078": "inconclusive",
   "msg-079": "inconclusive",
@@ -74,12 +75,7 @@ async function referenceCause(r: DatasetRecord): Promise<LikelyCause> {
     if (active.some((l) => l.state === "down" || l.state === "degraded")) return "line_fault";
     if (active.length > 0) return "customer_equipment";
   }
-  if (enrichment.outcome === "ambiguous") {
-    // A number that moved: one candidate's service is terminated, another's holds it now.
-    const terminated = new Set(lines.filter((l) => l.status === "terminated").map((l) => l.customer));
-    const active = new Set(lines.filter((l) => l.status === "active").map((l) => l.customer));
-    if ([...terminated].some((c) => !active.has(c)) && active.size > 0) return "service_inactive";
-  }
+  // Ambiguous: the tools can't tell which candidate is writing, so nothing is concluded.
   return "inconclusive";
 }
 

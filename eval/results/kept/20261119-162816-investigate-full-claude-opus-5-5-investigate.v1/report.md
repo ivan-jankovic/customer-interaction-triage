@@ -5,7 +5,8 @@
 | Set | full (17 labelled technical faults) |
 | Agent | claude-opus-5-5, effort low, prompt investigate.v1, investigate.v1, at most 6 turns |
 | Input | classify run 20261119-010458-full-claude-opus-5-5-classify.v2 (classify.v2) |
-| Masking and enrichment | mask.v1, enrich.v1, CRM seed sha256 97503b40f736 |
+| Masking, enrichment and tools | mask.v1, enrich.v1, CRM seed sha256 97503b40f736 |
+| Labels | designed causes from CRM seed sha256 d08644869c58 (rescored: the run used another seed, see above) |
 | Dataset | eval/data/dataset.jsonl (sha256 94ee3b2f479d) |
 | Code | 57a954f0aa11 |
 | Started | 2026-11-19T16:28:16.062Z |
@@ -21,7 +22,7 @@ With 17 faults, and one or two examples of some causes, the per-cause and per-la
 | --- | --- |
 | Faults | 17 |
 | Investigated | 17 |
-| Cause accuracy | 94.1% |
+| Cause accuracy | 100.0% |
 | Sent to review by the investigation | 47.1% |
 | Outcomes | valid 17, step_limit 0, invalid 0, error 0 |
 | Turns per investigation | mean 2.00, max 3, step-limit hits 0 |
@@ -37,8 +38,8 @@ With 17 faults, and one or two examples of some causes, the per-cause and per-la
 | area_outage | 8 | 8 | 100.0% | 100.0% |
 | line_fault | 1 | 1 | 100.0% | 100.0% |
 | customer_equipment | 0 | 0 | – | – |
-| service_inactive | 1 | 0 | – | 0.0% |
-| inconclusive | 7 | 8 | 87.5% | 100.0% |
+| service_inactive | 0 | 0 | – | – |
+| inconclusive | 8 | 8 | 100.0% | 100.0% |
 
 ## Confusion matrix
 
@@ -49,14 +50,14 @@ Rows: designed cause. Columns: the agent's answer.
 | area_outage | 8 | 0 | 0 | 0 | 0 | 0 | 0 |
 | line_fault | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | customer_equipment | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| service_inactive | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
-| inconclusive | 0 | 0 | 0 | 0 | 7 | 0 | 0 |
+| service_inactive | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| inconclusive | 0 | 0 | 0 | 0 | 8 | 0 | 0 |
 
 ## Per language
 
 | Language | Faults | Cause accuracy |
 | --- | --- | --- |
-| cs | 10 | 90.0% |
+| cs | 10 | 100.0% |
 | sk | 4 | 100.0% |
 | en | 3 | 100.0% |
 
@@ -76,7 +77,7 @@ Rows: designed cause. Columns: the agent's answer.
 | msg-051 | sk | area_outage | area_outage | 0.95 | valid | no | 2 | check_outages, get_line_status, get_recent_tickets | $0.0195 |
 | msg-056 | cs | area_outage | area_outage | 0.70 | valid | no | 2 | check_outages | $0.0179 |
 | msg-063 | cs | inconclusive | inconclusive | 0.40 | valid | yes | 2 | check_outages | $0.0149 |
-| msg-069 | cs | service_inactive | inconclusive ✗ | 0.30 | valid | yes | 3 | get_line_status, get_line_status, check_outages, check_outages | $0.0381 |
+| msg-069 | cs | inconclusive | inconclusive | 0.30 | valid | yes | 3 | get_line_status, get_line_status, check_outages, check_outages | $0.0381 |
 | msg-071 | sk | line_fault | line_fault | 0.75 | valid | no | 2 | get_line_status, check_outages, get_recent_tickets | $0.0232 |
 | msg-078 | cs | inconclusive | inconclusive | 0.30 | valid | yes | 2 | check_outages | $0.0126 |
 | msg-079 | en | inconclusive | inconclusive | 0.20 | valid | yes | 2 | check_outages | $0.0117 |

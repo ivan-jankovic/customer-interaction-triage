@@ -110,8 +110,13 @@ export const FILLER_CUSTOMERS = 20;
  */
 export const LINE_FAULT = ["msg-071"] as const;
 
-/** P10: technical faults about a service that isn't active (the number moved to another customer). */
-export const SERVICE_INACTIVE = ["msg-069"] as const;
+/**
+ * P10: technical faults about a found customer's service that isn't active. None in this
+ * dataset. msg-069 (the phone number moved to another customer) was first designed as
+ * service_inactive, then relabelled inconclusive during review: the number matches two
+ * customers, so the tools can't tell who is calling or which service the message is about.
+ */
+export const SERVICE_INACTIVE: readonly string[] = [];
 
 /**
  * P10: technical faults whose found customer's line is up with no outage. None in this dataset:
@@ -320,7 +325,7 @@ export function designedCause(id: string, intent: Intent): LikelyCause | null {
   if (intent !== "technical_fault") return null;
   if ((OUTAGE_MATCH as readonly string[]).includes(id)) return "area_outage";
   if ((LINE_FAULT as readonly string[]).includes(id)) return "line_fault";
-  if ((SERVICE_INACTIVE as readonly string[]).includes(id)) return "service_inactive";
+  if (SERVICE_INACTIVE.includes(id)) return "service_inactive";
   if (CUSTOMER_EQUIPMENT.includes(id)) return "customer_equipment";
   return "inconclusive";
 }

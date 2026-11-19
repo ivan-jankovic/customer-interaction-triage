@@ -74,9 +74,10 @@ interface Section {
 /** Markdown-ish inline code (`x`) is the only markup paragraphs use. */
 const inlineHtml = (s: string) => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>");
 
-function sections(run: InvestigationRunInfo, m: InvestigationMetrics): Section[] {
+function sections(run: InvestigationRunInfo, m: InvestigationMetrics, labelsSeedSha256: string): Section[] {
   const out: Section[] = [];
   const inv = run.investigator;
+  const rescored = labelsSeedSha256 !== run.seed.sha256;
   out.push({
     table: {
       header: ["Setting", "Value"],
@@ -88,8 +89,12 @@ function sections(run: InvestigationRunInfo, m: InvestigationMetrics): Section[]
         ],
         ["Input", `classify run ${run.input.runId} (${run.input.classifierPromptVersion})`],
         [
-          "Masking and enrichment",
+          "Masking, enrichment and tools",
           `${run.masker.version}, ${run.enricherVersion}, CRM seed sha256 ${run.seed.sha256.slice(0, 12)}`,
+        ],
+        [
+          "Labels",
+          `designed causes from CRM seed sha256 ${labelsSeedSha256.slice(0, 12)}${rescored ? " (rescored: the run used another seed, see above)" : ""}`,
         ],
         ["Dataset", `${run.dataset.file} (sha256 ${run.dataset.sha256.slice(0, 12)})`],
         ["Code", `${run.git.commit.slice(0, 12)}${run.git.dirty ? " (with uncommitted changes)" : ""}`],
@@ -199,9 +204,13 @@ function sections(run: InvestigationRunInfo, m: InvestigationMetrics): Section[]
   return out;
 }
 
-export function renderInvestigationMarkdown(run: InvestigationRunInfo, m: InvestigationMetrics): string {
+export function renderInvestigationMarkdown(
+  run: InvestigationRunInfo,
+  m: InvestigationMetrics,
+  labelsSeedSha256 = run.seed.sha256,
+): string {
   const lines: string[] = [`# Investigation evaluation ${run.runId}`, ""];
-  for (const s of sections(run, m)) {
+  for (const s of sections(run, m, labelsSeedSha256)) {
     if (s.heading) lines.push(`## ${s.heading}`, "");
     for (const p of s.paragraphs ?? []) lines.push(p, "");
     if (s.table) {
@@ -214,9 +223,13 @@ export function renderInvestigationMarkdown(run: InvestigationRunInfo, m: Invest
   return lines.join("\n");
 }
 
-export function renderInvestigationHtml(run: InvestigationRunInfo, m: InvestigationMetrics): string {
+export function renderInvestigationHtml(
+  run: InvestigationRunInfo,
+  m: InvestigationMetrics,
+  labelsSeedSha256 = run.seed.sha256,
+): string {
   const body: string[] = [`<h1>Investigation evaluation</h1>`, `<p class="muted">${esc(run.runId)}</p>`];
-  for (const s of sections(run, m)) {
+  for (const s of sections(run, m, labelsSeedSha256)) {
     if (s.heading) body.push(`<h2>${esc(s.heading)}</h2>`);
     for (const p of s.paragraphs ?? []) body.push(`<p>${inlineHtml(p)}</p>`);
     if (s.table) {
@@ -262,13 +275,13 @@ export function writeInvestigationReports(
   const seedHash = sha256File(seedPath);
   if (seedHash !== run.seed.sha256) {
     log(
-      `Warning: the CRM seed changed since run ${run.runId} (sha256 ${seedHash.slice(0, 12)}, run used ${run.seed.sha256.slice(0, 12)}); designed causes may differ.`,
+      `Note: the CRM seed changed since run ${run.runId} (sha256 ${seedHash.slice(0, 12)}, run used ${run.seed.sha256.slice(0, 12)}); the run is scored against the current designed causes, and the report says so.`,
     );
   }
   const lines = readJsonl<InvestigationOutputLine>(join(runDir, "outputs.jsonl"));
   const metrics = computeInvestigationMetrics(lines, causeLabels(seedPath, options.datasetPath));
   writeFileSync(join(runDir, "metrics.json"), JSON.stringify(metrics, null, 2) + "\n");
-  writeFileSync(join(runDir, "report.md"), renderInvestigationMarkdown(run, metrics));
-  writeFileSync(join(runDir, "report.html"), renderInvestigationHtml(run, metrics));
+  writeFileSync(join(runDir, "report.md"), renderInvestigationMarkdown(run, metrics, seedHash));
+  writeFileSync(join(runDir, "report.html"), renderInvestigationHtml(run, metrics, seedHash));
   return metrics;
 }

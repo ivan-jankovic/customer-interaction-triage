@@ -75,8 +75,8 @@ describe("computeInvestigationMetrics", () => {
 
 /**
  * A rule-based agent: checks outages of the case's service type in its area (if any), then answers area_outage when
- * one was ongoing, else inconclusive. On the dataset it should get the 8 area_outage and the 7
- * inconclusive faults right, and miss line_fault (msg-071) and service_inactive (msg-069).
+ * one was ongoing, else inconclusive. On the dataset it should get the 8 area_outage and the 8
+ * inconclusive faults right, and miss line_fault (msg-071).
  */
 function ruleAgent(): ConverseClient & { calls: ConverseRequest[] } {
   const calls: ConverseRequest[] = [];
@@ -187,15 +187,14 @@ describe("npm run eval:investigate", () => {
     const metrics = JSON.parse(readFileSync(join(dir, "metrics.json"), "utf8")) as ReturnType<
       typeof computeInvestigationMetrics
     >;
-    expect(metrics.accuracy).toBeCloseTo(15 / 17, 6);
+    expect(metrics.accuracy).toBeCloseTo(16 / 17, 6);
     expect(metrics.messages.filter((x) => !x.correct).map((x) => [x.id, x.expected, x.predicted])).toEqual([
-      ["msg-069", "service_inactive", "inconclusive"],
       ["msg-071", "line_fault", "inconclusive"],
     ]);
     // The agent saw masked text only.
     expect(JSON.stringify(agent.calls)).not.toMatch(/MR\d{8}|SML-\d{4}-\d{5}/);
     const md = readFileSync(join(dir, "report.md"), "utf8");
-    expect(md).toContain("| Cause accuracy | 88.2% |");
+    expect(md).toContain("| Cause accuracy | 94.1% |");
     expect(md).toContain("indicative only");
   });
 

@@ -4376,7 +4376,7 @@
     {
       "message_id": "msg-069",
       "received_at": "2026-11-05T13:29:00.000Z",
-      "design": "ambiguous: the phone number moved to another customer; the old service is terminated; designed cause service_inactive",
+      "design": "ambiguous: the phone number moved to another customer; the old service is terminated; designed cause inconclusive",
       "expected": {
         "outcome": "ambiguous",
         "customer_id": null,
@@ -4384,7 +4384,7 @@
         "area_source": null,
         "outage_ids": []
       },
-      "expected_cause": "service_inactive"
+      "expected_cause": "inconclusive"
     },
     {
       "message_id": "msg-070",

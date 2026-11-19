@@ -2,11 +2,11 @@
   "n": 17,
   "investigated": 17,
   "notInvestigated": [],
-  "accuracy": 0.941176,
+  "accuracy": 1,
   "byLanguage": {
     "cs": {
       "n": 10,
-      "accuracy": 0.9
+      "accuracy": 1
     },
     "sk": {
       "n": 4,
@@ -37,15 +37,15 @@
       "recall": null
     },
     "service_inactive": {
-      "support": 1,
+      "support": 0,
       "predicted": 0,
       "precision": null,
-      "recall": 0
+      "recall": null
     },
     "inconclusive": {
-      "support": 7,
+      "support": 8,
       "predicted": 8,
-      "precision": 0.875,
+      "precision": 1,
       "recall": 1
     }
   },
@@ -82,7 +82,7 @@
       "line_fault": 0,
       "customer_equipment": 0,
       "service_inactive": 0,
-      "inconclusive": 1,
+      "inconclusive": 0,
       "no answer": 0,
       "not investigated": 0
     },
@@ -91,7 +91,7 @@
       "line_fault": 0,
       "customer_equipment": 0,
       "service_inactive": 0,
-      "inconclusive": 7,
+      "inconclusive": 8,
       "no answer": 0,
       "not investigated": 0
     }
@@ -342,9 +342,9 @@
     {
       "id": "msg-069",
       "language": "cs",
-      "expected": "service_inactive",
+      "expected": "inconclusive",
       "predicted": "inconclusive",
-      "correct": false,
+      "correct": true,
       "outcome": "valid",
       "confidence": 0.3,
       "toReview": true,
