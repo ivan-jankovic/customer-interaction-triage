@@ -85,7 +85,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** a processed message with its case, routing decision and reasons.
 **Done when:** rule tests pass; evaluation reports the new metrics.
 
-## P08: Asynchronous processing
+## ✅ P08: Asynchronous processing
 
 - Queue with BullMQ on Redis: intake enqueues, a worker runs the pipeline.
 - Queue consistency between PostgreSQL and Redis (outbox table or periodic sweep, see `tech-stack.md`); idempotent jobs.

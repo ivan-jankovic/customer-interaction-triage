@@ -8,7 +8,7 @@
 import { fileURLToPath } from "node:url";
 import type { Kysely } from "kysely";
 import { loadDatabaseUrl } from "../config.js";
-import { NotReadyForRouting, routeInteraction, type DecisionLogEntry } from "../db/cases.js";
+import { NotReadyForRouting, routeInteraction, type DecisionLogEntry, type RoutedCase } from "../db/cases.js";
 import { createDb, type Database } from "../db/database.js";
 import { findInteraction } from "./find-interaction.js";
 
@@ -35,6 +35,27 @@ function describeStep(entry: DecisionLogEntry): string {
     case "route":
       return `team ${show(o.target_team)}, review ${o.needs_review ? "yes" : "no"}`;
   }
+}
+
+/** Prints a case, its reasons and its decision log; shared with `npm run process` (P08). */
+export function printCase(c: RoutedCase, out: (line: string) => void): void {
+  out(
+    c.created
+      ? `Case ${c.id}, routed with ${c.routerVersion}.`
+      : `Case ${c.id}: existing case, routed with ${c.routerVersion} at ${c.createdAt.toISOString()}; nothing written.`,
+  );
+  out(`\nTeam: ${c.targetTeam}`);
+  out(`Review: ${c.needsReview ? "yes" : "no"}`);
+  const fired = (c.log.find((l) => l.step === "route")?.output.fired_rules ?? []) as {
+    reason_code: string;
+    detail: string;
+  }[];
+  for (const r of fired) out(`  - ${r.reason_code}: ${r.detail}`);
+  if (c.customerId) out(`Customer: ${c.customerId}`);
+
+  out("\nDecision log:");
+  for (const entry of c.log)
+    out(`  ${entry.seq}. ${entry.step.padEnd(8)} (${entry.ruleApplied}) ${describeStep(entry)}`);
 }
 
 export async function runRoute(
@@ -65,23 +86,7 @@ export async function runRoute(
   }
 
   out(`Interaction ${interaction.id}${interaction.external_id ? ` (${interaction.external_id})` : ""}`);
-  out(
-    c.created
-      ? `Case ${c.id}, routed with ${c.routerVersion}.`
-      : `Case ${c.id}: existing case, routed with ${c.routerVersion} at ${c.createdAt.toISOString()}; nothing written.`,
-  );
-  out(`\nTeam: ${c.targetTeam}`);
-  out(`Review: ${c.needsReview ? "yes" : "no"}`);
-  const fired = (c.log.find((l) => l.step === "route")?.output.fired_rules ?? []) as {
-    reason_code: string;
-    detail: string;
-  }[];
-  for (const r of fired) out(`  - ${r.reason_code}: ${r.detail}`);
-  if (c.customerId) out(`Customer: ${c.customerId}`);
-
-  out("\nDecision log:");
-  for (const entry of c.log)
-    out(`  ${entry.seq}. ${entry.step.padEnd(8)} (${entry.ruleApplied}) ${describeStep(entry)}`);
+  printCase(c, out);
   return 0;
 }
 

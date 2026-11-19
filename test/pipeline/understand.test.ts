@@ -146,10 +146,13 @@ describe("understand", () => {
   it("marks an API error as error, with zero usage", async () => {
     const attempt = await understand(
       input,
-      deps(scripted({ ok: false, error: "API error 529: overloaded", failure: "api_error", text: undefined })),
+      deps(
+        scripted({ ok: false, error: "API error 529: overloaded", failure: "api_error", status: 529, text: undefined }),
+      ),
     );
     expect(attempt).toMatchObject({
       outcome: "error",
+      apiStatus: 529,
       errors: ["API error 529: overloaded"],
       usage: { input_tokens: 0, output_tokens: 0 },
       costUsd: 0,

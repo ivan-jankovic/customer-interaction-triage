@@ -2,18 +2,20 @@
 // with the rules in src/pipeline/route.ts, and writes the case and its decision log in one
 // transaction. One case per interaction: a second call returns the existing case and writes
 // nothing, so it is idempotent (P08's jobs rely on this). Free: no model is called.
+// From P08, writing a case also marks the interaction `processed`, and recordFailureCase writes
+// the case of an interaction whose processing failed for good.
 //
 // The decision log holds IDs, versions, outcomes and placeholders, never the message text, the
 // summary or an identifier value: those stay in their own tables.
 
-import type { Kysely } from "kysely";
-import { customerServiceTypes, route, ROUTER_VERSION, type RouteResult } from "../pipeline/route.js";
+import type { Kysely, Transaction } from "kysely";
+import { customerServiceTypes, FALLBACK_TEAM, route, ROUTER_VERSION } from "../pipeline/route.js";
 import type { CrmServiceType } from "../pipeline/enrich.js";
 import type { ReasonCode, Team } from "../taxonomy.js";
 import { KyselyClassificationStore, type StoredClassification } from "./classifications.js";
 import { KyselyCrm } from "./crm.js";
 import type { CaseRow, Database, DecisionLogRow, DecisionStep } from "./database.js";
-import { toStoredEnrichment, type StoredEnrichment } from "./enrichments.js";
+import { latestEnrichmentFor, listEnrichments, type StoredEnrichment } from "./enrichments.js";
 import { InteractionNotFound, readMasking } from "./masking.js";
 
 /** Routing needs what earlier steps stored; this says which one is missing. */
@@ -31,7 +33,8 @@ export interface DecisionLogEntry {
 export interface StoredCase {
   id: string;
   interactionId: string;
-  classificationId: string;
+  /** Null only on a failure case that failed before classifying (P08). */
+  classificationId: string | null;
   enrichmentId: string | null;
   customerId: string | null;
   targetTeam: Team;
@@ -93,20 +96,13 @@ async function pickEnrichment(
   interactionId: string,
   classificationId: string,
 ): Promise<StoredEnrichment> {
-  const row = await db
-    .selectFrom("enrichments")
-    .selectAll()
-    .where("interaction_id", "=", interactionId)
-    .where("classification_id", "=", classificationId)
-    .orderBy("id", "desc")
-    .limit(1)
-    .executeTakeFirst();
-  if (!row) {
+  const enrichment = await latestEnrichmentFor(db, interactionId, classificationId);
+  if (!enrichment) {
     throw new NotReadyForRouting(
       `Interaction ${interactionId} has no enrichment of its current classification; enrich first.`,
     );
   }
-  return toStoredEnrichment(row);
+  return enrichment;
 }
 
 const countBy = <T>(items: readonly T[], key: (t: T) => string) => {
@@ -115,33 +111,38 @@ const countBy = <T>(items: readonly T[], key: (t: T) => string) => {
   return out;
 };
 
-interface LogInput {
+interface StepsInput {
   channel: string;
-  masking: NonNullable<Awaited<ReturnType<typeof readMasking>>>;
-  classification: StoredClassification;
+  /** Null when masking didn't finish (failure cases only). */
+  masking: NonNullable<Awaited<ReturnType<typeof readMasking>>> | null;
+  classification: StoredClassification | null;
   enrichment: StoredEnrichment | null;
-  serviceTypes: CrmServiceType[];
-  result: RouteResult;
 }
 
-/** One entry per step; IDs, versions, outcomes and placeholders only. */
-function buildLog(interactionId: string, x: LogInput): Omit<DecisionLogEntry, "seq" | "createdAt">[] {
-  const placeholdersByType: Record<string, string[]> = {};
-  for (const i of x.masking.identifiers) (placeholdersByType[i.type] ??= []).push(i.placeholder);
-  const c = x.classification;
-  const entries: Omit<DecisionLogEntry, "seq" | "createdAt">[] = [
-    {
+type NewLogEntry = Omit<DecisionLogEntry, "seq" | "createdAt">;
+
+/** One entry per finished step before routing; IDs, versions, outcomes and placeholders only. */
+function stepEntries(interactionId: string, x: StepsInput): NewLogEntry[] {
+  const entries: NewLogEntry[] = [];
+  const m = x.masking;
+  if (m) {
+    const placeholdersByType: Record<string, string[]> = {};
+    for (const i of m.identifiers) (placeholdersByType[i.type] ??= []).push(i.placeholder);
+    entries.push({
       step: "mask",
       inputSummary: { interaction_id: interactionId, channel: x.channel },
       output: { placeholders: placeholdersByType },
-      ruleApplied: x.masking.maskerVersion,
-    },
-    {
+      ruleApplied: m.maskerVersion,
+    });
+  }
+  const c = x.classification;
+  if (c) {
+    entries.push({
       step: "classify",
       inputSummary: {
         classification_id: c.id,
         prompt_version: c.promptVersion,
-        identifier_types: countBy(x.masking.identifiers, (i) => i.type),
+        identifier_types: countBy(m?.identifiers ?? [], (i) => i.type),
       },
       output: {
         outcome: c.outcome,
@@ -152,8 +153,8 @@ function buildLog(interactionId: string, x: LogInput): Omit<DecisionLogEntry, "s
         confidence: c.classification?.confidence ?? null,
       },
       ruleApplied: `${c.promptVersion} / ${c.servedModel}`,
-    },
-  ];
+    });
+  }
   const e = x.enrichment;
   if (e) {
     entries.push({
@@ -171,75 +172,69 @@ function buildLog(interactionId: string, x: LogInput): Omit<DecisionLogEntry, "s
       ruleApplied: e.enricherVersion,
     });
   }
-  entries.push({
-    step: "route",
-    inputSummary: {
-      classification_id: c.id,
-      enrichment_id: e?.id ?? null,
-      customer_service_types: x.serviceTypes,
-    },
-    output: {
-      target_team: x.result.targetTeam,
-      needs_review: x.result.needsReview,
-      fired_rules: x.result.firedRules.map((r) => ({ reason_code: r.reasonCode, detail: r.detail })),
-    },
-    ruleApplied: ROUTER_VERSION,
-  });
   return entries;
 }
 
-export async function routeInteraction(db: Kysely<Database>, interactionId: string): Promise<RoutedCase> {
-  const existing = await readCase(db, interactionId);
-  if (existing) return { ...existing, created: false };
+function routeEntry(
+  x: StepsInput & { serviceTypes: CrmServiceType[] },
+  output: { targetTeam: Team; needsReview: boolean; firedRules: { reasonCode: ReasonCode; detail: string }[] },
+): NewLogEntry {
+  return {
+    step: "route",
+    inputSummary: {
+      classification_id: x.classification?.id ?? null,
+      enrichment_id: x.enrichment?.id ?? null,
+      customer_service_types: x.serviceTypes,
+    },
+    output: {
+      target_team: output.targetTeam,
+      needs_review: output.needsReview,
+      fired_rules: output.firedRules.map((r) => ({ reason_code: r.reasonCode, detail: r.detail })),
+    },
+    ruleApplied: ROUTER_VERSION,
+  };
+}
 
-  const interaction = await db
-    .selectFrom("interactions")
-    .select(["id", "channel"])
-    .where("id", "=", interactionId)
-    .executeTakeFirst();
-  if (!interaction) throw new InteractionNotFound(`No interaction ${interactionId}.`);
+/** Sets the interaction's status; called inside the transaction that writes its case (P08). */
+async function markProcessed(trx: Transaction<Database>, interactionId: string): Promise<void> {
+  await trx.updateTable("interactions").set({ status: "processed" }).where("id", "=", interactionId).execute();
+}
 
-  const masking = await readMasking(db, interactionId);
-  if (!masking) throw new NotReadyForRouting(`Interaction ${interactionId} is not masked yet; classify first.`);
-  const classification = await pickClassification(db, interactionId);
-  const valid = classification.outcome === "valid" && classification.classification !== null;
-  const enrichment = valid ? await pickEnrichment(db, interactionId, classification.id) : null;
-  const serviceTypes = await customerServiceTypes(new KyselyCrm(db), enrichment?.customerId ?? null);
+interface NewCase {
+  interactionId: string;
+  classificationId: string | null;
+  enrichmentId: string | null;
+  customerId: string | null;
+  targetTeam: Team;
+  needsReview: boolean;
+  reasonCodes: ReasonCode[];
+}
 
-  const result = route({
-    outcome: classification.outcome,
-    classification: classification.classification,
-    enrichment,
-    customerServiceTypes: serviceTypes,
-  });
-  const log = buildLog(interactionId, {
-    channel: interaction.channel,
-    masking,
-    classification,
-    enrichment,
-    serviceTypes,
-    result,
-  });
-
-  // ON CONFLICT DO NOTHING on the unique interaction_id: when two calls race, one inserts the
-  // case and its log; the other inserts nothing, writes no log, and reads the winner's case.
-  const created = await db.transaction().execute(async (trx) => {
+/**
+ * Inserts the case, marks the interaction processed and writes the log, in one transaction.
+ * ON CONFLICT DO NOTHING on the unique interaction_id: when two calls race (or a failure case
+ * races a normal one), one inserts the case and its log; the other writes nothing. Returns
+ * whether this call inserted.
+ */
+async function insertCase(db: Kysely<Database>, c: NewCase, log: NewLogEntry[]): Promise<boolean> {
+  return db.transaction().execute(async (trx) => {
     const row = await trx
       .insertInto("cases")
       .values({
-        interaction_id: interactionId,
-        classification_id: classification.id,
-        enrichment_id: enrichment?.id ?? null,
-        customer_id: enrichment?.customerId ?? null,
-        target_team: result.targetTeam,
-        needs_review: result.needsReview,
-        reason_codes: JSON.stringify(result.reasonCodes),
+        interaction_id: c.interactionId,
+        classification_id: c.classificationId,
+        enrichment_id: c.enrichmentId,
+        customer_id: c.customerId,
+        target_team: c.targetTeam,
+        needs_review: c.needsReview,
+        reason_codes: JSON.stringify(c.reasonCodes),
         router_version: ROUTER_VERSION,
       })
       .onConflict((oc) => oc.column("interaction_id").doNothing())
       .returning("id")
       .executeTakeFirst();
     if (!row) return false;
+    await markProcessed(trx, c.interactionId);
     await trx
       .insertInto("decision_log")
       .values(
@@ -255,7 +250,125 @@ export async function routeInteraction(db: Kysely<Database>, interactionId: stri
       .execute();
     return true;
   });
+}
 
+async function readChannel(db: Kysely<Database>, interactionId: string): Promise<string> {
+  const interaction = await db
+    .selectFrom("interactions")
+    .select("channel")
+    .where("id", "=", interactionId)
+    .executeTakeFirst();
+  if (!interaction) throw new InteractionNotFound(`No interaction ${interactionId}.`);
+  return interaction.channel;
+}
+
+export async function routeInteraction(db: Kysely<Database>, interactionId: string): Promise<RoutedCase> {
+  const existing = await readCase(db, interactionId);
+  if (existing) return { ...existing, created: false };
+
+  const channel = await readChannel(db, interactionId);
+  const masking = await readMasking(db, interactionId);
+  if (!masking) throw new NotReadyForRouting(`Interaction ${interactionId} is not masked yet; classify first.`);
+  const classification = await pickClassification(db, interactionId);
+  const valid = classification.outcome === "valid" && classification.classification !== null;
+  const enrichment = valid ? await pickEnrichment(db, interactionId, classification.id) : null;
+  const serviceTypes = await customerServiceTypes(new KyselyCrm(db), enrichment?.customerId ?? null);
+
+  const result = route({
+    outcome: classification.outcome,
+    classification: classification.classification,
+    enrichment,
+    customerServiceTypes: serviceTypes,
+  });
+  const steps = { channel, masking, classification, enrichment, serviceTypes };
+  const log = [...stepEntries(interactionId, steps), routeEntry(steps, result)];
+
+  const created = await insertCase(
+    db,
+    {
+      interactionId,
+      classificationId: classification.id,
+      enrichmentId: enrichment?.id ?? null,
+      customerId: enrichment?.customerId ?? null,
+      targetTeam: result.targetTeam,
+      needsReview: result.needsReview,
+      reasonCodes: result.reasonCodes,
+    },
+    log,
+  );
+
+  const stored = await readCase(db, interactionId);
+  return { ...stored!, created };
+}
+
+/** The pipeline steps a failure case can name (P08). */
+export type PipelineStep = DecisionStep;
+
+export interface FailureInput {
+  /** The step that threw on the job's last attempt. */
+  failedStep: PipelineStep;
+  error: unknown;
+  /** What earlier steps stored and the runner had in hand; null when they didn't finish. */
+  classificationId: string | null;
+  enrichmentId: string | null;
+}
+
+/** The error's class name only: a message can quote values (a database error, for example). */
+export function errorClassName(error: unknown): string {
+  if (error instanceof Error) return error.constructor.name || error.name || "Error";
+  return typeof error;
+}
+
+/**
+ * Writes the failure case of an interaction whose processing failed on its last job attempt
+ * (P08 requirements.md, "Other failures"): team general, reason code processing_failed, the
+ * IDs of the steps that finished, and a decision log of those steps plus a route entry naming
+ * the failed step and the error's class. Returns the existing case when there already is one.
+ */
+export async function recordFailureCase(
+  db: Kysely<Database>,
+  interactionId: string,
+  failure: FailureInput,
+): Promise<RoutedCase> {
+  const existing = await readCase(db, interactionId);
+  if (existing) return { ...existing, created: false };
+
+  const channel = await readChannel(db, interactionId);
+  const masking = await readMasking(db, interactionId);
+  const classification = failure.classificationId
+    ? ((await new KyselyClassificationStore(db).listFor(interactionId)).find(
+        (c) => c.id === failure.classificationId,
+      ) ?? null)
+    : null;
+  const enrichment = failure.enrichmentId
+    ? ((await listEnrichments(db, interactionId)).find((e) => e.id === failure.enrichmentId) ?? null)
+    : null;
+
+  const firedRules = [
+    {
+      reasonCode: "processing_failed" as const,
+      detail: `failed at ${failure.failedStep}: ${errorClassName(failure.error)}`,
+    },
+  ];
+  const steps = { channel, masking, classification, enrichment, serviceTypes: [] };
+  const log = [
+    ...stepEntries(interactionId, steps),
+    routeEntry(steps, { targetTeam: FALLBACK_TEAM, needsReview: true, firedRules }),
+  ];
+
+  const created = await insertCase(
+    db,
+    {
+      interactionId,
+      classificationId: classification?.id ?? null,
+      enrichmentId: enrichment?.id ?? null,
+      customerId: enrichment?.customerId ?? null,
+      targetTeam: FALLBACK_TEAM,
+      needsReview: true,
+      reasonCodes: ["processing_failed"],
+    },
+    log,
+  );
   const stored = await readCase(db, interactionId);
   return { ...stored!, created };
 }

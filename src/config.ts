@@ -11,6 +11,8 @@ export interface ServiceConfig {
 
 export interface ApiConfig {
   databaseUrl: string;
+  /** Intake enqueues each stored interaction (P08). */
+  redisUrl: string;
   intakeApiKey: string;
   host: string;
   port: number;
@@ -42,7 +44,11 @@ export function loadDatabaseUrl(env: NodeJS.ProcessEnv = process.env): string {
 
 /** Configuration of the intake API (src/api/server.ts). */
 export function loadApiConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
-  const [databaseUrl, intakeApiKey] = requireVars(env, ["DATABASE_URL", "INTAKE_API_KEY"]) as [string, string];
+  const [databaseUrl, redisUrl, intakeApiKey] = requireVars(env, ["DATABASE_URL", "REDIS_URL", "INTAKE_API_KEY"]) as [
+    string,
+    string,
+    string,
+  ];
   if (intakeApiKey.length < MIN_API_KEY_LENGTH) {
     throw new Error(
       `INTAKE_API_KEY must be at least ${MIN_API_KEY_LENGTH} characters. Generate one with: openssl rand -hex 32`,
@@ -53,7 +59,7 @@ export function loadApiConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
   if (!Number.isInteger(port) || port < 1 || port > 65_535) {
     throw new Error(`PORT must be a whole number from 1 to 65535, got "${portText}".`);
   }
-  return { databaseUrl, intakeApiKey, host: env.HOST?.trim() || "127.0.0.1", port };
+  return { databaseUrl, redisUrl, intakeApiKey, host: env.HOST?.trim() || "127.0.0.1", port };
 }
 
 export interface ClassifierConfig {
@@ -76,4 +82,25 @@ export function loadClassifierConfig(env: NodeJS.ProcessEnv = process.env): Clas
     throw new Error(`TRIAGE_EFFORT must be one of ${EFFORTS.join(", ")}, got "${effort}".`);
   }
   return { model, effort: effort as Effort };
+}
+
+export interface WorkerConfig extends ServiceConfig, ClassifierConfig {
+  concurrency: number;
+}
+
+/**
+ * Configuration of the queue worker (src/worker.ts, P08). It calls a paid model for every
+ * message it processes, so it refuses to start without ANTHROPIC_API_KEY.
+ */
+export function loadWorkerConfig(env: NodeJS.ProcessEnv = process.env): WorkerConfig {
+  const [databaseUrl, redisUrl] = requireVars(env, ["DATABASE_URL", "REDIS_URL", "ANTHROPIC_API_KEY"]) as [
+    string,
+    string,
+  ];
+  const text = env.WORKER_CONCURRENCY?.trim() || "4";
+  const concurrency = Number(text);
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 32) {
+    throw new Error(`WORKER_CONCURRENCY must be a whole number from 1 to 32, got "${text}".`);
+  }
+  return { databaseUrl, redisUrl, concurrency, ...loadClassifierConfig(env) };
 }

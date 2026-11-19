@@ -4,8 +4,11 @@ import type { Classification } from "../llm/schemas/classification.schema.js";
 import type { AreaSource, CrmServiceType, EnrichmentOutcome, ServiceStatus } from "../pipeline/enrich.js";
 import type { Channel, IdentifierType, Intent, Language, ReasonCode, Team, Urgency } from "../taxonomy.js";
 
-/** Lifecycle of an interaction. Only `received` until the queue arrives in P08. */
-export const INTERACTION_STATUSES = ["received"] as const;
+/**
+ * Lifecycle of an interaction: `received` at intake, `processed` once its case is written (P08,
+ * in the same transaction as the case). Whether it is queued lives in Redis, not here.
+ */
+export const INTERACTION_STATUSES = ["received", "processed"] as const;
 export type InteractionStatus = (typeof INTERACTION_STATUSES)[number];
 
 // pg returns timestamptz as Date; inserts may pass a Date or an ISO string; nothing updates these.
@@ -147,7 +150,8 @@ export type EnrichmentRow = Selectable<EnrichmentsTable>;
 export interface CasesTable {
   id: Generated<string>;
   interaction_id: Immutable<string>;
-  classification_id: Immutable<string>;
+  /** Null only on a failure case (reason code processing_failed) that failed before classifying (P08). */
+  classification_id: Immutable<string | null>;
   enrichment_id: Immutable<string | null>;
   customer_id: Immutable<string | null>;
   target_team: Immutable<Team>;

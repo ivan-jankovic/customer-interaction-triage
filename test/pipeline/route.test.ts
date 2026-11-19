@@ -144,13 +144,18 @@ describe("review reasons", () => {
     expect(r.needsReview).toBe(true);
   });
 
-  it("never produces investigation_inconclusive", () => {
+  it("never produces investigation_inconclusive or processing_failed", () => {
     for (const intent of INTENTS) {
       for (const outcome of ["found", "not_found", "ambiguous", "no_identifiers"] as const) {
-        expect(route(input({ intent, outcome, confidence: 0.1 })).reasonCodes).not.toContain(
-          "investigation_inconclusive",
-        );
+        const codes = route(input({ intent, outcome, confidence: 0.1 })).reasonCodes;
+        expect(codes).not.toContain("investigation_inconclusive");
+        expect(codes).not.toContain("processing_failed");
       }
+    }
+    for (const outcome of ["invalid", "error"] as const) {
+      expect(
+        route({ outcome, classification: null, enrichment: null, customerServiceTypes: [] }).reasonCodes,
+      ).not.toContain("processing_failed");
     }
   });
 

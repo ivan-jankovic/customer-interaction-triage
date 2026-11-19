@@ -74,6 +74,12 @@ export type ReviewReason = (typeof REVIEW_REASONS)[number];
  * label has no code of its own: at runtime it is caught by `low_confidence`.
  */
 export const REASON_CODES = [
+  /**
+   * Processing failed for good after every job attempt (P08): nothing else was decided. Written
+   * only by the pipeline runner's failure path (src/db/cases.ts, recordFailureCase), never by
+   * route(); it comes first because it outranks every other reason.
+   */
+  "processing_failed",
   "invalid_output",
   "classification_error",
   "cancellation",
@@ -84,7 +90,7 @@ export const REASON_CODES = [
   "customer_unidentified",
   "crm_mismatch_unmatched_key",
   "crm_mismatch_service_type",
-  /** Produced from P10 (the investigating agent); never produced by route.v1. */
+  /** Produced from P10 (the investigating agent); never produced by route.v1 or route.v2. */
   "investigation_inconclusive",
 ] as const;
 export type ReasonCode = (typeof REASON_CODES)[number];

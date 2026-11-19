@@ -150,9 +150,22 @@ describe("createAnthropicClient", () => {
       ok: false,
       failure: "api_error",
       error: expect.stringContaining("API error 400") as string,
+      status: 400,
       model: "claude-opus-5-5",
       usage: { input_tokens: 0, output_tokens: 0 },
     });
+  });
+
+  it.each([
+    ["a rate limit", () => new Anthropic.RateLimitError(429, { error: {} }, "rate", new Headers()), 429],
+    ["an overload", () => new Anthropic.InternalServerError(529, { error: {} }, "overloaded", new Headers()), 529],
+    ["a server error", () => new Anthropic.InternalServerError(500, { error: {} }, "server", new Headers()), 500],
+    ["a request timeout", () => new Anthropic.APIError(408, { error: {} }, "timeout", new Headers()), 408],
+    ["a connection error", () => new Anthropic.APIConnectionError({ message: "down" }), null],
+    ["a connection timeout", () => new Anthropic.APIConnectionTimeoutError(), null],
+  ])("reports the status of %s (P08)", async (_name, make, status) => {
+    const { sdk } = fakeSdk(() => Promise.reject(make()));
+    expect(await createAnthropicClient(sdk).complete(request)).toMatchObject({ failure: "api_error", status });
   });
 
   it("rethrows errors that are not API errors", async () => {

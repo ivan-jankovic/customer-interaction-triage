@@ -43,13 +43,18 @@
     "crm:generate": "tsx eval/crm/generate.ts",
     "crm:seed": "tsx --env-file-if-exists=.env src/cli/crm-seed.ts",
     "enrich": "tsx --env-file-if-exists=.env src/cli/enrich.ts",
-    "route": "tsx --env-file-if-exists=.env src/cli/route.ts"
+    "route": "tsx --env-file-if-exists=.env src/cli/route.ts",
+    "worker": "tsx --env-file-if-exists=.env src/worker.ts",
+    "worker:dist": "node dist/worker.js",
+    "process": "tsx --env-file-if-exists=.env src/cli/process.ts",
+    "queue:status": "tsx --env-file-if-exists=.env src/cli/queue-status.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",
     "@fastify/type-provider-json-schema-to-ts": "^5.0.1",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
+    "bullmq": "^6.7.8",
     "fastify": "^5.12.8",
     "ioredis": "^6.0.0",
     "json-schema-to-ts": "^3.1.1",

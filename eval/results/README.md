@@ -16,7 +16,7 @@
 
 ## Reproducing a report
 
-`npm run eval:report -- <run-id>` recomputes `metrics.json`, `report.md` and `report.html` from `run.json`, `outputs.jsonl`, the dataset and the CRM seed, with no model calls, and gives the same bytes. Routing is recomputed with the current rules (`route.v1`), so recomputing an older run adds or updates its routing section. It warns if the dataset changed since the run, because the labels it scores against may have changed.
+`npm run eval:report -- <run-id>` recomputes `metrics.json`, `report.md` and `report.html` from `run.json`, `outputs.jsonl`, the dataset and the CRM seed, with no model calls, and gives the same bytes. Routing is recomputed with the current rules (`route.v2` since P08), so recomputing an older run adds or updates its routing section. It warns if the dataset changed since the run, because the labels it scores against may have changed.
 
 A new `npm run eval` calls the model again; its numbers can differ slightly from an earlier run's.
 

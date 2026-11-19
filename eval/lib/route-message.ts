@@ -1,7 +1,7 @@
 // Routes one dataset message from a stored classification attempt, without a database or a
 // model (P07 requirements.md, "Evaluation"): mask the text (mask.v1), enrich against the
 // in-memory seed CRM with the classified area and service type and the seed's received_at,
-// then route (route.v1). Used by the eval scoring and by the dataset-wide routing test, so
+// then route (ROUTER_VERSION). Used by the eval scoring and by the dataset-wide routing test, so
 // both see exactly what the pipeline would decide.
 
 import { readCrmSeed, type CrmSeed } from "../../src/db/crm-seed.js";

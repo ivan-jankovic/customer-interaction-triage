@@ -8,12 +8,12 @@
 | Runtime | **Node.js LTS** | |
 | HTTP API | **Fastify** | Intake API; later also serves the review web page. |
 | Database | **PostgreSQL** + **Kysely** | Messages, cases, decision log, review corrections, mock CRM and outage data. Kysely (typed query builder on `pg`) with its built-in migrator; migrations in `src/db/migrations/`, one per change, each table added by the phase that uses it. |
-| Queue | **Redis** + **BullMQ** | Asynchronous processing with retries; Redis runs as a container in Docker Compose with append-only persistence and a volume. Client: ioredis (BullMQ's own). See "Queue consistency" below. |
+| Queue | **Redis** + **BullMQ** | Asynchronous processing with retries (from P08): one `process` queue, one job per interaction (job ID = interaction ID, data = the ID only, so Redis holds no message text). A worker (`src/worker.ts`) runs the pipeline. Redis runs as a container in Docker Compose with append-only persistence and a volume. Client: ioredis (BullMQ's own). See "Queue consistency" below. |
 | LLM | **Claude** via the **Anthropic SDK** | Structured output through `output_config.format` with a JSON Schema (forced tool use is rejected by the current models; decided in P03). Model and effort configurable (`TRIAGE_MODEL`, default `claude-opus-5-5`; `TRIAGE_EFFORT`, default `low`). The classifier uses server-side refusal fallbacks and records the model that answered. One client in `src/llm/`, shared with the dataset scripts. |
 | Validation | **Ajv** + **ajv-formats**, types via **json-schema-to-ts** | Every model output is validated before use; invalid output goes to review. |
 | Tests | **Vitest** | Unit tests (`npm test`) never call a model (the LLM client is mocked) and need no Docker. Integration tests (`npm run test:integration`) run against the Compose services. |
 | Lint & format | **ESLint**, **Prettier**, `tsc --noEmit` | typescript-eslint `recommendedTypeChecked`; Prettier with print width 120 (Markdown excluded). |
-| Local setup | **Docker Compose** | PostgreSQL, Redis and (from P02) the app, one command. Images pinned to exact versions. Local only; no hosted deployment. |
+| Local setup | **Docker Compose** | PostgreSQL, Redis and (from P02) the app, one command. The queue worker (from P08) is a `worker` service under the Compose profile `worker`, so it starts only with `--profile worker`: every message it processes is a paid model call. Images pinned to exact versions. Local only; no hosted deployment. |
 | CI | **GitHub Actions** | On every pull request and push to `main`: a `checks` job (lint, format, type check, unit tests, dependency audit) and an `integration` job against the Compose services (started with `docker compose up --wait`, so CI uses the same configuration as local). Actions pinned to commit SHAs; Dependabot for npm, Actions and Compose images. From P12: the small evaluation subset with a model (API key as a secret) and a pass threshold. |
 | Package manager | **npm** | |
 
@@ -25,20 +25,26 @@ intake (API) → store → queue → mask → understand (LLM) → enrich (CRM, 
    → review queue (if required)
 ```
 
-Each step is a separate module with its own tests. Nothing after "mask" sees raw personal data: every model call (the classifier, and the evaluation's judge) gets masked text only (from P05).
+Each step is a separate module with its own tests. From P08, the steps after "queue" run in the worker through one runner (`src/pipeline/process.ts`, `process.v1`), which resumes from what earlier attempts stored. Nothing after "mask" sees raw personal data: every model call (the classifier, and the evaluation's judge) gets masked text only (from P05).
 
 ## Queue consistency
 
-Saving a message (PostgreSQL) and enqueueing its job (Redis) are two separate writes, so a crash in between could leave a message that is never processed. The intake must guarantee that every stored message is eventually processed, e.g. with an **outbox table** written in the same transaction as the message and forwarded to the queue, or a periodic **sweep** for unprocessed messages. The approach is decided and tested in P08. Jobs are idempotent, so a message processed twice does not create two cases.
+Saving a message (PostgreSQL) and enqueueing its job (Redis) are two separate writes, so a crash in between could leave a message that is never processed. Decided in P08: **best-effort enqueue at intake plus a periodic sweep**.
+
+- **Intake** stores the interaction, then adds its job with a 1-second timeout. If Redis is down it still answers `201` and logs the ID.
+- **The sweep** runs in the worker every 30 seconds (and at start). It enqueues every interaction that has no case and is older than a 60-second grace period, and re-adds one whose completed or failed job left no case. It runs on a timer in the worker, not as a BullMQ job scheduler, because a scheduler lives in Redis and would vanish with the data it should recover.
+- **Why not an outbox table:** it needs its own poller anyway and can't recover a job that was forwarded and then lost inside Redis. The sweep reads the one fact that matters, "no case yet", from PostgreSQL.
+- **Jobs are idempotent:** duplicate job IDs collapse in Redis, each pipeline step reuses what is stored (a retry never pays twice for a classification), and a case is unique per interaction.
+- **Retries:** the SDK's own retries, then 5 job attempts with exponential backoff from 10 s for transient model errors (connection, 408, 409, 429, 5xx). The last attempt routes the error to review (`classification_error`); any other error on the last attempt writes a failure case (`processing_failed`). Every interaction ends as exactly one case.
 
 ## Data model (initial)
 
-- `interactions`: id (uuidv7), external id (the caller's own id, unique when set), channel (`email` | `chat` | `call`), language (`cs` | `sk` | `en`, nullable when unknown), raw text, received at, status, created at (from P02); masked text, masker version, masked at (P05, set together once)
+- `interactions`: id (uuidv7), external id (the caller's own id, unique when set), channel (`email` | `chat` | `call`), language (`cs` | `sk` | `en`, nullable when unknown), raw text, received at, status (`received` | `processed`, set to `processed` with the case from P08), created at (from P02); masked text, masker version, masked at (P05, set together once)
 - `masked_identifiers` (from P05): id, interaction id, placeholder, type, value, normalised value, start and end offset, created at; unique per interaction and placeholder, indexed by type and normalised value
 - `classifications` (from P03): one row per attempt, never updated: id, interaction id, outcome (`valid` | `invalid` | `error`), intent, urgency, language, fields (jsonb), summary, confidence (0–1), raw output, errors, prompt version, requested and served model, fell back, effort, tokens (input, output, cache write, cache read), cost, latency, created at. The current classification is the latest valid row.
 - `investigations`: interaction id, steps taken, tools called, likely cause, evidence, confidence
 - `enrichments` (from P06): one row per attempt, never updated: id, interaction id, classification id (whose area and service type were used), enricher version, outcome (`found` | `not_found` | `ambiguous` | `no_identifiers`), customer id (set exactly when found), candidates (jsonb: customer id and the placeholders that matched it), unmatched placeholders, area, area source (`message` | `customer`), outage ids, created at. The current enrichment is the latest row.
-- `cases` (from P07): one per interaction (unique), written once: id, interaction id, classification id (the attempt used), enrichment id (null exactly when the classification isn't valid), customer id (nullable), target team, needs review (true exactly when there are reason codes), reason codes (jsonb), router version, created at
+- `cases` (from P07): one per interaction (unique), written once: id, interaction id, classification id (the attempt used; null only on a `processing_failed` case that failed before classifying, from P08), enrichment id (null exactly when the classification isn't valid), customer id (nullable), target team, needs review (true exactly when there are reason codes), reason codes (jsonb), router version, created at
 - `decision_log` (from P07): one entry per pipeline step of a case, written in the same transaction: id, case id, seq (1–4), step (`mask` | `classify` | `enrich` | `route`), input summary (jsonb), output (jsonb), rule applied (the version that decided), created at. IDs, versions, outcomes and placeholders only: no message text, summary or identifier value.
 - `reviews`: case id, reviewer decision, corrected intent/team, note, reviewed at
 - Mock data (from P06), loaded from `eval/data/crm/seed.json` by `npm run crm:seed`:
@@ -70,10 +76,11 @@ Defined in code in `src/taxonomy.ts`, with definitions, examples and borderline 
 
 ## Routing rules
 
-Deterministic code (no model), in `src/pipeline/route.ts`, versioned (`route.v1` from P07). The full rules are in the P07 spec.
+Deterministic code (no model), in `src/pipeline/route.ts`, versioned (`route.v1` from P07; `route.v2` from P08 adds `processing_failed`, with the same result for every other input). The full rules are in the P07 spec.
 
 - **Team** by intent, as in the table above; `general` when the classification is invalid or failed.
 - **Review** when at least one reason code applies; every rule is checked and all codes are kept:
+  - `processing_failed` (from P08): the job failed for good; written only by the pipeline runner's failure path, team `general`, never by `route()`;
   - `invalid_output`, `classification_error`: no usable classification;
   - `cancellation`, `complaint`: by intent;
   - `low_confidence`: confidence below **0.7**;
@@ -82,7 +89,7 @@ Deterministic code (no model), in `src/pipeline/route.ts`, versioned (`route.v1`
   - `crm_mismatch_unmatched_key`: a customer was found but another key matched no one;
   - `crm_mismatch_service_type`: the classified service type is not among the customer's services;
   - `investigation_inconclusive`: from P10.
-- **Runs** with `npm run route -- <id>` after `classify` and `enrich`; one case per interaction, so a second run writes nothing. From P08 in the worker.
+- **Runs** in the queue worker (from P08), or with `npm run process -- <id>` (the whole pipeline) or `npm run route -- <id>` after `classify` and `enrich`; one case per interaction, so a second run writes nothing.
 - Rules are covered by unit tests, and a dataset-wide test routes the kept `classify.v2` outputs and requires 100% recall on must-review. Every case's decision log records the rules that fired.
 
 ## Masking
@@ -101,7 +108,7 @@ Deterministic code (no model), in `src/pipeline/enrich.ts`, versioned (`enrich.v
 - **Customer lookup** from the masking map's account keys only: customer number, contract number, phone (compared by its last 9 digits) and e-mail. One distinct customer is `found`; none is `not_found`; more than one is `ambiguous`; no key is `no_identifiers`. Keys that match nothing are recorded; P07 decides what they mean.
 - **Outage check:** the classification's area, or the found customer's service area when the message names none; areas compare ignoring case and diacritics; the classified service type must match when known; the outage must cover the interaction's `received_at`.
 - **The mock CRM** is generated from the dataset by `npm run crm:generate` (deterministic, no model), with the expected enrichment of every dataset message, which a unit test checks. The CRM is reached through a small `CrmLookup` interface with a PostgreSQL and an in-memory implementation.
-- **Runs** with `npm run enrich -- <id>` after classification; from P08 in the worker.
+- **Runs** in the queue worker (from P08), or with `npm run enrich -- <id>` after classification.
 
 ## Languages
 

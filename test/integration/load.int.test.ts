@@ -21,7 +21,12 @@ let file: string;
 
 beforeAll(async () => {
   testDb = await createTestDatabase({ migrate: true });
-  app = buildApp({ store: new KyselyInteractionStore(testDb.db), apiKey: KEY, checkDb: () => Promise.resolve() });
+  app = buildApp({
+    store: new KyselyInteractionStore(testDb.db),
+    apiKey: KEY,
+    checkDb: () => Promise.resolve(),
+    enqueue: () => Promise.resolve("queued"),
+  });
   apiUrl = await app.listen({ host: "127.0.0.1", port: 0 });
 
   // Three real dataset records, one per channel where possible.

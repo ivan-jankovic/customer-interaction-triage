@@ -329,9 +329,13 @@
   "worstErrors": [],
   "routing": {
     "enricherVersion": "enrich.v1",
-    "routerVersion": "route.v1",
+    "routerVersion": "route.v2",
     "seedSha256": "b411896f811086a14db32bd79ba87d3984f7eda4fe11e61227f8bfda596a8a83",
     "reasonCodes": [
+      {
+        "code": "processing_failed",
+        "n": 0
+      },
       {
         "code": "invalid_output",
         "n": 0

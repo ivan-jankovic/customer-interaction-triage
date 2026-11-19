@@ -1,5 +1,7 @@
 # The local stack: PostgreSQL, Redis, the one-shot `migrate` service and the intake API (`app`).
 # `docker compose up -d --wait` builds the image (Dockerfile), migrates, then starts the API.
+# The queue worker (P08) is under the `worker` profile and starts only on request, because every
+# message it processes is a paid model call: `docker compose --profile worker up -d --wait`.
 # Credentials are for local development only, so every port is published on 127.0.0.1 and is
 # unreachable from other machines. CI starts the same file (see .github/workflows/ci.yml).
 # INTAKE_API_KEY is read from .env (see .env.example); without it, `app` exits with a message.
@@ -54,6 +56,8 @@ services:
     image: customer-interaction-triage-app
     environment:
       DATABASE_URL: postgres://triage:triage@postgres:5432/triage
+      # Intake enqueues each stored interaction (P08); it tolerates Redis going away later.
+      REDIS_URL: redis://redis:6379
       INTAKE_API_KEY: ${INTAKE_API_KEY:-}
       # Inside the container the API must listen on all interfaces; the port mapping below
       # still publishes it on 127.0.0.1 only.
@@ -64,6 +68,9 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+      # BullMQ needs Redis up when the intake's queue is created.
+      redis:
+        condition: service_healthy
     healthcheck:
       # The image has no curl; Node's fetch does the same.
       test:
@@ -76,6 +83,27 @@ services:
       interval: 2s
       timeout: 3s
       retries: 30
+
+  # The queue worker (P08): runs the pipeline for each job and sweeps for interactions with no
+  # case. Only with `--profile worker`; it exits with a message without ANTHROPIC_API_KEY.
+  worker:
+    profiles: ["worker"]
+    build: .
+    image: customer-interaction-triage-app
+    command: ["node", "dist/worker.js"]
+    environment:
+      DATABASE_URL: postgres://triage:triage@postgres:5432/triage
+      REDIS_URL: redis://redis:6379
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      TRIAGE_MODEL: ${TRIAGE_MODEL:-claude-opus-5-5}
+      TRIAGE_EFFORT: ${TRIAGE_EFFORT:-low}
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-4}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres-data:

@@ -30,6 +30,8 @@ beforeAll(async () => {
     checkDb: async () => {
       await sql`select 1`.execute(testDb.db);
     },
+    // The queue itself is tested in queue.int.test.ts.
+    enqueue: () => Promise.resolve("queued"),
   });
 });
 

@@ -10,12 +10,14 @@ Requirements: Node.js 24 (see `.nvmrc`) and Docker with Compose.
 
 ```sh
 npm ci
-cp .env.example .env                 # then set INTAKE_API_KEY (below); ANTHROPIC_API_KEY only for the dataset scripts
+cp .env.example .env                 # then set INTAKE_API_KEY (below); ANTHROPIC_API_KEY for anything that calls a model
 openssl rand -hex 32                 # a key for INTAKE_API_KEY in .env (at least 32 characters)
-docker compose up -d --wait          # PostgreSQL, Redis, migrations, and the intake API on http://localhost:3000
+docker compose up -d --wait          # PostgreSQL, Redis, migrations, and the intake API on http://localhost:3000 (no worker)
 npm run crm:seed                     # load the mock CRM and outage list (safe to repeat, see "Enrichment")
 npm run dataset:load                 # import the 100 dataset messages through the API (safe to repeat)
 ```
+
+Loading stores and queues the messages; nothing is classified until a worker runs (see "Background processing").
 
 Every port is published on `127.0.0.1` only. If 5432, 6379 or 3000 is taken, start Compose with `POSTGRES_PORT=…`, `REDIS_PORT=…` or `APP_PORT=…` and change the URLs in `.env` to match. Without `INTAKE_API_KEY` in `.env`, the `app` container exits with a message and the other services still run.
 
@@ -27,7 +29,7 @@ All `/interactions` routes need the header `x-api-key` with the value of `INTAKE
 
 | Route | What it does |
 | --- | --- |
-| `POST /interactions` | Stores a message: `channel` (`email`, `chat`, `call`) and `text` are required; `language` (`cs`, `sk`, `en`), `external_id` and `received_at` are optional. 201 when stored; 200 when the same `external_id` with the same content is already stored; 409 when it is stored with different content. |
+| `POST /interactions` | Stores a message and queues it for processing: `channel` (`email`, `chat`, `call`) and `text` are required; `language` (`cs`, `sk`, `en`), `external_id` and `received_at` are optional. 201 when stored; 200 when the same `external_id` with the same content is already stored; 409 when it is stored with different content. If Redis is down the message is still stored (201) and the worker's sweep queues it later. |
 | `GET /interactions/:id` | One stored message. |
 | `GET /interactions?limit=20&before=<id>` | Newest first; pass `next_before` from the response to get the next page. |
 | `GET /health` | 200 when the database answers (no key needed). |
@@ -83,10 +85,10 @@ npm run enrich -- msg-011   # customer, area and outages for the latest classifi
 
 ## Routing and cases
 
-The routing step turns the classification and the enrichment into a **case**: the target team, whether a person must review it, and the reason codes. The rules are plain code (`route.v1` in [src/pipeline/route.ts](src/pipeline/route.ts)), no model, and free to run.
+The routing step turns the classification and the enrichment into a **case**: the target team, whether a person must review it, and the reason codes. The rules are plain code (`route.v2` in [src/pipeline/route.ts](src/pipeline/route.ts)), no model, and free to run.
 
 - **Team** by intent (billing, technical support, sales, retention, complaints, general); `general` when the model's output was invalid or the call failed.
-- **Review** when any rule applies, with all the codes kept: invalid output or a failed call, a cancellation or complaint, confidence below 0.7, a customer not found or ambiguous, a technical fault with no account identifiers, or a CRM mismatch (a key that matched no one, or a service type the customer doesn't have).
+- **Review** when any rule applies, with all the codes kept: invalid output or a failed call, a cancellation or complaint, confidence below 0.7, a customer not found or ambiguous, a technical fault with no account identifiers, or a CRM mismatch (a key that matched no one, or a service type the customer doesn't have). A message whose processing failed for good gets a case too, in `general` with `processing_failed` (see below).
 
 Each interaction gets **one case**, written together with a **decision log**: one entry per step (mask, classify, enrich, route) with the IDs it read, what it produced and the version that decided. The log holds no message text and no identifier values.
 
@@ -99,6 +101,24 @@ npm run route -- msg-011    # team, review flag, reason codes and the decision l
 On the kept `classify.v2` run, routing sends every message to its labelled team, catches **all 38** messages labelled must-review (recall 100%, precision 67.9%), and sends 56 of the 100 messages to review. The rules and their reasons are in the [P07 spec](specs/phases/008-p07-routing-rules-decision-log/requirements.md).
 
 The review rate reflects the test set, not real traffic. The dataset gives every intent an equal share, so cancellations and complaints, which are always reviewed, make up a third of it. The mock CRM was also seeded with not-found and ambiguous customers on purpose. Among routine messages (all intents except cancellation and complaint), 34% go to review. The rules are conservative on purpose: a missed review costs more than an extra check. They are meant to be tuned later with reviewers' corrections (P09) and the confidence-gate comparison (P17). The breakdown is in the P07 spec, under Results.
+
+## Background processing
+
+Intake queues every stored message (BullMQ on Redis, one job per message; the job holds only the message's ID). A **worker** runs the whole pipeline for each job: mask, classify, enrich, route. Every message ends as exactly one case.
+
+```sh
+docker compose --profile worker up -d --wait   # the worker as a container (or: npm run worker, reads .env)
+npm run queue:status                            # jobs by state, interactions by status, and the backlog
+npm run process -- msg-011                      # the whole pipeline for one message, now (costs money unless classified)
+```
+
+> **The worker costs money.** It processes every stored message that has no case yet, about $0.01 each: starting it after `dataset:load` classifies all 100 dataset messages. That's why plain `docker compose up` doesn't start it, and why it refuses to start without `ANTHROPIC_API_KEY`.
+
+- **Nothing is lost between the database and the queue.** If queueing fails (Redis down, or a crash right after saving), the worker's **sweep**, every 30 seconds, queues every message that has no case and is more than a minute old. Redis also keeps queued jobs on disk (append-only file), so they survive a restart.
+- **Retries.** Rate limits, overloads and connection errors are retried 5 times over about 2.5 minutes; after that the case goes to review (`classification_error`). Each attempt is stored, and a retry never pays again for a classification that already succeeded.
+- **Failures end in review.** Any other error that lasts to the last attempt writes a case in `general` with `processing_failed`, naming the step that failed.
+
+The design and its reasons are in the [P08 spec](specs/phases/009-p08-asynchronous-processing/requirements.md).
 
 ## Evaluating
 
@@ -120,7 +140,7 @@ Each run lands in `eval/results/<run-id>/` with `report.md` and `report.html` (i
 | Command | What it does |
 | --- | --- |
 | `npm test` | Unit tests. No Docker, no network, never calls a model. |
-| `npm run test:integration` | Tests against the Compose services (migrations, API with PostgreSQL, loader, masking, mock CRM and enrichment, Redis). |
+| `npm run test:integration` | Tests against the Compose services (migrations, API with PostgreSQL, loader, masking, mock CRM and enrichment, routing, the queue and worker). The Redis outage tests stop and start the Compose Redis, so they run last. |
 | `npm run lint` | ESLint with type-aware rules. |
 | `npm run format` / `format:check` | Prettier. |
 | `npm run typecheck` | TypeScript 7 type check. |
