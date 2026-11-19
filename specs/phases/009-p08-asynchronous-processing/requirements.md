@@ -171,3 +171,45 @@ The sweep interval, grace period and job options are constants in `src/queue.ts`
 - **`processing_failed` is first in `REASON_CODES`.** This changes the order constant that P07's tests use; the reason codes of existing cases don't change.
 - **Intake latency.** Enqueueing adds one Redis round trip to `POST /interactions`. With Redis down, a request waits up to the 1-second timeout.
 - Docs consulted: BullMQ (`/taskforcesh/bullmq`, v6): custom job IDs and duplicates, `removeOnComplete` and duplicates, retries with exponential backoff.
+
+## Implementation notes
+
+- **The runner writes failure cases, not the worker.** The plan had the worker call `recordFailureCase` on the last attempt. `processInteraction` does it instead when `finalAttempt` is true, so `npm run process` behaves the same as the worker, and the worker's processor stays one call. The job then completes (it has a case); only an error while writing the failure case fails the job, and the sweep picks the interaction up again.
+- **A stored `invalid` attempt is reused.** The spec reused only a valid classification. If an earlier attempt stored invalid output and the job then failed before writing the case, a retry would pay again for an answer that goes to review anyway. The runner now reuses the latest attempt when it is `invalid`; an `error` attempt is still re-called.
+- **An error attempt with no known status isn't retried.** `isTransient` retries `apiStatus: null` (connection error or timeout) but not an attempt without `apiStatus` at all, which didn't come from the API client.
+- **The eval reports gained a row.** Besides the router version, the reason-code table lists `processing_failed` with 0, like `investigation_inconclusive`, because it iterates `REASON_CODES`. No metric changed.
+- **Redis must be up when the API starts.** BullMQ can't create a fail-fast producer queue while Redis is down, so the server awaits `queue.waitUntilReady()` and the Compose `app` service now waits for Redis to be healthy. After start, intake tolerates outages (tested).
+- **The outage tests run last through a small Vitest sequencer** in `vitest.integration.config.ts`: Vitest orders files by cached duration, not by name, so a file name alone can't guarantee the order.
+- **Shared printing.** `npm run process` prints the case with the route CLI's `printCase`, now exported.
+- **The sweep goes oldest first by ID** (uuidv7, time-ordered and indexed), not by `created_at`.
+- **The spec files were committed with group 1**, not in a commit of their own.
+
+## Results (recorded during implementation)
+
+- **Tests:** 722 unit tests and 135 integration tests pass locally, including the 3 Redis outage tests (each stops and starts the Compose Redis, about 10 seconds for the file). The worker and outage files passed on repeated runs.
+- **Kept runs recomputed** with `npm run eval:report`: only the router version (`route.v2`) and a `processing_failed | 0` row changed in each report; `outputs.jsonl` and `run.json` are unchanged.
+- **Demo** on a separate `triage_demo` database with Redis database 1 and the API on port 3001, after `crm:seed`; dropped and flushed afterwards. The development database was not touched.
+
+  1. Worker started (backlog 0), then `dataset:load`: **100 interactions, 100 cases, 0 left in the backlog, 54 seconds** from the first message stored to the last case written (concurrency 4; 2.2 to 53.8 seconds per message, waiting included).
+
+     | | |
+     | --- | --- |
+     | Classifications | 100, all valid, average latency 2.1 s |
+     | Cost | $0.649 for the 100 (about $0.0065 per message) |
+     | Sent to review | 57 of 100 (the kept `classify.v2` run: 56) |
+     | Teams | 17 each for complaints, billing, technical support and sales; 16 each for general and retention |
+
+     | Reason code | Cases |
+     | --- | --- |
+     | `complaint` | 17 |
+     | `cancellation` | 16 |
+     | `low_confidence` | 9 |
+     | `customer_unidentified` | 9 |
+     | `customer_ambiguous` | 5 |
+     | `customer_not_found` | 5 |
+     | `crm_mismatch_unmatched_key` | 3 |
+
+  2. **Worker stopped** (`SIGINT`: "finishing active jobs"), one message posted: `queue:status` showed it waiting. After the worker started again, it was processed within seconds (`technical_support`, `customer_unidentified`: a fault with no account number).
+  3. **Redis stopped**, one message posted: `201` in 0.02 s, and the API logged "enqueue failed" with the interaction ID only. After Redis started, the worker's sweep enqueued it ("added": 1) once it was past the 60-second grace period: the case was written 74 seconds after the message was stored (`retention`, `cancellation`).
+
+  Total demo cost: **$0.669** for 102 classifications.
