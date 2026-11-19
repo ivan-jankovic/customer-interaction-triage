@@ -38,8 +38,8 @@ Saving a message (PostgreSQL) and enqueueing its job (Redis) are two separate wr
 - `classifications` (from P03): one row per attempt, never updated: id, interaction id, outcome (`valid` | `invalid` | `error`), intent, urgency, language, fields (jsonb), summary, confidence (0–1), raw output, errors, prompt version, requested and served model, fell back, effort, tokens (input, output, cache write, cache read), cost, latency, created at. The current classification is the latest valid row.
 - `investigations`: interaction id, steps taken, tools called, likely cause, evidence, confidence
 - `enrichments` (from P06): one row per attempt, never updated: id, interaction id, classification id (whose area and service type were used), enricher version, outcome (`found` | `not_found` | `ambiguous` | `no_identifiers`), customer id (set exactly when found), candidates (jsonb: customer id and the placeholders that matched it), unmatched placeholders, area, area source (`message` | `customer`), outage ids, created at. The current enrichment is the latest row.
-- `cases`: id, interaction id, customer id (nullable), target team, needs review, reason codes, created at
-- `decision_log`: case id, step, input summary, output, rule applied, timestamp
+- `cases` (from P07): one per interaction (unique), written once: id, interaction id, classification id (the attempt used), enrichment id (null exactly when the classification isn't valid), customer id (nullable), target team, needs review (true exactly when there are reason codes), reason codes (jsonb), router version, created at
+- `decision_log` (from P07): one entry per pipeline step of a case, written in the same transaction: id, case id, seq (1–4), step (`mask` | `classify` | `enrich` | `route`), input summary (jsonb), output (jsonb), rule applied (the version that decided), created at. IDs, versions, outcomes and placeholders only: no message text, summary or identifier value.
 - `reviews`: case id, reviewer decision, corrected intent/team, note, reviewed at
 - Mock data (from P06), loaded from `eval/data/crm/seed.json` by `npm run crm:seed`:
   - `crm_customers`: id, customer number (unique), e-mail (lower case, not unique), segment (`residential` | `business`), created at. No names or addresses.
@@ -64,15 +64,26 @@ Defined in code in `src/taxonomy.ts`, with definitions, examples and borderline 
 
 - **One primary intent per message.** When several apply, precedence decides: `cancellation` > `complaint` > `technical_fault` > `billing_question` > `tariff_change` > `other`.
 - **Urgency:** `low`, `normal`, `high`.
-- **Review reasons in the dataset:** `cancellation`, `complaint` (by rule, from the intent) and `unclear` (by judgement). `must_review` is true exactly when there is at least one reason. Runtime reasons (confidence, CRM mismatch, …) are added in P07.
+- **Review reasons in the dataset:** `cancellation`, `complaint` (by rule, from the intent) and `unclear` (by judgement). `must_review` is true exactly when there is at least one reason. At runtime, review is decided by the reason codes of the routing rules (`REASON_CODES`, from P07); `unclear` is caught by `low_confidence`.
 - **Fields:** `identifiers` (typed: `customer_number`, `contract_number`, `phone`, `email`, `birth_number`, `bank_account`, `iban`, each with its value exactly as written), `service_type` (`internet`, `mobile`, `tv`, `unknown`) and `area` (town in nominative form, or none).
 - **Dataset record:** `{ intent, urgency, must_review, review_reasons, expected_team, fields: { identifiers, service_type, area } }`, schema in `eval/schema/`.
 
-## Routing rules (initial)
+## Routing rules
 
-- Target team by intent, as in the table above.
-- **Always review:** `cancellation`, `complaint`, confidence below threshold, invalid model output, customer not found or ambiguous, CRM mismatch, investigation inconclusive.
-- Rules live in code and are covered by unit tests; every applied rule is written to the decision log as a reason code.
+Deterministic code (no model), in `src/pipeline/route.ts`, versioned (`route.v1` from P07). The full rules are in the P07 spec.
+
+- **Team** by intent, as in the table above; `general` when the classification is invalid or failed.
+- **Review** when at least one reason code applies; every rule is checked and all codes are kept:
+  - `invalid_output`, `classification_error`: no usable classification;
+  - `cancellation`, `complaint`: by intent;
+  - `low_confidence`: confidence below **0.7**;
+  - `customer_not_found`, `customer_ambiguous`: from the enrichment;
+  - `customer_unidentified`: a `technical_fault` with no account identifiers (other intents without identifiers are not reviewed for this);
+  - `crm_mismatch_unmatched_key`: a customer was found but another key matched no one;
+  - `crm_mismatch_service_type`: the classified service type is not among the customer's services;
+  - `investigation_inconclusive`: from P10.
+- **Runs** with `npm run route -- <id>` after `classify` and `enrich`; one case per interaction, so a second run writes nothing. From P08 in the worker.
+- Rules are covered by unit tests, and a dataset-wide test routes the kept `classify.v2` outputs and requires 100% recall on must-review. Every case's decision log records the rules that fired.
 
 ## Masking
 
@@ -116,7 +127,8 @@ Deterministic code (no model), in `src/pipeline/enrich.ts`, versioned (`enrich.v
   3. **Human review of mismatches.** A message goes to review when the chosen labels and the two graders do not all agree. The reviewer confirms or corrects the labels, or has the message rewritten. Messages where all three agree are accepted, except for a random sample of about 10 that is also reviewed by hand, to catch mistakes the models share.
   4. **Record.** Each message keeps its chosen labels, both graders' labels and the final labels with a reviewed flag; `eval/data/README.md` records the models, prompt versions and review statistics.
 - The generator and graders are separate from the triage prompts being evaluated, so the pipeline is not tested on labels it produced itself.
-- **Metrics** (overall and per language): intent accuracy, per-intent precision and recall, confusion matrix, field extraction accuracy, routing accuracy, recall on must-review, summary quality (LLM-graded rubric), cost and latency per message.
+- **Metrics** (overall and per language): intent accuracy, per-intent precision and recall, confusion matrix, field extraction accuracy, routing accuracy, recall and precision on must-review and the review rate, summary quality (LLM-graded rubric), cost and latency per message.
+- **Routing metrics (from P07)** are scored from the stored outputs, without a model: each message is masked, enriched against the in-memory CRM seed and routed. The report also counts each reason code, checks each labelled reason against its code, lists missed must-review messages, and records `enrich.v1`, `route.v1` and the seed hash.
 - **Injection set:** messages containing instructions aimed at the model; pass = no action triggered and review rules still apply.
 - **Runs (from P04):** `npm run eval` classifies the full dataset (or `--subset small`, 18 fixed messages in `eval/data/subsets/small.json`) with the pipeline's understanding step, directly from the dataset file (no database), under the paid-run guard (dry run, confirmation, cost cap). Each run writes `eval/results/<run-id>/`: `run.json` (models, effort, prompt versions and hashes, dataset hash, git commit), `outputs.jsonl`, `metrics.json`, `report.md` and a self-contained `report.html`. `npm run eval:report` recomputes the reports from the stored outputs byte for byte; `npm run eval:keep` moves a run to `eval/results/kept/`, the only runs committed. The small subset runs in CI from P12.
 - **Summary judge:** prompt `summary-judge.v1` on `claude-haiku-5-5` (a different model from the classifier) grades each summary for faithfulness and completeness (1–5) and flags personal data; it never sees the labels.
