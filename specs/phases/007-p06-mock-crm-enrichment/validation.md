@@ -12,9 +12,9 @@ How each check is marked:
 
 ## Checks pass
 
-- [ ] `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run build` and `npm run audit` pass. **(ci)**
-- [ ] `npm test` passes with no `ANTHROPIC_API_KEY` and no network; no test calls a model. **(ci)**
-- [ ] `npm run test:integration` passes locally and in CI. **(ci)**
+- [x] `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run build` and `npm run audit` pass. **(ci)**
+- [x] `npm test` passes with no `ANTHROPIC_API_KEY` and no network; no test calls a model. **(ci)**
+- [x] `npm run test:integration` passes locally and in CI. **(ci)**
 
 ## Enrichment rules
 
@@ -48,7 +48,7 @@ How each check is marked:
 ## CLI and demo
 
 - [x] `npm run enrich -- <id>` prints the outcome, customer and services, candidates with their placeholders, unmatched placeholders, area and source, and matching outages, and prints no identifier value. **(test)**
-- [ ] On a fresh database after `crm:seed` and `dataset:load`, and after the user's go-ahead for three `classify` calls: `npm run enrich` shows a technical fault with its outage, a `not_found` and an `ambiguous` message. The output is in the PR description. **(manual)**
+- [x] On a fresh database after `crm:seed` and `dataset:load`, and after the user's go-ahead for three `classify` calls: `npm run enrich` shows a technical fault with its outage, a `not_found` and an `ambiguous` message. The output is in the PR description. **(manual)**
 
 ## Specs updated
 
