@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { compareRunDirs } from "../../eval/compare.js";
+import { compareRunDirs, parseCompareArgs } from "../../eval/compare.js";
 import { writeReports } from "../../eval/report/index.js";
 import { fixtureRun } from "./fixtures/fixture-run.js";
 
@@ -53,5 +53,12 @@ describe("eval:compare", () => {
     const md = compareRunDirs(a.runDir, other.runDir);
     expect(md).toContain("**Warning:** the runs cover different messages (8 vs 2)");
     expect(md).toContain("**Warning:** the runs used different dataset files");
+  });
+
+  it("parses two runs with or without --out", () => {
+    expect(parseCompareArgs(["a", "b"])).toEqual({ refs: ["a", "b"], outFile: undefined });
+    expect(parseCompareArgs(["a", "--out", "x.md", "b"])).toEqual({ refs: ["a", "b"], outFile: "x.md" });
+    expect(() => parseCompareArgs(["a"])).toThrow(/Usage/);
+    expect(() => parseCompareArgs(["a", "b", "--out"])).toThrow(/Usage/);
   });
 });

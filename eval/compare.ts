@@ -149,19 +149,25 @@ export function compareRuns(a: Run, b: Run): string {
   return out.join("\n").trimEnd() + "\n";
 }
 
+/** `<run A> <run B> [--out file.md]`, in any order. */
+export function parseCompareArgs(args: readonly string[]): { refs: [string, string]; outFile: string | undefined } {
+  const outIndex = args.indexOf("--out");
+  const outFile = outIndex >= 0 ? args[outIndex + 1] : undefined;
+  const refs = outIndex >= 0 ? args.filter((_, i) => i !== outIndex && i !== outIndex + 1) : [...args];
+  if (refs.length !== 2 || (outIndex >= 0 && !outFile)) {
+    throw new Error("Usage: npm run eval:compare -- <run A> <run B> [--out file.md]");
+  }
+  return { refs: [refs[0]!, refs[1]!], outFile };
+}
+
 export function compareRunDirs(dirA: string, dirB: string): string {
   return compareRuns(readRun(dirA), readRun(dirB));
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   try {
-    const args = process.argv.slice(2);
-    const outIndex = args.indexOf("--out");
-    const outFile = outIndex >= 0 ? args[outIndex + 1] : undefined;
-    const refs = args.filter((_, i) => i !== outIndex && i !== outIndex + 1);
-    if (refs.length !== 2 || (outIndex >= 0 && !outFile))
-      throw new Error("Usage: npm run eval:compare -- <run A> <run B> [--out file.md]");
-    const markdown = compareRunDirs(resolveRunDir(refs[0]!), resolveRunDir(refs[1]!));
+    const { refs, outFile } = parseCompareArgs(process.argv.slice(2));
+    const markdown = compareRunDirs(resolveRunDir(refs[0]), resolveRunDir(refs[1]));
     if (outFile) {
       writeFileSync(outFile, markdown);
       console.log(`Wrote ${outFile}`);
