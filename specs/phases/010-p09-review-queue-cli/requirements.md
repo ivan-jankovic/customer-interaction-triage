@@ -164,3 +164,35 @@ Indexes: `reviews(reviewer)`, `unmask_log(case_id)`, `unmask_log(reviewer)`.
 - **The handle is not verified.** Anyone running the CLI can type any handle. This is enough for a local tool and for the audit trail's honest use, and it is the same trust level as database access. P13 has the same limitation unless a later phase adds authentication.
 - **Failure cases** (`processing_failed`) are in the queue like any other. They may have no classification or masked text; the screen says what is missing, and correcting gives them an intent for the first time.
 - **The demo's session is driven by piped input** so its output can go in the PR description. The loop also runs in a terminal, which the user can try.
+
+## Implementation notes
+
+- **The case view leaves out the classification's identifiers.** The stored classification carries `fields.identifiers` with the actual values (they come from the masking map, P05). An integration test caught this, so the case view holds a reduced classification (outcome, intent, confidence, urgency, service type, area, summary, errors, prompt and model) with no identifiers. The found customer is shown by ID, segment and services, not by customer number, for the same reason.
+- **Decision-log lines moved to `src/format/decision-log.ts`**, shared by `npm run route`, `npm run process` and the review screen.
+- **`--reason` uses jsonb containment** (`reason_codes @> '["code"]'`).
+- **The loop reads lines with `node:readline`'s async iterator** and writes its own prompts, so end of input is a plain "no more lines" (quit) instead of a rejected question. With piped input the answers aren't echoed, which is why the demo output shows prompts run together.
+- **A correction whose only problem is a missing note asks for the note again**; any other refusal (for example a correction that changes nothing) goes back to the action prompt.
+
+## Results (recorded during implementation)
+
+- **Tests:** 752 unit tests and 168 integration tests pass locally, including 11 tests that drive the loop with scripted input.
+- **Demo** on a separate `triage_demo` database with Redis database 1 and the API on port 3001, after `crm:seed`; dropped and flushed afterwards. Eight dataset messages went through the API and the worker; the 8 classifications cost **$0.102** (the spec estimated $0.06).
+
+  | Message | Team | Reasons |
+  | --- | --- | --- |
+  | msg-011 | `technical_support` | none (auto-routed; ongoing outage in Opava) |
+  | msg-013 | `retention` | `cancellation` |
+  | msg-010 | `complaints` | `complaint` |
+  | msg-082 | `general` | `low_confidence` (0.45) |
+  | msg-001 | `complaints` | `complaint`, `customer_not_found` |
+  | msg-022 | `billing` | `customer_ambiguous` |
+  | msg-008 | `general` | `crm_mismatch_unmatched_key` |
+  | msg-007 | `technical_support` | `customer_unidentified` |
+
+  Three review sessions with piped input:
+
+  1. `reviewer-1`, 7 pending cases: unmasked msg-008 (reason "check which e-mail address the customer means") and confirmed it; confirmed msg-007; skipped msg-001; corrected msg-010's team only (complaint → `billing`); corrected msg-022's intent (→ complaint, default team `complaints`); confirmed msg-013; quit at msg-082. Summary: 3 confirmed, 2 corrected, 1 skipped, 1 unmasked.
+  2. `reviewer-2` (from `REVIEWER`), `--spot-check`: confirmed the auto-routed msg-011 ("ongoing outage in the area explains it"); `spot_check` is true on its review.
+  3. A new session showed "Case 1 of 2": the skipped msg-001 is back, with msg-082.
+
+  The model's classifications all looked right, so **both corrections were made only to show the flow**, and their notes say so. Six `reviews` rows and one `unmask_log` row were stored as expected.
