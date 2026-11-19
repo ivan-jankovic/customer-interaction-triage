@@ -1,5 +1,6 @@
 // Helpers for the pipeline runner and worker tests (P08): a scripted model client that answers
-// classify.v2 requests, and the runner's dependencies around it. No model is ever called.
+// classify.v2 requests, a scripted investigating agent (P10), and the runner's dependencies
+// around them. No model is ever called.
 
 import type { Kysely } from "kysely";
 import { readJsonl } from "../../eval/lib/jsonl.js";
@@ -7,10 +8,18 @@ import { PATHS } from "../../eval/lib/paths.js";
 import type { DatasetRecord } from "../../eval/schema/dataset-record.schema.js";
 import { readCrmSeed } from "../../src/db/crm-seed.js";
 import type { Database } from "../../src/db/database.js";
-import type { LlmClient, LlmRequest, LlmResult } from "../../src/llm/client.js";
+import type {
+  ConverseClient,
+  ConverseRequest,
+  ConverseResult,
+  LlmClient,
+  LlmRequest,
+  LlmResult,
+} from "../../src/llm/client.js";
 import { loadPrompt } from "../../src/llm/prompts.js";
 import type { ProcessDeps } from "../../src/pipeline/process.js";
 import { mask } from "../../src/pipeline/mask.js";
+import { INVESTIGATE_PROMPT_VERSION } from "../../src/pipeline/investigate.js";
 import { CLASSIFY_PROMPT_VERSION, escapeMessage } from "../../src/pipeline/understand.js";
 
 const USAGE = { input_tokens: 100, output_tokens: 50, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 };
@@ -80,8 +89,88 @@ export function scriptedLlm(
   };
 }
 
-export function processDeps(llm: LlmClient): ProcessDeps {
-  return { llm, model: "claude-opus-5-5", effort: "low", prompt: loadPrompt(CLASSIFY_PROMPT_VERSION) };
+/**
+ * One scripted investigation (P10), played per investigation (a conversation's first turn
+ * starts the next one):
+ * - "conclusive": calls check_outages once, then answers area_outage at 0.9 citing it;
+ * - "inconclusive": calls check_outages once, then answers inconclusive;
+ * - "loop": asks for check_outages every turn, so it ends at the step limit;
+ * - { status }: the first turn fails with that API status (null = connection error);
+ * - "throw": the client throws a plain Error.
+ */
+export type Investigation = "conclusive" | "inconclusive" | "loop" | "throw" | { status: number | null };
+
+export function scriptedAgent(
+  script: Investigation[] = ["conclusive"],
+): ConverseClient & { calls: ConverseRequest[]; investigations: number } {
+  const calls: ConverseRequest[] = [];
+  const agent = {
+    calls,
+    investigations: 0,
+    converse(req: ConverseRequest): Promise<ConverseResult> {
+      calls.push(req);
+      if (req.messages.length === 1) agent.investigations++;
+      const plan = script[Math.min(agent.investigations - 1, script.length - 1)]!;
+      if (plan === "throw") return Promise.reject(new Error("bug in the agent client"));
+      if (typeof plan === "object") {
+        return Promise.resolve({
+          ok: false,
+          error: `API error ${plan.status ?? "?"}: scripted`,
+          failure: "api_error",
+          status: plan.status,
+          model: req.model,
+          usage: USAGE,
+        });
+      }
+      if (req.messages.length === 1 || plan === "loop") {
+        const use = { id: `tu_${calls.length}`, name: "check_outages", input: { area: "Opava" } };
+        return Promise.resolve({
+          ok: true,
+          content: [{ type: "tool_use", ...use }],
+          toolUses: [use],
+          text: "",
+          stopReason: "tool_use",
+          model: req.model,
+          usage: USAGE,
+        });
+      }
+      const text = JSON.stringify(
+        plan === "conclusive"
+          ? {
+              likely_cause: "area_outage",
+              confidence: 0.9,
+              summary: "An outage covers the area.",
+              evidence: [{ tool: "check_outages", finding: "An outage in the area." }],
+            }
+          : { likely_cause: "inconclusive", confidence: 0.4, summary: "Nothing found.", evidence: [] },
+      );
+      return Promise.resolve({
+        ok: true,
+        content: [{ type: "text", text }],
+        toolUses: [],
+        text,
+        stopReason: "end_turn",
+        model: req.model,
+        usage: USAGE,
+      });
+    },
+  };
+  return agent;
+}
+
+export function processDeps(llm: LlmClient, agent: ConverseClient = scriptedAgent()): ProcessDeps {
+  return {
+    llm,
+    model: "claude-opus-5-5",
+    effort: "low",
+    prompt: loadPrompt(CLASSIFY_PROMPT_VERSION),
+    investigator: {
+      llm: agent,
+      model: "claude-opus-5-5",
+      effort: "low",
+      prompt: loadPrompt(INVESTIGATE_PROMPT_VERSION),
+    },
+  };
 }
 
 /**

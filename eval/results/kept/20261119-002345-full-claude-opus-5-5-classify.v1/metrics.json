@@ -329,8 +329,8 @@
   "worstErrors": [],
   "routing": {
     "enricherVersion": "enrich.v1",
-    "routerVersion": "route.v2",
-    "seedSha256": "b411896f811086a14db32bd79ba87d3984f7eda4fe11e61227f8bfda596a8a83",
+    "routerVersion": "route.v3",
+    "seedSha256": "97503b40f736c78697f2829eacb6118b165b652c0ba3d5d3ff4643e6c469d86a",
     "reasonCodes": [
       {
         "code": "processing_failed",

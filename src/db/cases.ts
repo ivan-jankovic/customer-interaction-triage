@@ -3,12 +3,18 @@
 // transaction. One case per interaction: a second call returns the existing case and writes
 // nothing, so it is idempotent (P08's jobs rely on this). Free: no model is called.
 // From P08, writing a case also marks the interaction `processed`, and recordFailureCase writes
-// the case of an interaction whose processing failed for good.
+// the case of an interaction whose processing failed for good. From P10, a valid technical
+// fault is routed with its investigation (the latest one of its enrichment) and can't be routed
+// without one; the decision log gains an `investigate` entry whenever it has an `enrich` one:
+// the investigation used, or `skipped` and why. The entry's investigation_id is how the case
+// names its investigation (cases has no column for it), so a later `npm run investigate`
+// can't change what a case shows.
 //
 // The decision log holds IDs, versions, outcomes and placeholders, never the message text, the
 // summary or an identifier value: those stay in their own tables.
 
 import type { Kysely, Transaction } from "kysely";
+import { INVESTIGATOR_VERSION } from "../pipeline/investigate.js";
 import { customerServiceTypes, FALLBACK_TEAM, route, ROUTER_VERSION } from "../pipeline/route.js";
 import type { CrmServiceType } from "../pipeline/enrich.js";
 import type { ReasonCode, Team } from "../taxonomy.js";
@@ -16,6 +22,12 @@ import { KyselyClassificationStore, type StoredClassification } from "./classifi
 import { KyselyCrm } from "./crm.js";
 import type { CaseRow, Database, DecisionLogRow, DecisionStep } from "./database.js";
 import { latestEnrichmentFor, listEnrichments, type StoredEnrichment } from "./enrichments.js";
+import {
+  investigationById,
+  isInvestigated,
+  latestInvestigationFor,
+  type StoredInvestigation,
+} from "./investigations.js";
 import { InteractionNotFound, readMasking } from "./masking.js";
 
 /** Routing needs what earlier steps stored; this says which one is missing. */
@@ -117,6 +129,8 @@ interface StepsInput {
   masking: NonNullable<Awaited<ReturnType<typeof readMasking>>> | null;
   classification: StoredClassification | null;
   enrichment: StoredEnrichment | null;
+  /** The investigation used; null when there was none (not a fault, or it didn't finish). */
+  investigation: StoredInvestigation | null;
 }
 
 type NewLogEntry = Omit<DecisionLogEntry, "seq" | "createdAt">;
@@ -171,8 +185,41 @@ function stepEntries(interactionId: string, x: StepsInput): NewLogEntry[] {
       },
       ruleApplied: e.enricherVersion,
     });
+    entries.push(investigateEntry(x));
   }
   return entries;
+}
+
+/** The investigate entry: tool names and counts only, never tool inputs or results. */
+function investigateEntry(x: StepsInput): NewLogEntry {
+  const i = x.investigation;
+  if (!i) {
+    const intent = x.classification?.classification?.intent ?? null;
+    return {
+      step: "investigate",
+      inputSummary: { classification_id: x.classification?.id ?? null },
+      output: {
+        skipped:
+          intent === "technical_fault"
+            ? "the investigation didn't finish"
+            : `intent ${intent} is not a technical fault`,
+      },
+      ruleApplied: INVESTIGATOR_VERSION,
+    };
+  }
+  return {
+    step: "investigate",
+    inputSummary: { investigation_id: i.id, enrichment_id: i.enrichmentId, prompt_version: i.promptVersion },
+    output: {
+      outcome: i.outcome,
+      likely_cause: i.likelyCause,
+      confidence: i.confidence,
+      steps: i.steps,
+      tools_called: i.toolCalls.map((c) => c.tool),
+      tool_errors: i.toolCalls.filter((c) => c.is_error).length,
+    },
+    ruleApplied: `${i.investigatorVersion} / ${i.servedModel}`,
+  };
 }
 
 function routeEntry(
@@ -184,6 +231,7 @@ function routeEntry(
     inputSummary: {
       classification_id: x.classification?.id ?? null,
       enrichment_id: x.enrichment?.id ?? null,
+      investigation_id: x.investigation?.id ?? null,
       customer_service_types: x.serviceTypes,
     },
     output: {
@@ -272,6 +320,13 @@ export async function routeInteraction(db: Kysely<Database>, interactionId: stri
   const classification = await pickClassification(db, interactionId);
   const valid = classification.outcome === "valid" && classification.classification !== null;
   const enrichment = valid ? await pickEnrichment(db, interactionId, classification.id) : null;
+  const investigation =
+    enrichment && isInvestigated(classification) ? await latestInvestigationFor(db, enrichment.id) : null;
+  if (enrichment && isInvestigated(classification) && !investigation) {
+    throw new NotReadyForRouting(
+      `Interaction ${interactionId} is a technical fault with no investigation; investigate first.`,
+    );
+  }
   const serviceTypes = await customerServiceTypes(new KyselyCrm(db), enrichment?.customerId ?? null);
 
   const result = route({
@@ -279,8 +334,9 @@ export async function routeInteraction(db: Kysely<Database>, interactionId: stri
     classification: classification.classification,
     enrichment,
     customerServiceTypes: serviceTypes,
+    investigation,
   });
-  const steps = { channel, masking, classification, enrichment, serviceTypes };
+  const steps = { channel, masking, classification, enrichment, investigation, serviceTypes };
   const log = [...stepEntries(interactionId, steps), routeEntry(steps, result)];
 
   const created = await insertCase(
@@ -311,6 +367,8 @@ export interface FailureInput {
   /** What earlier steps stored and the runner had in hand; null when they didn't finish. */
   classificationId: string | null;
   enrichmentId: string | null;
+  /** The investigation the runner had in hand, if the step finished (P10). */
+  investigationId?: string | null;
 }
 
 /** The error's class name only: a message can quote values (a database error, for example). */
@@ -343,6 +401,7 @@ export async function recordFailureCase(
   const enrichment = failure.enrichmentId
     ? ((await listEnrichments(db, interactionId)).find((e) => e.id === failure.enrichmentId) ?? null)
     : null;
+  const investigation = failure.investigationId ? await investigationById(db, failure.investigationId) : null;
 
   const firedRules = [
     {
@@ -350,7 +409,7 @@ export async function recordFailureCase(
       detail: `failed at ${failure.failedStep}: ${errorClassName(failure.error)}`,
     },
   ];
-  const steps = { channel, masking, classification, enrichment, serviceTypes: [] };
+  const steps = { channel, masking, classification, enrichment, investigation, serviceTypes: [] };
   const log = [
     ...stepEntries(interactionId, steps),
     routeEntry(steps, { targetTeam: FALLBACK_TEAM, needsReview: true, firedRules }),

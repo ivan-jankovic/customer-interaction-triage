@@ -1,6 +1,7 @@
 // The routing step with storage, and the route CLI (P07), on dataset messages stored the way the
 // pipeline stores them: interaction with the seed's received_at, masking, a classification
-// carrying the labelled intent, area and service type, and its enrichment (no model is called).
+// carrying the labelled intent, area and service type, its enrichment and, for a technical
+// fault, an investigation attempt (P10) (no model is called).
 
 import { sql } from "kysely";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -15,7 +16,17 @@ import { readCrmSeed } from "../../src/db/crm-seed.js";
 import { enrichInteraction } from "../../src/db/enrichments.js";
 import { maskInteraction } from "../../src/db/masking.js";
 import { ROUTER_VERSION } from "../../src/pipeline/route.js";
-import { attempt, errorAttempt, invalidAttempt, VALID_CLASSIFICATION } from "../support/attempts.js";
+import { latestEnrichmentFor } from "../../src/db/enrichments.js";
+import { recordInvestigation } from "../../src/db/investigations.js";
+import type { InvestigationAttempt } from "../../src/pipeline/investigate.js";
+import {
+  attempt,
+  errorAttempt,
+  inconclusiveInvestigation,
+  invalidAttempt,
+  investigationAttempt,
+  VALID_CLASSIFICATION,
+} from "../support/attempts.js";
 import { createTestDatabase, type TestDatabase } from "./support/test-database.js";
 
 const seed = readCrmSeed();
@@ -41,14 +52,18 @@ const labelledAttempt = (messageId: string, confidence = 0.9) => {
   });
 };
 
-/** Stores a dataset message as the pipeline would: masked, classified with its labels, enriched. */
+/**
+ * Stores a dataset message as the pipeline would: masked, classified with its labels, enriched,
+ * and for a technical fault investigated (`investigation`, conclusive by default; null for none).
+ */
 async function store(
   messageId: string,
   {
     classify = true,
     enrich = true,
     confidence = 0.9,
-  }: { classify?: boolean; enrich?: boolean; confidence?: number } = {},
+    investigation = investigationAttempt(),
+  }: { classify?: boolean; enrich?: boolean; confidence?: number; investigation?: InvestigationAttempt | null } = {},
 ): Promise<string> {
   const r = record(messageId);
   const m = seed.messages.find((x) => x.message_id === messageId)!;
@@ -64,7 +79,16 @@ async function store(
     .executeTakeFirstOrThrow();
   await maskInteraction(testDb.db, id);
   if (classify) await new KyselyClassificationStore(testDb.db).record(id, labelledAttempt(messageId, confidence));
-  if (classify && enrich) await enrichInteraction(testDb.db, id);
+  if (classify && enrich) {
+    const e = await enrichInteraction(testDb.db, id);
+    if (investigation && labelsOf(messageId).intent === "technical_fault") {
+      await recordInvestigation(
+        testDb.db,
+        { interactionId: id, classificationId: e.classificationId!, enrichmentId: e.id },
+        investigation,
+      );
+    }
+  }
   return id;
 }
 
@@ -100,10 +124,19 @@ describe("routeInteraction", () => {
       [1, "mask", "mask.v1"],
       [2, "classify", "classify.v2 / claude-opus-5-5"],
       [3, "enrich", "enrich.v1"],
-      [4, "route", ROUTER_VERSION],
+      [4, "investigate", "investigate.v1 / claude-opus-5-5"],
+      [5, "route", ROUTER_VERSION],
     ]);
     expect(c.log[2]!.output).toMatchObject({ outcome: "found", customer_id: c.customerId });
-    expect(c.log[3]!.output).toEqual({ target_team: c.targetTeam, needs_review: false, fired_rules: [] });
+    expect(c.log[3]!.output).toEqual({
+      outcome: "valid",
+      likely_cause: "area_outage",
+      confidence: 0.9,
+      steps: 2,
+      tools_called: ["check_outages"],
+      tool_errors: 0,
+    });
+    expect(c.log[4]!.output).toEqual({ target_team: c.targetTeam, needs_review: false, fired_rules: [] });
     const { created: _created, ...stored } = c;
     expect(await readCase(testDb.db, id)).toEqual(stored);
     const { status } = await testDb.db
@@ -130,7 +163,7 @@ describe("routeInteraction", () => {
     const c = await routeInteraction(testDb.db, await store("msg-055", { confidence: 0.5 }));
     expect(c.needsReview).toBe(true);
     expect(c.reasonCodes).toEqual(["low_confidence", "crm_mismatch_unmatched_key"]);
-    expect(c.log[3]!.output).toMatchObject({
+    expect(c.log[4]!.output).toMatchObject({
       needs_review: true,
       fired_rules: [
         { reason_code: "low_confidence", detail: "confidence 0.5 < 0.7" },
@@ -174,7 +207,7 @@ describe("routeInteraction", () => {
     expect(new Set(results.map((r) => r.id)).size).toBe(1);
     expect(results.filter((r) => r.created)).toHaveLength(1);
     const rows = await testDb.db.selectFrom("decision_log").select("id").where("case_id", "=", results[0].id).execute();
-    expect(rows).toHaveLength(4);
+    expect(rows).toHaveLength(5);
   });
 
   it("fails clearly, storing nothing, when classification or enrichment is missing", async () => {
@@ -194,12 +227,60 @@ describe("routeInteraction", () => {
     await expect(routeInteraction(testDb.db, id)).rejects.toThrow(/enrich first/);
   });
 
+  // P10: the investigation.
+  it("refuses to route a valid technical fault without an investigation, storing nothing", async () => {
+    const before = await count("cases");
+    const id = await store("msg-011", { investigation: null });
+    await expect(routeInteraction(testDb.db, id)).rejects.toThrow(/investigate first/);
+    expect(await count("cases")).toBe(before);
+  });
+
+  it("sends a fault with an inconclusive investigation to review, keeping its team", async () => {
+    const c = await routeInteraction(testDb.db, await store("msg-011", { investigation: inconclusiveInvestigation() }));
+    expect(c).toMatchObject({
+      targetTeam: "technical_support",
+      needsReview: true,
+      reasonCodes: ["investigation_inconclusive"],
+    });
+    expect(c.log[4]!.output).toMatchObject({
+      fired_rules: [{ reason_code: "investigation_inconclusive", detail: "investigation found no likely cause" }],
+    });
+  });
+
+  it("routes with the latest investigation of the enrichment, and names it in the log", async () => {
+    const id = await store("msg-011", { investigation: inconclusiveInvestigation() });
+    const e = (await latestEnrichmentFor(
+      testDb.db,
+      id,
+      (await new KyselyClassificationStore(testDb.db).latestValid(id))!.id,
+    ))!;
+    const latest = await recordInvestigation(
+      testDb.db,
+      { interactionId: id, classificationId: e.classificationId!, enrichmentId: e.id },
+      investigationAttempt(),
+    );
+    const c = await routeInteraction(testDb.db, id);
+    expect(c.reasonCodes).toEqual([]);
+    expect(c.log[3]!.inputSummary).toMatchObject({ investigation_id: latest.id, enrichment_id: e.id });
+    expect(c.log[4]!.inputSummary).toMatchObject({ investigation_id: latest.id });
+  });
+
+  it("logs the investigate step as skipped for a case that isn't a technical fault", async () => {
+    const c = await routeInteraction(testDb.db, await store("msg-022"));
+    expect(c.log.map((l) => l.step)).toEqual(["mask", "classify", "enrich", "investigate", "route"]);
+    expect(c.log[3]!.output).toEqual({ skipped: `intent ${labelsOf("msg-022").intent} is not a technical fault` });
+  });
+
   it("writes no message text, summary or identifier value to the decision log", async () => {
     for (const messageId of ["msg-011", "msg-055", "msg-022", "msg-014"]) {
       const c = await routeInteraction(testDb.db, await store(messageId));
       const log = JSON.stringify(c.log);
       for (const i of labelsOf(messageId).fields.identifiers) expect(log, messageId).not.toContain(i.value);
       expect(log).not.toContain(VALID_CLASSIFICATION.summary);
+      // Nor the investigation's summary, evidence or tool results (P10).
+      expect(log).not.toContain(investigationAttempt().summary!);
+      expect(log).not.toContain("TOOL-RESULT-TEXT");
+      expect(log).not.toContain(investigationAttempt().evidence[0]!.finding);
       expect(log).not.toContain(record(messageId).text.slice(0, 30));
     }
   });
@@ -252,7 +333,10 @@ describe("npm run route", () => {
     expect(out).toContain("Review: no");
     expect(out).toMatch(/1\. mask +\(mask\.v1\) placeholders: \[/);
     expect(out).toMatch(/3\. enrich +\(enrich\.v1\) found;/);
-    expect(out).toMatch(/4\. route +\(route\.v2\) team /);
+    expect(out).toMatch(
+      /4\. investigate +\(investigate\.v1 \/ claude-opus-5-5\) valid; cause area_outage, confidence 0\.9, 2 turns, tools check_outages/,
+    );
+    expect(out).toMatch(/5\. route +\(route\.v3\) team /);
     expect(out).not.toContain("existing case");
   });
 

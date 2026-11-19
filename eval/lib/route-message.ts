@@ -2,13 +2,15 @@
 // model (P07 requirements.md, "Evaluation"): mask the text (mask.v1), enrich against the
 // in-memory seed CRM with the classified area and service type and the seed's received_at,
 // then route (ROUTER_VERSION). Used by the eval scoring and by the dataset-wide routing test, so
-// both see exactly what the pipeline would decide.
+// both see exactly what the pipeline would decide. The classify-only scoring passes no
+// investigation (P10): those metrics then score as route.v2 did; the investigation eval
+// passes the agent's attempt.
 
 import { readCrmSeed, type CrmSeed } from "../../src/db/crm-seed.js";
 import { memoryCrm } from "../../src/pipeline/crm-memory.js";
 import { enrich, type EnrichmentResult } from "../../src/pipeline/enrich.js";
 import { mask } from "../../src/pipeline/mask.js";
-import { customerServiceTypes, route, type RouteResult } from "../../src/pipeline/route.js";
+import { customerServiceTypes, route, type InvestigationSummary, type RouteResult } from "../../src/pipeline/route.js";
 import type { ClassificationAttempt } from "../../src/pipeline/understand.js";
 
 export interface MessageRoute extends RouteResult {
@@ -19,13 +21,14 @@ export interface MessageRoute extends RouteResult {
 export type MessageRouter = (
   message: { id: string; text: string },
   attempt: Pick<ClassificationAttempt, "outcome" | "classification">,
+  investigation?: InvestigationSummary | null,
 ) => Promise<MessageRoute>;
 
 export function makeMessageRouter(seed: CrmSeed = readCrmSeed()): MessageRouter {
   const crm = memoryCrm(seed);
   const receivedAt = new Map(seed.messages.map((m) => [m.message_id, new Date(m.received_at)]));
 
-  return async (message, attempt) => {
+  return async (message, attempt, investigation = null) => {
     const c = attempt.outcome === "valid" ? attempt.classification : null;
     if (!c) {
       return {
@@ -49,6 +52,7 @@ export function makeMessageRouter(seed: CrmSeed = readCrmSeed()): MessageRouter 
       classification: c,
       enrichment,
       customerServiceTypes: await customerServiceTypes(crm, enrichment.customerId),
+      investigation,
     });
     return { ...result, enrichment };
   };

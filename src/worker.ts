@@ -20,6 +20,7 @@ import { createDb, type Database } from "./db/database.js";
 import { createAnthropicClient } from "./llm/client.js";
 import { loadPrompt } from "./llm/prompts.js";
 import { processInteraction, TransientModelError, type ProcessDeps } from "./pipeline/process.js";
+import { INVESTIGATE_PROMPT_VERSION } from "./pipeline/investigate.js";
 import { CLASSIFY_PROMPT_VERSION } from "./pipeline/understand.js";
 import {
   createQueue,
@@ -158,18 +159,22 @@ async function main(): Promise<void> {
   jsonLog("info", "worker starting", {
     model: config.model,
     effort: config.effort,
+    investigatorModel: config.investigator.model,
+    investigatorEffort: config.investigator.effort,
     concurrency: config.concurrency,
     // Every one of these is a paid classification unless it was classified before.
     backlog: backlog.length,
   });
+  const llm = createAnthropicClient();
   const handle = startWorker({
     db,
     redisUrl: config.redisUrl,
     deps: {
-      llm: createAnthropicClient(),
+      llm,
       model: config.model,
       effort: config.effort,
       prompt: loadPrompt(CLASSIFY_PROMPT_VERSION),
+      investigator: { llm, ...config.investigator, prompt: loadPrompt(INVESTIGATE_PROMPT_VERSION) },
     },
     concurrency: config.concurrency,
   });

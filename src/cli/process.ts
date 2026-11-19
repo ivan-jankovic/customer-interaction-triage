@@ -1,6 +1,7 @@
 // npm run process -- <id | external_id>: runs the whole pipeline for one interaction now, with
-// the same runner as the queue worker (P08): mask → classify → enrich → route, reusing every step
-// already stored. Paid: one model call unless the interaction was classified before.
+// the same runner as the queue worker (P08): mask → classify → enrich → investigate → route,
+// reusing every step already stored. Paid: one model call unless the interaction was classified
+// before, plus the investigating agent's calls for a technical fault (P10).
 //
 // It runs as the job's final attempt, so it always ends with a case: a transient model error goes
 // to review (classification_error) instead of being retried, and any other error writes a
@@ -8,11 +9,12 @@
 
 import { fileURLToPath } from "node:url";
 import type { Kysely } from "kysely";
-import { loadClassifierConfig, loadDatabaseUrl } from "../config.js";
+import { loadClassifierConfig, loadDatabaseUrl, loadInvestigatorConfig } from "../config.js";
 import { readCase } from "../db/cases.js";
 import { createDb, type Database } from "../db/database.js";
-import { createAnthropicClient, type LlmClient } from "../llm/client.js";
+import { createAnthropicClient, type ConverseClient, type LlmClient } from "../llm/client.js";
 import { loadPrompt } from "../llm/prompts.js";
+import { INVESTIGATE_PROMPT_VERSION } from "../pipeline/investigate.js";
 import { processInteraction } from "../pipeline/process.js";
 import { CLASSIFY_PROMPT_VERSION } from "../pipeline/understand.js";
 import { findInteraction } from "./find-interaction.js";
@@ -22,7 +24,7 @@ export interface ProcessCliDeps {
   db: Kysely<Database>;
   env: NodeJS.ProcessEnv;
   /** Created only when a model call may be needed; tests pass a mock. */
-  createLlm?: () => LlmClient;
+  createLlm?: () => LlmClient & ConverseClient;
   out?: (line: string) => void;
   err?: (line: string) => void;
 }
@@ -47,14 +49,21 @@ export async function runProcess(argv: string[], deps: ProcessCliDeps): Promise<
     return 2;
   }
   const config = loadClassifierConfig(deps.env);
+  const investigator = loadInvestigatorConfig(deps.env);
   // With a case, nothing runs, so no client is created.
-  const llm: LlmClient = hasCase
-    ? { complete: () => Promise.reject(new Error("no model call expected")) }
+  const unexpected = () => Promise.reject(new Error("no model call expected"));
+  const llm: LlmClient & ConverseClient = hasCase
+    ? { complete: unexpected, converse: unexpected }
     : (deps.createLlm ?? createAnthropicClient)();
 
   const r = await processInteraction(
     deps.db,
-    { llm, ...config, prompt: loadPrompt(CLASSIFY_PROMPT_VERSION) },
+    {
+      llm,
+      ...config,
+      prompt: loadPrompt(CLASSIFY_PROMPT_VERSION),
+      investigator: { llm, ...investigator, prompt: loadPrompt(INVESTIGATE_PROMPT_VERSION) },
+    },
     interaction.id,
     { finalAttempt: true },
   );

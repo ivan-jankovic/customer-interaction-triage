@@ -23,8 +23,10 @@ import type { Outcome } from "./understand.js";
 /**
  * route.v2 (P08) adds the reason code processing_failed, written only by the pipeline runner's
  * failure path. For every input route() accepts, its result is the same as route.v1's.
+ * route.v3 (P10) adds investigation_inconclusive, from the investigating agent's attempt. With
+ * no investigation (null), its result is the same as route.v2's.
  */
-export const ROUTER_VERSION = "route.v2";
+export const ROUTER_VERSION = "route.v3";
 
 /**
  * Below this self-reported confidence a case goes to review. 0.7 catches every message labelled
@@ -43,11 +45,7 @@ export const UNIDENTIFIED_REVIEW_INTENTS: readonly Intent[] = ["technical_fault"
  * Whether an investigation sends its case to review (P10 requirements.md, "Outcomes and
  * review"): it didn't end with a valid answer, found no cause, or isn't confident enough.
  */
-export function isInconclusive(a: {
-  outcome: InvestigationOutcome;
-  likelyCause: LikelyCause | null;
-  confidence: number | null;
-}): boolean {
+export function isInconclusive(a: InvestigationSummary): boolean {
   return (
     a.outcome !== "valid" ||
     a.likelyCause === null ||
@@ -55,6 +53,12 @@ export function isInconclusive(a: {
     a.confidence === null ||
     a.confidence < REVIEW_CONFIDENCE_THRESHOLD
   );
+}
+
+function describeInconclusive(inv: InvestigationSummary): string {
+  if (inv.outcome !== "valid") return `investigation ended with outcome ${inv.outcome}`;
+  if (inv.likelyCause === "inconclusive" || inv.likelyCause === null) return "investigation found no likely cause";
+  return `investigation confidence ${inv.confidence} < ${REVIEW_CONFIDENCE_THRESHOLD} (${inv.likelyCause})`;
 }
 
 /** The team of a case whose classification gave no usable intent. */
@@ -69,6 +73,19 @@ export interface RouteInput {
   enrichment: Pick<EnrichmentResult, "outcome" | "customerId" | "unmatchedPlaceholders"> | null;
   /** Service types of the found customer, active or terminated; empty when none was found. */
   customerServiceTypes: readonly CrmServiceType[];
+  /**
+   * The investigation used (P10), or null/absent when none was run. The pipeline always runs
+   * one for a valid technical fault (src/db/cases.ts refuses to route such a case without one);
+   * the evaluation's classify-only routing metrics pass none and so score as route.v2.
+   */
+  investigation?: InvestigationSummary | null;
+}
+
+/** What routing reads from an investigation attempt. */
+export interface InvestigationSummary {
+  outcome: InvestigationOutcome;
+  likelyCause: LikelyCause | null;
+  confidence: number | null;
 }
 
 export interface FiredRule {
@@ -124,6 +141,11 @@ export function route(input: RouteInput): RouteResult {
     if (e?.outcome === "found" && type !== "unknown" && !input.customerServiceTypes.includes(type)) {
       const held = [...new Set(input.customerServiceTypes)].sort().join(", ") || "none";
       add("crm_mismatch_service_type", `classified ${type}, customer ${e.customerId} has ${held}`);
+    }
+
+    const inv = input.investigation;
+    if (c.intent === "technical_fault" && inv && isInconclusive(inv)) {
+      add("investigation_inconclusive", describeInconclusive(inv));
     }
   }
 

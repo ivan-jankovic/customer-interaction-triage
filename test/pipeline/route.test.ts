@@ -174,3 +174,70 @@ describe("review reasons", () => {
     for (const rule of r.firedRules) expect(rule.detail).not.toMatch(/777|@/);
   });
 });
+
+describe("investigation_inconclusive (route.v3, P10)", () => {
+  const fault = (investigation: RouteInput["investigation"]) => ({
+    ...input({ intent: "technical_fault" }),
+    investigation,
+  });
+  const valid = { outcome: "valid" as const, likelyCause: "line_fault" as const, confidence: 0.8 };
+
+  it("adds nothing for a conclusive investigation, at or above the threshold", () => {
+    expect(route(fault(valid)).reasonCodes).toEqual([]);
+    expect(route(fault({ ...valid, confidence: 0.7 })).reasonCodes).toEqual([]);
+  });
+
+  it.each([
+    [
+      "a step limit",
+      { outcome: "step_limit", likelyCause: null, confidence: null },
+      "investigation ended with outcome step_limit",
+    ],
+    [
+      "invalid output",
+      { outcome: "invalid", likelyCause: null, confidence: null },
+      "investigation ended with outcome invalid",
+    ],
+    [
+      "an API error",
+      { outcome: "error", likelyCause: null, confidence: null },
+      "investigation ended with outcome error",
+    ],
+    [
+      "the cause inconclusive",
+      { outcome: "valid", likelyCause: "inconclusive", confidence: 0.9 },
+      "investigation found no likely cause",
+    ],
+    ["a confidence below 0.7", { ...valid, confidence: 0.69 }, "investigation confidence 0.69 < 0.7 (line_fault)"],
+  ] as const)("fires for %s, keeping the team", (_, inv, detail) => {
+    const r = route(fault(inv));
+    expect(r.reasonCodes).toEqual(["investigation_inconclusive"]);
+    expect(r.firedRules).toEqual([{ reasonCode: "investigation_inconclusive", detail }]);
+    expect(r.targetTeam).toBe("technical_support");
+    expect(r.needsReview).toBe(true);
+  });
+
+  it("keeps every other reason and lists them in REASON_CODES order", () => {
+    const r = route({
+      ...input({ intent: "technical_fault", confidence: 0.5, outcome: "no_identifiers" }),
+      investigation: { outcome: "error", likelyCause: null, confidence: null },
+    });
+    expect(r.reasonCodes).toEqual(["low_confidence", "customer_unidentified", "investigation_inconclusive"]);
+  });
+
+  it("ignores an investigation of a case that isn't a technical fault", () => {
+    const r = route({
+      ...input({ intent: "billing_question" }),
+      investigation: { outcome: "error", likelyCause: null, confidence: null },
+    });
+    expect(r.reasonCodes).toEqual([]);
+  });
+
+  it("with no investigation (null or absent), gives route.v2's result", () => {
+    for (const intent of INTENTS) {
+      const base = input({ intent });
+      expect(route({ ...base, investigation: null })).toEqual(route(base));
+      expect(route(base).reasonCodes).not.toContain("investigation_inconclusive");
+    }
+  });
+});

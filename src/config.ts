@@ -84,8 +84,27 @@ export function loadClassifierConfig(env: NodeJS.ProcessEnv = process.env): Clas
   return { model, effort: effort as Effort };
 }
 
+/**
+ * The investigating agent's model and effort (P10): TRIAGE_MODEL / TRIAGE_EFFORT (so the same
+ * as the classifier) unless INVESTIGATE_MODEL / INVESTIGATE_EFFORT say otherwise. Priced, like
+ * the classifier's.
+ */
+export function loadInvestigatorConfig(env: NodeJS.ProcessEnv = process.env): ClassifierConfig {
+  const base = loadClassifierConfig(env);
+  const model = env.INVESTIGATE_MODEL?.trim() || base.model;
+  const effort = env.INVESTIGATE_EFFORT?.trim() || base.effort;
+  if (!hasPrice(model)) {
+    throw new Error(`INVESTIGATE_MODEL "${model}" has no price in src/llm/pricing.ts; add it there first.`);
+  }
+  if (!(EFFORTS as readonly string[]).includes(effort)) {
+    throw new Error(`INVESTIGATE_EFFORT must be one of ${EFFORTS.join(", ")}, got "${effort}".`);
+  }
+  return { model, effort: effort as Effort };
+}
+
 export interface WorkerConfig extends ServiceConfig, ClassifierConfig {
   concurrency: number;
+  investigator: ClassifierConfig;
 }
 
 /**
@@ -102,5 +121,11 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv = process.env): WorkerCo
   if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 32) {
     throw new Error(`WORKER_CONCURRENCY must be a whole number from 1 to 32, got "${text}".`);
   }
-  return { databaseUrl, redisUrl, concurrency, ...loadClassifierConfig(env) };
+  return {
+    databaseUrl,
+    redisUrl,
+    concurrency,
+    ...loadClassifierConfig(env),
+    investigator: loadInvestigatorConfig(env),
+  };
 }

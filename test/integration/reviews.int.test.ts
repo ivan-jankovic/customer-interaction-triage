@@ -167,7 +167,7 @@ describe("case view", () => {
     expect(view.classification?.outcome).toBe("valid");
     expect(view.interaction.maskedText).toContain("[");
     expect(view.interaction).not.toHaveProperty("rawText");
-    expect(view.case.log.map((l) => l.step)).toEqual(["mask", "classify", "enrich", "route"]);
+    expect(view.case.log.map((l) => l.step)).toEqual(["mask", "classify", "enrich", "investigate", "route"]);
     noIdentifierValues("msg-011", view);
   });
 
