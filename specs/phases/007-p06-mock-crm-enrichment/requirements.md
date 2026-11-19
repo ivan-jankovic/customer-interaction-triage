@@ -107,7 +107,7 @@ Generated, committed, and never edited by hand (the generator is the source). It
 - **`received_at`** for every dataset message, spread over a fixed demo week (2026-11-02 to 2026-11-06, Prague time).
 - **Expectations:** for every dataset message, the expected `outcome`, `customer_id`, `area`, `area_source` and `outage_ids`, computed with the message's **labelled** area and service type.
 
-Synthetic values (customer numbers, phones, e-mails, contract numbers) that the generator invents for filler customers and second customers follow the dataset's formats (with invalid checksums, as the [labelling guide](../../../eval/labelling-guide.md) requires) and use `example.net` / `example.com` e-mail domains only.
+Synthetic values (customer numbers, phones, e-mails, contract numbers) that the generator invents for filler customers and second customers follow the dataset's formats (with invalid checksums, as the [labelling guide](../../../eval/labelling-guide.md) requires) and are made by the same functions (`eval/dataset/identifiers.ts`): RFC 2606 e-mail domains, national phone numbers starting with `0`.
 
 ## Decisions
 
@@ -148,3 +148,10 @@ Synthetic values (customer numbers, phones, e-mails, contract numbers) that the 
 - **The area depends on the model.** At runtime the area comes from the classification, so a model mistake in the area changes the outage result. The dataset-wide test uses labelled areas to test the rules; the model's area accuracy (99% in P05) is measured by the eval.
 - **Known limitation:** areas are compared exactly (apart from case and diacritics), so a message saying "Brno" doesn't match an outage in "Brno-Žabovřesky", and Czech declined forms aren't handled (the prompt already asks for the nominative form).
 - **No model sees CRM data in P06.** When P10's agent reads it, tool results must not contain raw identifiers; the CRM holds no names and the agent will get customer IDs.
+
+## Implementation notes
+
+- **Seed schema location.** The plan put the schema in `eval/schema/`; it is in `src/db/crm-seed.ts`, because `npm run crm:seed` (app code) reads and validates the file, and `src/` doesn't import from `eval/`.
+- **One lookup method.** `CrmLookup` has a single `customersByKey(type, key)` instead of one method per key type; both implementations compare keys with the same `lookupKey`.
+- **E-mail domains.** The spec said `example.net`/`example.com`; the generator reuses the dataset's identifier functions, which also use `example.org` (all three are reserved by RFC 2606).
+- **Area fallback wording.** The rule was clarified while writing the tests (see "Outage check"): services of the classified type when the customer has any, otherwise all, active ones preferred, and only when they share one area.

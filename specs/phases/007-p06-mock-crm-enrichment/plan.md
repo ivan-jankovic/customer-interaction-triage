@@ -7,7 +7,7 @@ See [requirements.md](requirements.md) for scope and decisions, and [validation.
 ## 1. Enrichment rules (pure)
 
 1.1. Write `src/pipeline/enrich.ts` with `ENRICHER_VERSION = "enrich.v1"`, the `CrmLookup` interface and `enrich(input, crm)`:
-  - `CrmLookup` has `customersByCustomerNumber`, `customersByContractNumber`, `customersByPhone` (last 9 digits), `customersByEmail`, `servicesOfCustomer` and `outagesAt(area, serviceType | null, receivedAt)`;
+  - `CrmLookup` has `customersByKey(type, key)` (the key normalised by `lookupKey`; phones by their last 9 digits), `servicesOfCustomer` and `outagesAt(area, serviceType | null, receivedAt)`;
   - the input is `{ identifiers (masking map), area, serviceType, receivedAt }`;
   - the result is `{ outcome, customerId, candidates, unmatchedPlaceholders, area, areaSource, outageIds }`, following requirements.md (Enrichment rules).
 1.2. Write a small `normalizeArea` (case and diacritics) and `phoneKey` (last 9 digits) next to it, so the seed generator and both `CrmLookup` implementations use the same helpers.
@@ -25,12 +25,12 @@ See [requirements.md](requirements.md) for scope and decisions, and [validation.
 ## 2. Seed generator and seed file
 
 2.1. Write `eval/crm/generate.ts` with the script `crm:generate`. It uses the fixed RNG in `eval/lib/rng.ts` and the dataset's final labels to build the seed described in requirements.md (Seed file): customers, services, tickets, outages, `received_at` per message, and expectations. The choice of `not_found`, `ambiguous` and outage messages is a fixed list of message IDs at the top of the file, so it is easy to review.
-2.2. Write `eval/schema/crm-seed.schema.ts` (JSON Schema, validated with Ajv) for `seed.json`.
+2.2. Write `src/db/crm-seed.ts`: the JSON Schema for `seed.json` (validated with Ajv) and `readCrmSeed`. It lives in `src/` because `crm:seed` reads it.
 2.3. Run it and commit `eval/data/crm/seed.json`. Add `eval/data/crm/README.md` with the counts (customers, services, tickets, outages, outcomes per type, technical faults with and without an outage) and how to regenerate.
 2.4. Unit tests:
   - the generator is deterministic (two runs give byte-identical output);
   - `seed.json` matches its schema and the committed file equals a fresh generation;
-  - every generated value follows the dataset formats, e-mail domains are `example.net`/`example.com`, and no generated value equals an identifier from another message;
+  - every generated value follows the dataset formats, e-mail domains are the RFC 2606 ones and phones start with `0`, and no generated value equals an identifier from another message;
   - tariffs and areas come from `src/company.ts`.
 
 ## 3. Dataset-wide check

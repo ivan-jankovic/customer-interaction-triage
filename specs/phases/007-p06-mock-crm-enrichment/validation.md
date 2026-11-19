@@ -28,7 +28,7 @@ How each check is marked:
 ## Seed
 
 - [ ] `npm run crm:generate` is deterministic, and the committed `eval/data/crm/seed.json` equals a fresh generation and matches its schema. **(test)**
-- [ ] Generated values follow the dataset formats, use only `example.net`/`example.com` e-mail domains, take tariffs and areas from `src/company.ts`, and don't collide with another message's identifiers. **(test)**
+- [ ] Generated values follow the dataset formats, use only the RFC 2606 e-mail domains (`example.com`, `example.net`, `example.org`) and national phone numbers starting with `0`, take tariffs and areas from `src/company.ts`, and don't collide with another message's identifiers. **(test)**
 - [ ] The seed holds no personal names, birth numbers, bank accounts or IBANs. **(test)**
 - [ ] For all 100 dataset messages, enrichment with the labelled area and service type equals the expectation in `seed.json`. **(test)**
 - [ ] The dataset has at least 3 messages each of `not_found` and `ambiguous`, some `found` with an unmatched key, and 6–9 of the 15 technical faults with an area have a matching outage, with at least one near miss (resolved, or another service type). **(test)**
