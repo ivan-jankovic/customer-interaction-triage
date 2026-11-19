@@ -3,19 +3,23 @@
 // (the API call failed). Every attempt is stored (src/db/classifications.ts), so invalid
 // output is visible in the audit trail and, from P07, sends the case to review.
 //
-// Masking exception: until P05 the text passed in is the raw message. That is allowed only
-// because all data is synthetic (P03 requirements.md, "Masking before P05"); P05 passes the
-// masked text instead, and nothing here changes.
+// Masked text only (P05): the input is the masking step's masked text and mapping. The model
+// sees placeholders such as [PHONE_1], never the values; fields.identifiers of the stored
+// classification come from the mapping, not from the model (prompt classify.v2).
 
 import { Ajv, type ErrorObject } from "ajv";
 import type { Effort, LlmClient, LlmRequest, LlmUsage } from "../llm/client.js";
 import { ZERO_USAGE } from "../llm/client.js";
 import { costOf } from "../llm/pricing.js";
 import { render, type PromptTemplate } from "../llm/prompts.js";
-import { classificationSchema, type Classification } from "../llm/schemas/classification.schema.js";
-import type { Channel } from "../taxonomy.js";
+import {
+  classificationOutputSchemaV2,
+  type Classification,
+  type ClassificationOutputV2,
+} from "../llm/schemas/classification.schema.js";
+import type { Channel, IdentifierType } from "../taxonomy.js";
 
-export const CLASSIFY_PROMPT_VERSION = "classify.v1";
+export const CLASSIFY_PROMPT_VERSION = "classify.v2";
 /** Thinking counts towards the limit; the answer itself is a few hundred tokens. */
 export const CLASSIFY_MAX_TOKENS = 4000;
 
@@ -42,7 +46,10 @@ export interface ClassificationAttempt {
 }
 
 export interface UnderstandInput {
-  text: string;
+  /** The masking step's output; the raw text never reaches this step. */
+  maskedText: string;
+  /** The masking map, in order of first appearance. */
+  identifiers: readonly { type: IdentifierType; value: string }[];
   channel: Channel;
 }
 
@@ -56,7 +63,7 @@ export interface UnderstandDeps {
 }
 
 const ajv = new Ajv({ allErrors: true, strict: true });
-const validateClassification = ajv.compile<Classification>(classificationSchema);
+const validateOutput = ajv.compile<ClassificationOutputV2>(classificationOutputSchemaV2);
 
 function formatErrors(errors: ErrorObject[] | null | undefined): string[] {
   return (errors ?? []).map((e) => {
@@ -74,23 +81,24 @@ export function escapeMessage(text: string): string {
 }
 
 export function buildRequest(
-  input: UnderstandInput,
+  input: Pick<UnderstandInput, "maskedText" | "channel">,
   deps: Pick<UnderstandDeps, "model" | "effort" | "prompt">,
 ): LlmRequest {
   return {
     model: deps.model,
     effort: deps.effort,
     system: deps.prompt.system,
-    user: render(deps.prompt.user, { channel: input.channel, message: escapeMessage(input.text) }),
-    schema: classificationSchema,
+    user: render(deps.prompt.user, { channel: input.channel, message: escapeMessage(input.maskedText) }),
+    schema: classificationOutputSchemaV2,
     maxTokens: CLASSIFY_MAX_TOKENS,
     fallbacks: true,
   };
 }
 
-/** Parses and validates the model's text. */
+/** Parses the model's text, validates it, and adds fields.identifiers from the masking map. */
 export function parseClassification(
   text: string,
+  identifiers: UnderstandInput["identifiers"],
 ): { ok: true; classification: Classification } | { ok: false; errors: string[] } {
   let data: unknown;
   try {
@@ -98,11 +106,20 @@ export function parseClassification(
   } catch (error) {
     return { ok: false, errors: [`not valid JSON: ${error instanceof Error ? error.message : String(error)}`] };
   }
-  if (!validateClassification(data)) return { ok: false, errors: formatErrors(validateClassification.errors) };
-  return { ok: true, classification: data };
+  if (!validateOutput(data)) return { ok: false, errors: formatErrors(validateOutput.errors) };
+  return {
+    ok: true,
+    classification: {
+      ...data,
+      fields: { identifiers: identifiers.map(({ type, value }) => ({ type, value })), ...data.fields },
+    },
+  };
 }
 
 export async function understand(input: UnderstandInput, deps: UnderstandDeps): Promise<ClassificationAttempt> {
+  if (deps.prompt.version !== CLASSIFY_PROMPT_VERSION) {
+    throw new Error(`understand() runs ${CLASSIFY_PROMPT_VERSION}, got ${deps.prompt.version}.`);
+  }
   const now = deps.now ?? (() => performance.now());
   const request = buildRequest(input, deps);
   const base = {
@@ -136,7 +153,7 @@ export async function understand(input: UnderstandInput, deps: UnderstandDeps): 
     };
   }
 
-  const parsed = parseClassification(result.text);
+  const parsed = parseClassification(result.text, input.identifiers);
   if (!parsed.ok) {
     return {
       ...base,

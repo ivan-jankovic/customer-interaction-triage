@@ -48,9 +48,17 @@ npm run classify -- msg-001 --dry-run   # show the prompt and its token count (f
 npm run classify -- msg-001             # classify one stored interaction (by id or external_id)
 ```
 
-Every attempt is stored in `classifications`, also when the output is invalid, with the model that answered, tokens, cost and latency. `TRIAGE_MODEL` (default `claude-opus-5-5`) and `TRIAGE_EFFORT` (default `low`) choose the model and effort. Until masking arrives in P05, the raw (synthetic) text is sent to the model.
+Every attempt is stored in `classifications`, also when the output is invalid, with the model that answered, tokens, cost and latency. `TRIAGE_MODEL` (default `claude-opus-5-5`) and `TRIAGE_EFFORT` (default `low`) choose the model and effort. The model only ever sees masked text (see below).
 
 Prompts are versioned: [versions.json](src/llm/prompts/versions.json) holds a hash of every prompt file, and a test fails if a published prompt changes. To change a prompt, add a new version.
+
+## Masking
+
+Before anything goes to a model, personal identifiers are replaced with typed placeholders: customer and contract numbers, phone numbers, e-mail addresses, birth numbers, bank accounts and IBANs become `[CUSTOMER_NUMBER_1]`, `[PHONE_1]` and so on. Masking is rule-based (no model) and runs once per interaction; the mapping is stored in `masked_identifiers` and is where a classification's identifiers come from. Personal names and street addresses are **not** masked: rules can't find them reliably.
+
+```sh
+npm run mask -- msg-001     # show the raw text, the masked text and the placeholders (free, no model)
+```
 
 ## Evaluating
 
@@ -62,6 +70,7 @@ npm run eval -- --subset small             # ~$0.20, for development
 npm run eval                               # the full 100 messages, ~$0.90
 npm run eval:report -- <run-id>            # recompute a run's reports from its stored outputs (free)
 npm run eval:keep -- <run-id>              # move a run to eval/results/kept/ so it can be committed
+npm run eval:compare -- <run A> <run B>    # two runs side by side, with the change in each metric
 ```
 
 Each run lands in `eval/results/<run-id>/` with `report.md` and `report.html` (intent accuracy, per-intent precision and recall, confusion matrix, field accuracy, summary scores, confidence, cost and latency, overall and per language). The format is described in [eval/results/README.md](eval/results/README.md); kept runs, including the baseline, are in [eval/results/kept/](eval/results/kept/).

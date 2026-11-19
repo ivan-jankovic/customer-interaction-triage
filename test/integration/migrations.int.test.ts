@@ -38,8 +38,14 @@ describe("migrations", () => {
       ["0000_baseline", "Success"],
       ["0001_interactions", "Success"],
       ["0002_classifications", "Success"],
+      ["0003_masking", "Success"],
     ]);
-    expect(await appliedMigrations()).toEqual(["0000_baseline", "0001_interactions", "0002_classifications"]);
+    expect(await appliedMigrations()).toEqual([
+      "0000_baseline",
+      "0001_interactions",
+      "0002_classifications",
+      "0003_masking",
+    ]);
   });
 
   it("creates interactions with defaults: uuidv7 id, status received, timestamps", async () => {
@@ -136,6 +142,7 @@ describe("migrations", () => {
     expect(await appliedMigrations()).toEqual([]);
     expect(await tableExists("interactions")).toBe(false);
     expect(await tableExists("classifications")).toBe(false);
+    expect(await tableExists("masked_identifiers")).toBe(false);
   });
 
   it("migrates to latest again", async () => {
@@ -144,5 +151,6 @@ describe("migrations", () => {
     expect(result.results?.every((r) => r.status === "Success")).toBe(true);
     expect(await tableExists("interactions")).toBe(true);
     expect(await tableExists("classifications")).toBe(true);
+    expect(await tableExists("masked_identifiers")).toBe(true);
   });
 });

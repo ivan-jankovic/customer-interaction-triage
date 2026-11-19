@@ -16,7 +16,11 @@ import { VALID_CLASSIFICATION } from "../support/attempts.js";
 const JUDGE_OK = { faithful: 5, complete: 4, contains_personal_data: false, reason: "Fine." };
 const USAGE = { input_tokens: 5000, output_tokens: 500, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 };
 
-function mockClient(classifyText = JSON.stringify(VALID_CLASSIFICATION)) {
+/** The classifier's answer under classify.v2: no identifiers (they come from the masking map). */
+const { identifiers: _ids, ...V2_FIELDS } = VALID_CLASSIFICATION.fields;
+const V2_OUTPUT = { ...VALID_CLASSIFICATION, fields: V2_FIELDS };
+
+function mockClient(classifyText = JSON.stringify(V2_OUTPUT)) {
   const calls: LlmRequest[] = [];
   const llm: LlmClient = {
     complete(req): Promise<LlmResult> {
@@ -59,7 +63,7 @@ describe("npm run eval", () => {
   it("classifies and grades the subset and writes every file", async () => {
     const { calls, deps } = setup();
     const runDir = (await runEval(["--subset", "small", "--yes", "--concurrency", "3"], deps))!;
-    expect(runDir).toMatch(/20261119-100001-small-claude-opus-5-5-classify\.v1$/);
+    expect(runDir).toMatch(/20261119-100001-small-claude-opus-5-5-classify\.v2$/);
     for (const f of ["run.json", "outputs.jsonl", "metrics.json", "report.md", "report.html"]) {
       expect(existsSync(join(runDir, f)), f).toBe(true);
     }
@@ -70,6 +74,22 @@ describe("npm run eval", () => {
     expect(lines.map((l) => l.id)).toEqual([...subset].sort());
     expect(lines.every((l) => l.attempt.outcome === "valid" && l.judge?.outcome === "graded")).toBe(true);
 
+    // No model request, classifier or judge, contains a labelled identifier (P05).
+    const records = readJsonl<DatasetRecord>(PATHS.dataset).filter((r) => subset.includes(r.id));
+    const values = records.flatMap((r) => r.final!.fields.identifiers.map((i) => i.value));
+    expect(values.length).toBeGreaterThan(0);
+    for (const call of calls) for (const v of values) expect(call.user + call.system).not.toContain(v);
+    expect(
+      calls.some((c) =>
+        /\[(CUSTOMER_NUMBER|PHONE|EMAIL|IBAN|CONTRACT_NUMBER|BANK_ACCOUNT|BIRTH_NUMBER)_1\]/.test(c.user),
+      ),
+    ).toBe(true);
+    // Identifiers are scored from the masking map: all exactly right on the subset.
+    const m = JSON.parse(readFileSync(join(runDir, "metrics.json"), "utf8")) as {
+      overall: { identifiers: { precision: number; recall: number } };
+    };
+    expect(m.overall.identifiers).toMatchObject({ precision: 1, recall: 1 });
+
     // No message text in the run files.
     const outputs = readFileSync(join(runDir, "outputs.jsonl"), "utf8");
     const dataset = readJsonl<DatasetRecord>(PATHS.dataset);
@@ -79,11 +99,12 @@ describe("npm run eval", () => {
     expect(run).toMatchObject({
       set: "small",
       complete: true,
-      classifier: { model: "claude-opus-5-5", effort: "low", promptVersion: "classify.v1" },
+      classifier: { model: "claude-opus-5-5", effort: "low", promptVersion: "classify.v2" },
       judge: { model: "claude-haiku-5-5", effort: "low", promptVersion: "summary-judge.v1" },
       dataset: { file: "eval/data/dataset.jsonl" },
       subset: { file: "eval/data/subsets/small.json" },
       git: { commit: "f".repeat(40), dirty: false },
+      masker: { version: "mask.v1" },
     });
     expect(run.classifier.promptSha256).toMatch(/^[0-9a-f]{64}$/);
     expect(run.dataset.sha256).toMatch(/^[0-9a-f]{64}$/);

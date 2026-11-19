@@ -1,20 +1,22 @@
-// Classifies one stored interaction (P03): npm run classify -- <id | external_id> [--dry-run]
+// Classifies one stored interaction (P03, P05): npm run classify -- <id | external_id> [--dry-run]
 //
-// Without --dry-run this makes one paid model call and stores the attempt in classifications,
-// whatever its outcome. --dry-run prints the prompt and its token count (the token-counting
-// endpoint is free) and stores nothing.
+// Runs the masking step first (stored once per interaction; P05), then classifies the masked
+// text: the model never sees the raw text. Without --dry-run this makes one paid model call
+// and stores the attempt in classifications, whatever its outcome. --dry-run masks in memory,
+// prints the prompt and its token count (the token-counting endpoint is free) and stores nothing.
 
 import { parseArgs } from "node:util";
 import { fileURLToPath } from "node:url";
 import type { Kysely } from "kysely";
 import { loadClassifierConfig, loadDatabaseUrl } from "../config.js";
 import { KyselyClassificationStore } from "../db/classifications.js";
-import { createDb, type Database, type InteractionRow } from "../db/database.js";
+import { createDb, type Database } from "../db/database.js";
+import { maskInteraction } from "../db/masking.js";
 import { createAnthropicClient, type LlmClient, type TokenCounter } from "../llm/client.js";
 import { loadPrompt } from "../llm/prompts.js";
+import { mask, MASKER_VERSION } from "../pipeline/mask.js";
 import { buildRequest, CLASSIFY_PROMPT_VERSION, understand } from "../pipeline/understand.js";
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { findInteraction } from "./find-interaction.js";
 
 export interface ClassifyCliDeps {
   db: Kysely<Database>;
@@ -23,13 +25,6 @@ export interface ClassifyCliDeps {
   createLlm?: () => LlmClient & TokenCounter;
   out?: (line: string) => void;
   err?: (line: string) => void;
-}
-
-async function findInteraction(db: Kysely<Database>, ref: string): Promise<InteractionRow | undefined> {
-  const query = db.selectFrom("interactions").selectAll();
-  return UUID.test(ref)
-    ? query.where("id", "=", ref).executeTakeFirst()
-    : query.where("external_id", "=", ref).executeTakeFirst();
 }
 
 const usd = (n: number | null) => (n === null ? "unknown (no price for the serving model)" : `$${n.toFixed(5)}`);
@@ -62,11 +57,16 @@ export async function runClassify(argv: string[], deps: ClassifyCliDeps): Promis
   }
 
   const prompt = loadPrompt(CLASSIFY_PROMPT_VERSION);
-  const input = { text: interaction.raw_text, channel: interaction.channel };
   const llm = hasKey || deps.createLlm ? (deps.createLlm ?? createAnthropicClient)() : undefined;
 
   if (dryRun) {
-    const request = buildRequest(input, { ...config, prompt });
+    // Masked in memory: a dry run stores nothing, not even the masking.
+    const masked = mask(interaction.raw_text);
+    const request = buildRequest(
+      { maskedText: masked.maskedText, channel: interaction.channel },
+      { ...config, prompt },
+    );
+    out(`Masked with ${MASKER_VERSION}: ${masked.identifiers.length} identifier(s).`);
     out(`=== system (${prompt.version}) ===\n${request.system}\n\n=== user ===\n${request.user}\n`);
     out(`Model ${config.model}, effort ${config.effort}, max_tokens ${request.maxTokens}.`);
     if (llm) out(`Input tokens (count_tokens, free): ${await llm.countTokens(request)}`);
@@ -75,7 +75,15 @@ export async function runClassify(argv: string[], deps: ClassifyCliDeps): Promis
     return 0;
   }
 
-  const attempt = await understand(input, { llm: llm!, ...config, prompt });
+  const masking = await maskInteraction(deps.db, interaction.id);
+  out(
+    `Masked with ${masking.maskerVersion} (${masking.stored === "now" ? "now" : "stored earlier"}): ` +
+      `${masking.identifiers.length} identifier(s).`,
+  );
+  const attempt = await understand(
+    { maskedText: masking.maskedText, identifiers: masking.identifiers, channel: interaction.channel },
+    { llm: llm!, ...config, prompt },
+  );
   const stored = await new KyselyClassificationStore(deps.db).record(interaction.id, attempt);
 
   out(`Interaction ${interaction.id}${interaction.external_id ? ` (${interaction.external_id})` : ""}`);

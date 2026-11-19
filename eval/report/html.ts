@@ -178,6 +178,7 @@ export function renderHtml(run: RunInfo, m: Metrics): string {
     ["Set", `${run.set} (${run.ids.length} messages)`],
     ["Classifier", `${run.classifier.model}, effort ${run.classifier.effort}, ${run.classifier.promptVersion}`],
     ["Summary judge", `${run.judge.model}, effort ${run.judge.effort}, ${run.judge.promptVersion}`],
+    ["Masking", run.masker ? run.masker.version : "none (raw text sent to the model)"],
     ["Dataset", `${run.dataset.file} (${run.dataset.sha256.slice(0, 12)})`],
     ["Code", `${run.git.commit.slice(0, 12)}${run.git.dirty ? " (uncommitted changes)" : ""}`],
     ["Started", run.startedAt],

@@ -29,6 +29,7 @@ const promptFiles = PROMPT_DIRS.flatMap((dir) =>
 /** Hashes as published in earlier phases; an entry here can never change. */
 const PUBLISHED = {
   "classify.v1": "5cbe9e96e1f574927aad9a5f66d095be6ff6aab97367ee56a1f2b20e5ccbe4b6", // P03
+  "summary-judge.v1": "84168ebd849a278d0d7f5d0f96ca5edfb52c0a4e6e66a662066a9a38e9d9d6ca", // P04; P05 keeps it unchanged
 };
 
 describe("prompt version registry", () => {
@@ -52,13 +53,13 @@ describe("prompt version registry", () => {
   });
 });
 
-describe("classify.v1", () => {
-  const raw = readFileSync(join(ROOT, "src/llm/prompts/classify.v1.md"), "utf8");
+describe.each(["classify.v1", "classify.v2"])("%s", (version) => {
+  const raw = readFileSync(join(ROOT, `src/llm/prompts/${version}.md`), "utf8");
   const normalize = (s: string) => s.replace(/\s+/g, " ").toLowerCase();
   const prompt = normalize(raw);
 
   it("has system and user sections with the channel and message placeholders", () => {
-    const template = loadPrompt("classify.v1");
+    const template = loadPrompt(version);
     expect(template.user).toContain("{{channel}}");
     expect(template.user).toMatch(/<customer_message>\n\{\{message\}\}\n<\/customer_message>/);
   });

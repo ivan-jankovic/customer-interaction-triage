@@ -1,4 +1,4 @@
-// What the understanding step's model call returns (P03 requirements.md, "Model output").
+// The understanding step's output schemas (P03 requirements.md, "Model output"; P05).
 // Sent to the API as output_config.format (with length and range limits stripped, see
 // toApiSchema) and validated in full with Ajv. No routing fields: must_review, review
 // reasons and the team are decided in code (P07).
@@ -42,4 +42,31 @@ export const classificationSchema = {
   additionalProperties: false,
 } as const;
 
+/**
+ * The stored classification: the model's answer plus fields.identifiers. Under classify.v1
+ * (P03, P04) the model extracted the identifiers; from classify.v2 (P05) they come from the
+ * masking map, so the shape stays the same for storage and evaluation.
+ */
 export type Classification = FromSchema<typeof classificationSchema>;
+
+/**
+ * What the model returns under classify.v2 (P05): the same as v1 without fields.identifiers.
+ * The model sees only masked text, so identifiers come from the masking map instead.
+ */
+export const classificationOutputSchemaV2 = {
+  ...classificationSchema,
+  properties: {
+    ...classificationSchema.properties,
+    fields: {
+      type: "object",
+      properties: {
+        service_type: classificationSchema.properties.fields.properties.service_type,
+        area: classificationSchema.properties.fields.properties.area,
+      },
+      required: ["service_type", "area"],
+      additionalProperties: false,
+    },
+  },
+} as const;
+
+export type ClassificationOutputV2 = FromSchema<typeof classificationOutputSchemaV2>;
