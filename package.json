@@ -49,7 +49,8 @@
     "process": "tsx --env-file-if-exists=.env src/cli/process.ts",
     "queue:status": "tsx --env-file-if-exists=.env src/cli/queue-status.ts",
     "review": "tsx --env-file-if-exists=.env src/review/cli.ts",
-    "investigate": "tsx --env-file-if-exists=.env src/cli/investigate.ts"
+    "investigate": "tsx --env-file-if-exists=.env src/cli/investigate.ts",
+    "eval:investigate": "tsx --env-file-if-exists=.env eval/investigate/run.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",

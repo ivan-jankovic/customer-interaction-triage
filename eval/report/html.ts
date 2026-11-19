@@ -11,7 +11,7 @@ import type { RunInfo } from "../run.js";
 import { int, ms, num, pct, usd } from "./format.js";
 import { WORST_ERRORS_SHOWN } from "./markdown.js";
 
-const esc = (s: string) =>
+export const esc = (s: string) =>
   s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 
 const TOKENS_LIGHT = `
@@ -29,7 +29,7 @@ const TOKENS_DARK = `
   --seq-0: #262624; --seq-1: #104281; --seq-2: #1c5cab; --seq-3: #2a78d6; --seq-4: #5598e7; --seq-5: #9ec5f4;
   --on-seq-dark: #0b0b0b;`;
 
-const CSS = `
+export const CSS = `
 :root {${TOKENS_LIGHT} }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {${TOKENS_DARK} } }
 :root[data-theme="dark"] {${TOKENS_DARK} }
