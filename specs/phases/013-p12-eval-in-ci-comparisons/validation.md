@@ -25,10 +25,10 @@ How each check is marked:
 
 - [x] `.github/workflows/eval.yml` has one job `eval`, runs on PRs and pushes to `main` only for the paths in requirements.md (CI) and on `workflow_dispatch`, pins actions to SHAs and has `permissions: contents: read`. **(manual)**
 - [x] `ci.yml` is unchanged and still calls no model. **(manual)**
-- [x] Without the secret the job ends green with a notice and makes no model call. **(manual)** (seen on a Dependabot PR or by reading the step's condition) Checked by reading: every step after the key check runs only when `secrets.ANTHROPIC_API_KEY != ''`; no Dependabot PR has hit it yet.
+- [x] Without the secret the job ends green with a notice and makes no model call. **(manual)** (seen on a Dependabot PR or by reading the step's condition) Checked by reading: every step after the key check runs only when that check found the secret (`secrets.ANTHROPIC_API_KEY != ''`); no Dependabot PR has hit it yet.
 - [x] On the PR, `eval` runs the small subset with the summary judge, is green, and the job summary shows the `eval:check` verdict and the report; the run folder is an artifact. **(ci)** [Run 44638499736](https://github.com/ivan-jankovic/customer-interaction-triage/actions/runs/44638499736): 18/18 intents, 6/6 must-review, $0.17.
 - [x] A `workflow_dispatch` run with `min_intent_correct=19` fails at `eval:check`; both runs are linked in the PR description. **(ci)** [Run 44638854433](https://github.com/ivan-jankovic/customer-interaction-triage/actions/runs/44638854433): "18 of 18 intents right; at least 19 required", exit 1, $0.11.
-- [ ] The CI secret is a separate key with its own spend limit, set by the user. **(manual)** The secret is set (2026-11-19); that it is a separate key with a spend limit is for the user to confirm.
+- [x] The CI secret is a separate key with its own spend limit, set by the user. **(manual)** The secret is set (2026-11-19); the user confirmed it is a separate key with its own spend limit.
 
 ## Comparison
 
@@ -40,7 +40,7 @@ How each check is marked:
 
 - [x] [tech-stack.md](../../tech-stack.md) describes the `eval` workflow, its triggers, the secret and the threshold, and the Opus vs Sonnet comparison. **(manual)**
 - [x] `README.md`, `eval/results/README.md` and `CLAUDE.md` (merge rule) are updated. **(manual)**
-- [ ] P12 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
+- [x] P12 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 

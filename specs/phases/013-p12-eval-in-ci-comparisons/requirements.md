@@ -107,6 +107,7 @@ Decided during spec review: **`claude-opus-5-5` vs `claude-sonnet-5-5`, on the f
 - **The key reaches one step only.** `eval.yml` checks for the secret with `secrets.ANTHROPIC_API_KEY != ''` (only "true" or "false" reaches the shell), and gives the key itself to the eval step alone, so `npm ci` install scripts never see it.
 - **The path list is written once,** as a YAML anchor shared by `pull_request` and `push` (GitHub Actions supports anchors and aliases).
 - **`actions/upload-artifact`** is pinned to v7.0.2 (`cf430e0…`, released 2026-10-07).
+- **Path filters on pull requests match the whole PR diff,** not the pushed commit: once a PR touches `eval/**` (as every phase that changes the eval will), each push to it runs `eval` again, even a spec-only commit (about $0.11–0.17 each). Accepted for now; a later change could run it only on `ready_for_review` or a label. Found while validating; the requirements (CI, Notes) assumed per-commit filtering.
 
 ## Results (recorded during implementation)
 
@@ -130,4 +131,4 @@ Decided during spec review: **`claude-opus-5-5` vs `claude-sonnet-5-5`, on the f
 - **CI runs on PR #14:**
   - [Run 44638499736](https://github.com/ivan-jankovic/customer-interaction-triage/actions/runs/44638499736) (pull request): **green**. 18/18 intents right, 6/6 must-review messages sent to review, $0.17. That is more than the ~$0.12 estimate because a fresh runner starts with an empty prompt cache.
   - [Run 44638854433](https://github.com/ivan-jankovic/customer-interaction-triage/actions/runs/44638854433) (`workflow_dispatch`, `min_intent_correct=19`): **red** at `eval:check` ("18 of 18 intents right; at least 19 required", exit 1), $0.11. The run folder was still uploaded as an artifact.
-- **Paid runs in this phase:** $0.33 (Sonnet comparison) + $0.28 (the two CI runs) = **$0.61**.
+- **Paid runs in this phase:** $0.33 (Sonnet comparison) + $0.39 (three CI runs before this commit: the green and red runs above, and a green $0.11 run after the validation commit) = **$0.72**, plus the run this final commit triggers.
