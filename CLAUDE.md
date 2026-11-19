@@ -35,7 +35,7 @@ Read all three at the start of every phase. Changes to them need approval: if a 
 
 - A phase is finished when everything in its `validation.md` passes, including the **Demo** and **Done when** criteria from the roadmap.
 - Once it has been reviewed, mark the phase as done in `specs/roadmap.md` (e.g. "✅ P04 …") on the phase branch, so the update is merged together with the work.
-- Push the phase branch and open a pull request to `main` on GitHub. Merge only when CI (`checks` and `integration`) is green, with a merge commit (the repository allows no other kind). `main` is not protected on this plan, so this is a rule to follow, not one GitHub enforces: never push to `main` directly.
+- Push the phase branch and open a pull request to `main` on GitHub. Merge only when CI (`checks` and `integration`, and `eval` when the pull request triggered it) is green, with a merge commit (the repository allows no other kind). `main` is not protected on this plan, so this is a rule to follow, not one GitHub enforces: never push to `main` directly.
 - Ask before merging the pull request.
 
 ## Engineering rules

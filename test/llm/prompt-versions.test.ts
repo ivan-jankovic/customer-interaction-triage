@@ -31,6 +31,7 @@ const PUBLISHED = {
   "classify.v1": "5cbe9e96e1f574927aad9a5f66d095be6ff6aab97367ee56a1f2b20e5ccbe4b6", // P03
   "summary-judge.v1": "84168ebd849a278d0d7f5d0f96ca5edfb52c0a4e6e66a662066a9a38e9d9d6ca", // P04; P05 keeps it unchanged
   "classify.v2": "1be65fa847d0c24e8d3640dd49ad996711e43ab3130334b8b071c8f3b85865ff", // P05; P10 keeps it unchanged
+  "investigate.v1": "a78a5415aa138befb2ed58b08fcc4ee9abd9bbd42c17958b7d4af7f2db4870fe", // P10; P11 and P12 keep it unchanged
 };
 
 describe("prompt version registry", () => {

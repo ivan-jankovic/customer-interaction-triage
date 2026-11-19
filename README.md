@@ -172,7 +172,29 @@ npm run eval                               # the full 100 messages, ~$0.90
 npm run eval:report -- <run-id>            # recompute a run's reports from its stored outputs (free)
 npm run eval:keep -- <run-id>              # move a run to eval/results/kept/ so it can be committed
 npm run eval:compare -- <run A> <run B>    # two runs side by side, with the change in each metric
+npm run eval:check -- <run-id>             # a small run against the CI threshold; exits 1 below it (free)
 ```
+
+### In CI
+
+The `eval` workflow ([`.github/workflows/eval.yml`](.github/workflows/eval.yml)) runs the small subset with the real model on every pull request and push to `main` that changes what the model sees or how it is scored (`src/llm`, `src/pipeline`, `eval/`, the taxonomy, the config, the lockfile), and from the Actions tab by hand. It fails when fewer than 16 of the 18 intents are right or when any message labelled must-review would be auto-routed; the judge's scores and the other metrics are in the job summary but don't decide. The run folder is attached to the job as an artifact. It costs about $0.12 a run, with a $1 cap, using a separate CI key (`ANTHROPIC_API_KEY` secret) with its own spend limit. Without the secret (Dependabot, forks) the job skips with a notice.
+
+### Opus vs Sonnet
+
+The same prompt (`classify.v2`) on `claude-opus-5-5` and `claude-sonnet-5-5`, over the full 100 messages ([full comparison](eval/results/kept/comparisons/p12-opus-vs-sonnet.md)):
+
+| Metric | Opus 5.5 | Sonnet 5.5 |
+| --- | --- | --- |
+| Intent accuracy | 100.0% | 100.0% |
+| Routing accuracy (team) | 100.0% | 100.0% |
+| Must-review recall | 100.0% (38/38) | 100.0% (38/38) |
+| Urgency accuracy | 89.0% | 85.0% |
+| Service type / area | 98.0% / 99.0% | 100.0% / 100.0% |
+| Summary faithful / complete (1–5) | 4.86 / 4.49 | 4.88 / 4.45 |
+| Cost per message | $0.0060 | $0.0033 |
+| Latency p50 / p95 | 2.1 s / 2.9 s | 2.0 s / 2.4 s |
+
+On this dataset Sonnet makes the same routing and review decisions at 55% of the cost; it is 4 points weaker on urgency (Czech messages), which no rule reads. The default stays Opus for now: the dataset is small and every intent is already right with both models, so it can't show where they would differ.
 
 For the investigating agent, `npm run eval:investigate` runs it over the dataset's 17 technical faults, using the classifications stored in the kept `classify.v2` run (so only the agent is paid for), and scores the cause it finds against the cause designed into the mock CRM: cause accuracy, per-cause precision and recall, the confusion matrix, turns, tool calls, cost and latency.
 

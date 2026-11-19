@@ -1,8 +1,8 @@
 // The eval runner over the real small subset with a mocked client: no model calls.
 
-import { existsSync, mkdtempSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { readJsonl } from "../../eval/lib/jsonl.js";
 import { PATHS } from "../../eval/lib/paths.js";
@@ -144,5 +144,15 @@ describe("npm run eval", () => {
   it("rejects an unknown subset", async () => {
     const { deps } = setup();
     await expect(runEval(["--subset", "tiny", "--dry-run"], deps)).rejects.toThrow(/Unknown subset "tiny"/);
+  });
+
+  it("writes the run id and folder to $GITHUB_OUTPUT when set (P12), and nothing on a dry run", async () => {
+    const { resultsDir, deps } = setup();
+    const output = join(resultsDir, "github-output");
+    writeFileSync(output, "");
+    await runEval(["--subset", "small", "--dry-run"], { ...deps, env: { GITHUB_OUTPUT: output } });
+    expect(readFileSync(output, "utf8")).toBe("");
+    const runDir = (await runEval(["--subset", "small", "--yes"], { ...deps, env: { GITHUB_OUTPUT: output } }))!;
+    expect(readFileSync(output, "utf8")).toBe(`run-id=${basename(runDir)}\nrun-dir=${runDir}\n`);
   });
 });

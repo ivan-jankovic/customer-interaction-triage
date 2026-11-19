@@ -34,6 +34,28 @@
 
 Summaries graded: 5 vs 5. Invalid outputs: 1 vs 1; errors: 1 vs 1; fallbacks: 1 vs 1.
 
+## Routing
+
+| Metric | A | B | Change |
+| --- | --- | --- | --- |
+| Routing accuracy (team) | 62.5% | 75.0% | +12.5 pp |
+| Must-review recall | 80.0% | 80.0% | ±0.0 pp |
+| Must-review precision | 66.7% | 66.7% | ±0.0 pp |
+| Review rate | 75.0% | 75.0% | ±0.0 pp |
+
+Must-review messages auto-routed: 1 of 5 vs 1 of 5. Router: route.v4 vs route.v4.
+
+## Per intent
+
+| Intent | F1 A | F1 B | Change |
+| --- | --- | --- | --- |
+| `billing_question` (n=1) | 0.67 | 0.67 | ±0.00 |
+| `technical_fault` (n=2) | 0.67 | 1.00 | +0.33 |
+| `tariff_change` (n=1) | 1.00 | 1.00 | ±0.00 |
+| `cancellation` (n=1) | 0.00 | 0.00 | ±0.00 |
+| `complaint` (n=2) | 0.50 | 0.67 | +0.17 |
+| `other` (n=1) | 0.00 | 0.00 | ±0.00 |
+
 ## By language
 
 | Language | Intent A | Intent B | Change | Urgency A | Urgency B | Change |

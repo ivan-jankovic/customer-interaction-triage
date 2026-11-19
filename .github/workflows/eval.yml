@@ -1,0 +1,90 @@
+# The small evaluation subset with a real model (P12): 18 messages through classify.v2 and the
+# summary judge, then `eval:check` against the threshold (intent >= 16/18, no must-review
+# message auto-routed). It calls paid models (about $0.12 a run), so it runs only when the
+# model's input or the scoring can change, and lives apart from ci.yml, which calls no model.
+# Actions are pinned to full commit SHAs (version in the comment); Dependabot updates them.
+name: Eval
+
+on:
+  pull_request:
+    paths: &model-paths
+      - "src/llm/**"
+      - "src/pipeline/**"
+      - "src/taxonomy.ts"
+      - "src/config.ts"
+      - "eval/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/eval.yml"
+  push:
+    branches: [main]
+    paths: *model-paths
+  workflow_dispatch:
+    inputs:
+      min_intent_correct:
+        description: "Override the intent threshold (messages right out of 18). Empty = the code's threshold. Set 19 to see the job fail."
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+# One eval per branch: a new push cancels the running one, so quick pushes don't pay twice.
+concurrency:
+  group: eval-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eval:
+    name: eval
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Secrets are not given to Dependabot or forks' pull requests: end green without a
+      # model call, and say so. Only "is it set" reaches this step, never the key.
+      - name: Check for the API key
+        id: key
+        env:
+          HAS_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+        run: |
+          echo "present=$HAS_KEY" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_KEY" != "true" ]; then
+            echo "::notice::ANTHROPIC_API_KEY is not available to this run (Dependabot or a fork); the evaluation was skipped."
+            echo "Evaluation skipped: ANTHROPIC_API_KEY is not available to this run (Dependabot or a fork). This change was not evaluated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - if: steps.key.outputs.present == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: steps.key.outputs.present == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # Install scripts run without the key in their environment; only the eval step gets it.
+      - if: steps.key.outputs.present == 'true'
+        run: npm ci
+      - name: Evaluate the small subset
+        id: eval
+        if: steps.key.outputs.present == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: npm run eval -- --subset small --yes --max-cost 1
+      - name: Check the threshold
+        if: steps.eval.outcome == 'success'
+        env:
+          RUN_DIR: ${{ steps.eval.outputs.run-dir }}
+          MIN_INTENT_CORRECT: ${{ inputs.min_intent_correct }}
+        run: npm run eval:check -- "$RUN_DIR" --min-intent-correct "$MIN_INTENT_CORRECT" --summary "$GITHUB_STEP_SUMMARY"
+      - name: Add the report to the summary
+        if: always() && steps.eval.outputs.run-dir != ''
+        env:
+          RUN_DIR: ${{ steps.eval.outputs.run-dir }}
+        run: cat "$RUN_DIR/report.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload the run folder
+        if: always() && steps.eval.outputs.run-dir != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ steps.eval.outputs.run-id }}
+          path: ${{ steps.eval.outputs.run-dir }}
+          retention-days: 30

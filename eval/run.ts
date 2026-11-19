@@ -254,6 +254,9 @@ export async function runEval(argv: string[], deps: EvalDeps = {}): Promise<stri
   writeFileSync(join(runDir, "run.json"), JSON.stringify(finalInfo, null, 2) + "\n");
   await writeReports(runDir, { datasetPath, crmSeedPath: deps.crmSeedPath, log });
   log(`Run folder: ${relative(process.cwd(), runDir)}`);
+  // In GitHub Actions (P12), later steps read the run from the step's outputs instead of
+  // guessing the newest folder.
+  if (env.GITHUB_OUTPUT) appendFileSync(env.GITHUB_OUTPUT, `run-id=${info.runId}\nrun-dir=${runDir}\n`);
   return runDir;
 }
 

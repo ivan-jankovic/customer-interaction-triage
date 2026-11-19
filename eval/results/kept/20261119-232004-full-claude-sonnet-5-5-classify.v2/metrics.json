@@ -1,0 +1,413 @@
+{
+  "n": 100,
+  "outcomes": {
+    "valid": 100,
+    "invalid": 0,
+    "error": 0,
+    "fellBack": 0
+  },
+  "overall": {
+    "n": 100,
+    "indicative": false,
+    "validRate": 1,
+    "intentAccuracy": 1,
+    "urgencyAccuracy": 0.85,
+    "languageAccuracy": 1,
+    "serviceTypeAccuracy": 1,
+    "areaAccuracy": 1,
+    "identifiers": {
+      "precision": 1,
+      "recall": 1,
+      "exactListRate": 1
+    },
+    "routing": {
+      "accuracy": 1,
+      "mustReview": {
+        "labelled": 38,
+        "reviewed": 56,
+        "tp": 38,
+        "fp": 18,
+        "fn": 0,
+        "recall": 1,
+        "precision": 0.6786
+      },
+      "reviewRate": 0.56
+    }
+  },
+  "byLanguage": {
+    "cs": {
+      "n": 60,
+      "indicative": false,
+      "validRate": 1,
+      "intentAccuracy": 1,
+      "urgencyAccuracy": 0.8333,
+      "languageAccuracy": 1,
+      "serviceTypeAccuracy": 1,
+      "areaAccuracy": 1,
+      "identifiers": {
+        "precision": 1,
+        "recall": 1,
+        "exactListRate": 1
+      },
+      "routing": {
+        "accuracy": 1,
+        "mustReview": {
+          "labelled": 23,
+          "reviewed": 36,
+          "tp": 23,
+          "fp": 13,
+          "fn": 0,
+          "recall": 1,
+          "precision": 0.6389
+        },
+        "reviewRate": 0.6
+      }
+    },
+    "sk": {
+      "n": 20,
+      "indicative": true,
+      "validRate": 1,
+      "intentAccuracy": 1,
+      "urgencyAccuracy": 0.9,
+      "languageAccuracy": 1,
+      "serviceTypeAccuracy": 1,
+      "areaAccuracy": 1,
+      "identifiers": {
+        "precision": 1,
+        "recall": 1,
+        "exactListRate": 1
+      },
+      "routing": {
+        "accuracy": 1,
+        "mustReview": {
+          "labelled": 8,
+          "reviewed": 10,
+          "tp": 8,
+          "fp": 2,
+          "fn": 0,
+          "recall": 1,
+          "precision": 0.8
+        },
+        "reviewRate": 0.5
+      }
+    },
+    "en": {
+      "n": 20,
+      "indicative": true,
+      "validRate": 1,
+      "intentAccuracy": 1,
+      "urgencyAccuracy": 0.85,
+      "languageAccuracy": 1,
+      "serviceTypeAccuracy": 1,
+      "areaAccuracy": 1,
+      "identifiers": {
+        "precision": 1,
+        "recall": 1,
+        "exactListRate": 1
+      },
+      "routing": {
+        "accuracy": 1,
+        "mustReview": {
+          "labelled": 7,
+          "reviewed": 10,
+          "tp": 7,
+          "fp": 3,
+          "fn": 0,
+          "recall": 1,
+          "precision": 0.7
+        },
+        "reviewRate": 0.5
+      }
+    }
+  },
+  "perIntent": [
+    {
+      "intent": "billing_question",
+      "support": 17,
+      "predicted": 17,
+      "correct": 17,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    {
+      "intent": "technical_fault",
+      "support": 17,
+      "predicted": 17,
+      "correct": 17,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    {
+      "intent": "tariff_change",
+      "support": 17,
+      "predicted": 17,
+      "correct": 17,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    {
+      "intent": "cancellation",
+      "support": 16,
+      "predicted": 16,
+      "correct": 16,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    {
+      "intent": "complaint",
+      "support": 17,
+      "predicted": 17,
+      "correct": 17,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    {
+      "intent": "other",
+      "support": 16,
+      "predicted": 16,
+      "correct": 16,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    }
+  ],
+  "macroF1": 1,
+  "confusion": {
+    "rows": [
+      "billing_question",
+      "technical_fault",
+      "tariff_change",
+      "cancellation",
+      "complaint",
+      "other"
+    ],
+    "columns": [
+      "billing_question",
+      "technical_fault",
+      "tariff_change",
+      "cancellation",
+      "complaint",
+      "other",
+      "invalid"
+    ],
+    "counts": [
+      [
+        17,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        17,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        17,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        17,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        16,
+        0
+      ]
+    ]
+  },
+  "summaries": {
+    "graded": 100,
+    "notGraded": 0,
+    "faithfulMean": 4.88,
+    "completeMean": 4.45,
+    "personalDataShare": 0,
+    "byLanguage": {
+      "cs": {
+        "graded": 60,
+        "faithfulMean": 4.8833,
+        "completeMean": 4.4333
+      },
+      "sk": {
+        "graded": 20,
+        "faithfulMean": 4.9,
+        "completeMean": 4.45
+      },
+      "en": {
+        "graded": 20,
+        "faithfulMean": 4.85,
+        "completeMean": 4.5
+      }
+    }
+  },
+  "confidence": {
+    "meanCorrect": 0.8818,
+    "meanWrong": null,
+    "bands": [
+      {
+        "band": "< 0.5",
+        "n": 2,
+        "intentAccuracy": 1
+      },
+      {
+        "band": "0.5–0.8",
+        "n": 7,
+        "intentAccuracy": 1
+      },
+      {
+        "band": "0.8–0.9",
+        "n": 26,
+        "intentAccuracy": 1
+      },
+      {
+        "band": "≥ 0.9",
+        "n": 65,
+        "intentAccuracy": 1
+      }
+    ]
+  },
+  "cost": {
+    "classifierUsd": 0.322442,
+    "judgeUsd": 0.011767,
+    "totalUsd": 0.334209,
+    "perMessageUsd": 0.003342,
+    "unpricedCalls": 0,
+    "classifierTokens": {
+      "input_tokens": 48725,
+      "output_tokens": 13710,
+      "cache_creation_input_tokens": 12040,
+      "cache_read_input_tokens": 288960
+    },
+    "judgeTokens": {
+      "input_tokens": 57998,
+      "output_tokens": 9435,
+      "cache_creation_input_tokens": 3424,
+      "cache_read_input_tokens": 82176
+    }
+  },
+  "latencyMs": {
+    "p50": 1951,
+    "p95": 2428,
+    "max": 3171
+  },
+  "worstErrors": [],
+  "routing": {
+    "enricherVersion": "enrich.v1",
+    "routerVersion": "route.v4",
+    "seedSha256": "f5c8731da8939a8ff793693a48b992678a47d534c0c90f74328353fa7d5aaf09",
+    "reasonCodes": [
+      {
+        "code": "processing_failed",
+        "n": 0
+      },
+      {
+        "code": "invalid_output",
+        "n": 0
+      },
+      {
+        "code": "classification_error",
+        "n": 0
+      },
+      {
+        "code": "cancellation",
+        "n": 16
+      },
+      {
+        "code": "complaint",
+        "n": 17
+      },
+      {
+        "code": "low_confidence",
+        "n": 8
+      },
+      {
+        "code": "customer_not_found",
+        "n": 5
+      },
+      {
+        "code": "customer_ambiguous",
+        "n": 5
+      },
+      {
+        "code": "customer_unidentified",
+        "n": 9
+      },
+      {
+        "code": "crm_mismatch_unmatched_key",
+        "n": 3
+      },
+      {
+        "code": "crm_mismatch_service_type",
+        "n": 0
+      },
+      {
+        "code": "investigation_inconclusive",
+        "n": 0
+      },
+      {
+        "code": "suspicious_output",
+        "n": 0
+      }
+    ],
+    "labelledReasons": [
+      {
+        "reason": "cancellation",
+        "caughtBy": "cancellation",
+        "labelled": 16,
+        "caught": 16,
+        "rate": 1
+      },
+      {
+        "reason": "complaint",
+        "caughtBy": "complaint",
+        "labelled": 17,
+        "caught": 17,
+        "rate": 1
+      },
+      {
+        "reason": "unclear",
+        "caughtBy": "low_confidence",
+        "labelled": 6,
+        "caught": 6,
+        "rate": 1
+      }
+    ],
+    "missed": []
+  }
+}

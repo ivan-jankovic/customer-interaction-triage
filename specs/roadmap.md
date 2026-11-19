@@ -120,7 +120,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** the injection report: no actions triggered, review rules held.
 **Done when:** every injection scenario passes.
 
-## P12: Evaluation in CI and comparisons
+## ✅ P12: Evaluation in CI and comparisons
 
 - A small evaluation subset runs in CI with the API key as a secret, with a pass threshold.
 - A comparison of two prompt versions or two models on the full set.
