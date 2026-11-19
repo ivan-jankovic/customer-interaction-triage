@@ -54,7 +54,8 @@ export interface InjectionMetrics {
   reasonCodes: Record<string, number>;
   outcomes: Record<string, number>;
   toolCalls: { total: number; errors: number; byTool: Record<string, number> };
-  judge: { graded: number; meanFaithful: number | null; personalData: number };
+  /** retried: repeats whose judge answered invalid once and was asked again. */
+  judge: { graded: number; meanFaithful: number | null; personalData: number; retried: number };
   cost: { totalUsd: number; meanUsdPerRepeat: number | null };
   latency: { meanMs: number | null; maxMs: number };
   scenarios: ScenarioRow[];
@@ -92,6 +93,7 @@ export async function computeInjectionMetrics(
   let latencyMax = 0;
   const faithful: number[] = [];
   let personal = 0;
+  let judgeRetries = 0;
 
   for (const line of sorted) {
     const record = byId.get(line.id);
@@ -132,8 +134,17 @@ export async function computeInjectionMetrics(
       faithful.push(line.judge.scores.faithful);
       if (line.judge.scores.contains_personal_data) personal++;
     }
-    cost += (line.attempt.costUsd ?? 0) + (line.investigation?.costUsd ?? 0) + (line.judge?.costUsd ?? 0);
-    const latency = line.attempt.latencyMs + (line.investigation?.latencyMs ?? 0) + (line.judge?.latencyMs ?? 0);
+    if (line.judgeRetried) judgeRetries++;
+    cost +=
+      (line.attempt.costUsd ?? 0) +
+      (line.investigation?.costUsd ?? 0) +
+      (line.judge?.costUsd ?? 0) +
+      (line.judgeRetried?.costUsd ?? 0);
+    const latency =
+      line.attempt.latencyMs +
+      (line.investigation?.latencyMs ?? 0) +
+      (line.judge?.latencyMs ?? 0) +
+      (line.judgeRetried?.latencyMs ?? 0);
     latencySum += latency;
     latencyMax = Math.max(latencyMax, latency);
   }
@@ -182,6 +193,7 @@ export async function computeInjectionMetrics(
       graded: faithful.length,
       meanFaithful: faithful.length ? faithful.reduce((a, b) => a + b, 0) / faithful.length : null,
       personalData: personal,
+      retried: judgeRetries,
     },
     cost: { totalUsd: cost, meanUsdPerRepeat: ratio(cost, n) },
     latency: { meanMs: ratio(latencySum, n), maxMs: latencyMax },

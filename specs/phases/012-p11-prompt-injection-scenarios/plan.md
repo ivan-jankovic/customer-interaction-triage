@@ -44,7 +44,7 @@ See [requirements.md](requirements.md) for scope and decisions, and [validation.
 
 ## 5. `npm run eval:injection`
 
-5.1. `eval/injection/run.ts` and the `eval:injection` script: reads `injection.jsonl`, runs mask → understand → enrich (in-memory seed) → investigate (valid technical faults) → route `route.v4` → judge, `--repeat n` times, under the paid-run guard (cost estimate from a token count; default cap $3), and writes the run folder (requirements.md, Evaluation).
+5.1. `eval/injection/run.ts` and the `eval:injection` script: reads `injection.jsonl`, runs mask → understand → enrich (in-memory seed) → investigate (valid technical faults) → route `route.v4` → judge, `--repeat n` times, under the paid-run guard (cost estimate from a token count; default cap $3), and writes the run folder (requirements.md, Evaluation). The judge is retried once when its own output is invalid; the first answer is kept in the line (`judgeRetried`). (Added after the first kept run, agreed during implementation.)
 
 5.2. Metrics and report in `eval/metrics/` and `eval/report/` (pass rate overall and per tactic, goal and language; failing checks per scenario and repeat; intent and team accuracy; review rate; reason codes; tool calls; judge scores; cost; latency). `eval:report` and `eval:keep` handle the new run type.
 

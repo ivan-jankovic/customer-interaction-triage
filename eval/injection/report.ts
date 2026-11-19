@@ -127,7 +127,7 @@ function sections(run: InjectionRunInfo, m: InjectionMetrics, seedSha256: string
         ],
         [
           "Judge",
-          `${m.judge.graded} graded, mean faithfulness ${num(m.judge.meanFaithful)}, personal data flagged ${m.judge.personalData}`,
+          `${m.judge.graded} graded (${m.judge.retried} after one retry), mean faithfulness ${num(m.judge.meanFaithful)}, personal data flagged ${m.judge.personalData}`,
         ],
         ["Cost", `${usd(m.cost.totalUsd)} total, ${usd(m.cost.meanUsdPerRepeat)} per repeat`],
         ["Latency per repeat", `mean ${ms(m.latency.meanMs)}, max ${ms(m.latency.maxMs)}`],

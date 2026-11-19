@@ -25,7 +25,8 @@ const idOf = (text: string) => starts.find(([, s]) => text.includes(s))![0];
  * Classifies every message as labelled (or with `override` for some IDs), lets the agent check
  * outages and answer inconclusive, and grades every summary as faithful with no personal data.
  */
-function scripted(override: Record<string, object> = {}) {
+function scripted(override: Record<string, object> = {}, judgeInvalidOnce: readonly string[] = []) {
+  const judgedOnce = new Set<string>();
   const complete: LlmRequest[] = [];
   const converse: ConverseRequest[] = [];
   const llm: InjectionLlm = {
@@ -33,6 +34,17 @@ function scripted(override: Record<string, object> = {}) {
       complete.push(req);
       const isJudge = "faithful" in (req.schema as { properties: object }).properties;
       if (isJudge) {
+        const jid = idOf(req.user);
+        if (judgeInvalidOnce.includes(jid) && !judgedOnce.has(jid)) {
+          judgedOnce.add(jid);
+          const text = JSON.stringify({
+            faithful: 5,
+            complete: 5,
+            contains_personal_data: false,
+            reason: "x".repeat(301),
+          });
+          return Promise.resolve({ ok: true, text, model: req.model, usage: USAGE });
+        }
         const text = JSON.stringify({ faithful: 5, complete: 4, contains_personal_data: false, reason: "ok" });
         return Promise.resolve({ ok: true, text, model: req.model, usage: USAGE });
       }
@@ -85,9 +97,9 @@ function scripted(override: Record<string, object> = {}) {
   return { llm, complete, converse };
 }
 
-function setup(override: Record<string, object> = {}) {
+function setup(override: Record<string, object> = {}, judgeInvalidOnce: readonly string[] = []) {
   const resultsDir = mkdtempSync(join(tmpdir(), "eval-injection-"));
-  const client = scripted(override);
+  const client = scripted(override, judgeInvalidOnce);
   const log: string[] = [];
   let t = Date.parse("2026-11-20T10:00:00Z");
   const deps = {
@@ -168,6 +180,19 @@ describe("npm run eval:injection", () => {
     const s = m.scenarios.find((x) => x.id === "inj-011")!;
     expect(s.status).toBe("fail");
     expect(s.failedChecks.map((f) => f.name)).toEqual(["review_held", "goal"]);
+  });
+
+  it("retries the judge once when its own output is invalid, and keeps the first answer", async () => {
+    const { deps } = setup({}, ["inj-011"]);
+    const dir = (await runInjectionEval(["--yes"], deps))!;
+    const line = readJsonl<InjectionOutputLine>(join(dir, "outputs.jsonl")).find((l) => l.id === "inj-011")!;
+    expect(line.judgeRetried?.outcome).toBe("invalid");
+    expect(line.judgeRetried?.errors).toEqual(["/reason must NOT have more than 300 characters"]);
+    expect(line.judge?.outcome).toBe("graded");
+    const m = metricsOf(dir);
+    expect(m.overall.passed).toBe(15);
+    expect(m.judge.retried).toBe(1);
+    expect(readJsonl<InjectionOutputLine>(join(dir, "outputs.jsonl")).filter((l) => l.judgeRetried)).toHaveLength(1);
   });
 
   it("--repeat 2 stores two outputs per message, and the report recomputes byte for byte", async () => {

@@ -281,13 +281,28 @@ export async function runInjectionEval(argv: string[], deps: InjectionEvalDeps =
             prompt: investigatePrompt,
           });
         }
-        const judge = c
-          ? await judgeSummary(
-              { channel: record.channel, text: masked.maskedText, summary: c.summary },
-              { llm: budgetedComplete(getLlm(), budget, plannedJudge), ...judgeConfig, prompt: judgePrompt },
-            )
-          : null;
-        const line: InjectionOutputLine = { id: record.id, repeat: k + 1, attempt, investigation, judge };
+        // One retry when the judge's own output is invalid (as the P00 graders do): the judge
+        // measures the summary, and a malformed grade says nothing about the pipeline. Decided
+        // during implementation after the first kept run (requirements.md, Implementation notes).
+        const grade = () =>
+          judgeSummary(
+            { channel: record.channel, text: masked.maskedText, summary: c!.summary },
+            { llm: budgetedComplete(getLlm(), budget, plannedJudge), ...judgeConfig, prompt: judgePrompt },
+          );
+        let judge = c ? await grade() : null;
+        let judgeRetried: InjectionOutputLine["judgeRetried"] = null;
+        if (judge?.outcome === "invalid") {
+          judgeRetried = judge;
+          judge = await grade();
+        }
+        const line: InjectionOutputLine = {
+          id: record.id,
+          repeat: k + 1,
+          attempt,
+          investigation,
+          judge,
+          judgeRetried,
+        };
         writeLine(line);
         return line;
       },

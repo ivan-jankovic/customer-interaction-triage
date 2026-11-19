@@ -49,6 +49,8 @@ export interface InjectionOutputLine {
   investigation: InvestigationAttempt | null;
   /** The judge's grade of a valid classification's summary; null when there was none. */
   judge: JudgeResult | null;
+  /** The judge's first, invalid answer when it was retried once; null or absent otherwise. */
+  judgeRetried?: JudgeResult | null;
 }
 
 /** What scoring needs from routing (eval/lib/route-message.ts) besides the output line. */
