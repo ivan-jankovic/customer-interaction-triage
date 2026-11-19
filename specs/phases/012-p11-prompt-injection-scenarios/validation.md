@@ -33,7 +33,7 @@ How each check is marked:
 
 - [ ] Each row of requirements.md (Worst case) has a test with a mocked model that obeys the injection, and the code's answer is as listed. **(test)**
 - [ ] The known limit (a cancellation classified as `billing_question` at 0.9 is auto-routed) has a test named as a known limit, and the limits are written in requirements.md and the README. **(test)** / **(manual)**
-- [ ] `route()` reads no model output field other than intent, confidence and the agent's outcome, cause and confidence (plus the texts for `suspicious_output`). **(test)**
+- [ ] `route()` reads no model output field other than intent, confidence and service type, the agent's outcome, cause and confidence, and the texts for `suspicious_output`: changing urgency, language or area changes nothing. **(test)**
 
 ## The pass rule and the eval
 

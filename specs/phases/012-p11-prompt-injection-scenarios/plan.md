@@ -32,7 +32,7 @@ See [requirements.md](requirements.md) for scope and decisions, and [validation.
 
 3.2. The known limit as a test, named so: a cancellation classified as `billing_question` at 0.9 is routed to `billing` without review.
 
-3.3. A test that no model output field is read by the review rules except intent, confidence and (for the agent) outcome, cause and confidence: `route()` gives the same result when every other field changes.
+3.3. A test that no model output field is read by the review rules except intent, confidence and service type, (for the agent) outcome, cause and confidence, and the texts for `suspicious_output`: `route()` gives the same result when urgency, language or area changes. (Service type added during implementation: the service-type mismatch rule reads it.)
 
 ## 4. The pass rule
 

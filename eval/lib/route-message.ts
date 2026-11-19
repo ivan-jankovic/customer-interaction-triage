@@ -26,7 +26,8 @@ export type MessageRouter = (
 
 export function makeMessageRouter(seed: CrmSeed = readCrmSeed()): MessageRouter {
   const crm = memoryCrm(seed);
-  const receivedAt = new Map(seed.messages.map((m) => [m.message_id, new Date(m.received_at)]));
+  // Dataset and injection messages (P11) alike: IDs are distinct (msg-…, inj-…).
+  const receivedAt = new Map([...seed.messages, ...seed.injection].map((m) => [m.message_id, new Date(m.received_at)]));
 
   return async (message, attempt, investigation = null) => {
     const c = attempt.outcome === "valid" ? attempt.classification : null;
