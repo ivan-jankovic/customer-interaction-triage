@@ -47,6 +47,20 @@ describe("eval:compare", () => {
     expect(md).not.toContain("**Warning:**");
   });
 
+  it("adds routing and per-intent tables (P12), with – for a run scored before routing existed", async () => {
+    const { a, b } = await runs();
+    // A run from before P07: metrics.json has no routing anywhere.
+    const path = join(a.runDir, "metrics.json");
+    const m = JSON.parse(readFileSync(path, "utf8")) as { overall: Record<string, unknown>; routing?: unknown };
+    delete m.overall.routing;
+    delete m.routing;
+    writeFileSync(path, JSON.stringify(m));
+    const md = compareRunDirs(a.runDir, b.runDir);
+    expect(md).toContain("| Must-review recall | – | 80.0% | – |");
+    expect(md).toContain("Must-review messages auto-routed: – vs 1 of 5. Router: – vs route.v4.");
+    expect(md).toContain("| `technical_fault` (n=2) | 0.67 | 1.00 | +0.33 |");
+  });
+
   it("warns when the runs cover different messages or datasets", async () => {
     const { a } = await runs();
     const other = fixtureRun({ run: { ids: ["m1", "m2"], dataset: { file: "x", sha256: "d".repeat(64) } } });

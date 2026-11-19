@@ -126,6 +126,45 @@ export function compareRuns(a: Run, b: Run): string {
     `Summaries graded: ${ma.summaries.graded} vs ${mb.summaries.graded}. Invalid outputs: ${ma.outcomes.invalid} vs ${mb.outcomes.invalid}; errors: ${ma.outcomes.error} vs ${mb.outcomes.error}; fallbacks: ${ma.outcomes.fellBack} vs ${mb.outcomes.fellBack}.`,
   );
 
+  // Routing (P12): what the model's output means for review. Runs scored before P07 have no
+  // routing metrics; their cells show "–".
+  const routing = (m: Metrics) => (m.overall as Partial<Metrics["overall"]>).routing;
+  const routingRows: [string, Kind, (m: Metrics) => number | null][] = [
+    ["Routing accuracy (team)", "rate", (m) => routing(m)?.accuracy ?? null],
+    ["Must-review recall", "rate", (m) => routing(m)?.mustReview.recall ?? null],
+    ["Must-review precision", "rate", (m) => routing(m)?.mustReview.precision ?? null],
+    ["Review rate", "rate", (m) => routing(m)?.reviewRate ?? null],
+  ];
+  push("## Routing");
+  push(
+    table(
+      ["Metric", "A", "B", "Change"],
+      routingRows.map(([label, kind, get]) => [
+        label,
+        format[kind](get(ma)),
+        format[kind](get(mb)),
+        change(kind, get(ma), get(mb)),
+      ]),
+    ),
+  );
+  const missed = (m: Metrics) => {
+    const r = routing(m);
+    return r ? `${r.mustReview.fn} of ${r.mustReview.labelled}` : "–";
+  };
+  const router = (m: Metrics) => (m.routing as Metrics["routing"] | undefined)?.routerVersion ?? "–";
+  push(`Must-review messages auto-routed: ${missed(ma)} vs ${missed(mb)}. Router: ${router(ma)} vs ${router(mb)}.`);
+
+  push("## Per intent");
+  push(
+    table(
+      ["Intent", "F1 A", "F1 B", "Change"],
+      mb.perIntent.map((ib) => {
+        const fa = ma.perIntent.find((ia) => ia.intent === ib.intent)?.f1 ?? null;
+        return [`\`${ib.intent}\` (n=${ib.support})`, num(fa), num(ib.f1), change("score", fa, ib.f1)];
+      }),
+    ),
+  );
+
   push("## By language");
   push(
     table(
