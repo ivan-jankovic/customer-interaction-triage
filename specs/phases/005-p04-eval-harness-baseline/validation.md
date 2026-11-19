@@ -47,13 +47,13 @@ How each check is marked:
 
 - [x] After the user's go-ahead, `npm run eval -- --subset small --yes` completes, and its report is checked. **(manual)**
 - [x] After a second go-ahead, the full run completes with `n = 100`. Its run folder is moved to `eval/results/kept/` and committed as the baseline. **(manual)**
-- [ ] The baseline's intent accuracy, macro F1, per-language accuracy, valid rate, summary means, total cost and latency p50/p95 are quoted in the PR description. **(manual)**
+- [x] The baseline's intent accuracy, macro F1, per-language accuracy, valid rate, summary means, total cost and latency p50/p95 are quoted in the PR description. **(manual)**
 
 ## Specs updated
 
 - [x] [tech-stack.md](../../tech-stack.md) says the CI evaluation subset comes in P12, and describes the run layout, the subset and the summary judge. **(manual)**
 - [x] `eval/results/README.md`, `README.md` and `.env.example` describe how to run, reproduce and keep an evaluation. **(manual)**
-- [ ] P04 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
+- [x] P04 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 

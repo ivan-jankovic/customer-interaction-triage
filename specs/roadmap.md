@@ -52,7 +52,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** classifying a few messages shows intent, fields, summary and confidence.
 **Done when:** unit tests with a mocked client pass.
 
-## P04: Evaluation harness and baseline
+## ✅ P04: Evaluation harness and baseline
 
 - `npm run eval`: runs classification over the dataset, computes accuracy, per-intent precision/recall, confusion matrix, field accuracy, cost and latency, overall and per language (Czech, Slovak, English).
 - Results saved to `eval/results/` with model and prompt version.
