@@ -112,7 +112,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** a technical fault investigated, with the tools it called and the evidence.
 **Done when:** loop tests with a mocked client pass (including the step limit); evaluation reports cause accuracy.
 
-## P11: Prompt-injection scenarios
+## ✅ P11: Prompt-injection scenarios
 
 - Run the injection set through the full pipeline.
 - Harden prompts and checks where needed.

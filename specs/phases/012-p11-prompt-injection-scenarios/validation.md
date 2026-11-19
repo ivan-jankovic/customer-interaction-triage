@@ -51,7 +51,7 @@ How each check is marked:
 
 - [x] [tech-stack.md](../../tech-stack.md) has `route.v4` with `suspicious_output`, `eval:injection` with the pass rule and repeats, and `crm-generate.v3`. **(manual)**
 - [x] `README.md` has a "Prompt injection" section with the defences, the results and the known limits. **(manual)**
-- [ ] P11 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
+- [x] P11 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 
