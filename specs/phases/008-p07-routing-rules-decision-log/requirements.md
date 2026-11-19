@@ -189,3 +189,50 @@ Added to `metrics.json`, `report.md` and `report.html`, overall and per language
 - **The golden report fixture changes** (`test/eval/fixtures/report.md`): it gets the routing sections. It is regenerated with `UPDATE_GOLDEN=1` and checked by reading the diff.
 - **The scoring needs `seed.json`.** If the seed changes, the routing metrics of old runs change too. The report records the seed hash so this is visible.
 - **`REVIEW_REASONS` in `taxonomy.ts`** stays the dataset's label list. The runtime reason codes are a separate list (`REASON_CODES`), because a label and a reason code are different things.
+
+## Implementation notes
+
+- **Concurrent runs.** The plan said a conflicting insert rolls back. The case is instead inserted with `ON CONFLICT (interaction_id) DO NOTHING`: the losing call inserts no case and no log entries, then reads the winner's case. The effect is the same, without catching a database error.
+- **`enrichment_id` and the outcome.** "Null exactly when the classification is not valid" is enforced in code, not by a check constraint, because the outcome lives in `classifications` (as the plan expected).
+- **Shared helper.** `customerServiceTypes(crm, customerId)` sits next to `route` in `src/pipeline/route.ts`, so the routing step and the evaluation read the customer's service types the same way. `route` itself stays pure.
+- **Reports are async.** Enrichment goes through the async `CrmLookup`, so `buildMetrics` and `writeReports` became async and take an optional `crmSeedPath` (default `eval/data/crm/seed.json`).
+- **Eval fixture.** The 8-message fixture in `test/eval/fixtures/` gained message texts, labels that follow the review rules (two messages labelled `unclear`), and a two-customer `FIXTURE_SEED`, so routing is worked out by hand there too: one missed must-review message (m3 at confidence 0.70) and one `crm_mismatch_service_type` (m8). Because the fixture dataset changed, the compare golden's only change is the dataset hash.
+- **Wording.** "Not masked yet" errors say "classify first", because `classify` masks the message (as in P06).
+
+## Results (recorded during implementation)
+
+- **Kept runs recomputed** with `npm run eval:report`, no model call. Only `metrics.json`, `report.md` and `report.html` changed, and the Markdown diffs only add lines.
+
+  | | `classify.v2` | `classify.v1` |
+  | --- | --- | --- |
+  | Routing accuracy (team) | 100% | 100% |
+  | Must-review recall | 100% (38 of 38) | 100% |
+  | Must-review precision | 67.9% | 65.5% |
+  | Sent to review | 56 of 100 | 58 of 100 |
+
+- **`classify.v2` reason codes:**
+
+  | Code | Messages |
+  | --- | --- |
+  | `cancellation` | 16 |
+  | `complaint` | 17 |
+  | `low_confidence` | 8 |
+  | `customer_not_found` | 5 |
+  | `customer_ambiguous` | 5 |
+  | `customer_unidentified` | 9 |
+  | `crm_mismatch_unmatched_key` | 3 |
+  | `crm_mismatch_service_type` | 0 |
+
+  Every `unclear` message got `low_confidence`. The 56 reviews match the spec's estimate of 55–58.
+- **Demo** (a separate `triage_demo` database with its own API on port 3001, dropped afterwards; the development database was not touched). After `crm:seed` and `dataset:load`, six paid `classify` calls ($0.049 in total), then `enrich` and `route`:
+
+  | Message | Team | Review reasons |
+  | --- | --- | --- |
+  | msg-011 | `technical_support` | none (found customer, ongoing outage in Opava) |
+  | msg-013 | `retention` | `cancellation` |
+  | msg-082 | `general` | `low_confidence` (0.45 < 0.7) |
+  | msg-022 | `billing` | `customer_ambiguous` |
+  | msg-008 | `general` | `crm_mismatch_unmatched_key` (`[EMAIL_1]` matched no customer) |
+  | msg-007 | `technical_support` | `customer_unidentified` |
+
+  A second `route` on msg-011 printed "existing case" and wrote nothing.
