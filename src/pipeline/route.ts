@@ -8,7 +8,15 @@
 // reasons, not only the first. A change to the threshold or the rules is a new ROUTER_VERSION.
 
 import type { Classification } from "../llm/schemas/classification.schema.js";
-import { INTENT_TO_TEAM, REASON_CODES, type Intent, type ReasonCode, type Team } from "../taxonomy.js";
+import {
+  INTENT_TO_TEAM,
+  REASON_CODES,
+  type Intent,
+  type InvestigationOutcome,
+  type LikelyCause,
+  type ReasonCode,
+  type Team,
+} from "../taxonomy.js";
 import type { CrmLookup, CrmServiceType, EnrichmentResult } from "./enrich.js";
 import type { Outcome } from "./understand.js";
 
@@ -30,6 +38,24 @@ export const REVIEW_CONFIDENCE_THRESHOLD = 0.7;
  * sales teams routinely ask for the account number (P07 requirements.md, Decisions).
  */
 export const UNIDENTIFIED_REVIEW_INTENTS: readonly Intent[] = ["technical_fault"];
+
+/**
+ * Whether an investigation sends its case to review (P10 requirements.md, "Outcomes and
+ * review"): it didn't end with a valid answer, found no cause, or isn't confident enough.
+ */
+export function isInconclusive(a: {
+  outcome: InvestigationOutcome;
+  likelyCause: LikelyCause | null;
+  confidence: number | null;
+}): boolean {
+  return (
+    a.outcome !== "valid" ||
+    a.likelyCause === null ||
+    a.likelyCause === "inconclusive" ||
+    a.confidence === null ||
+    a.confidence < REVIEW_CONFIDENCE_THRESHOLD
+  );
+}
 
 /** The team of a case whose classification gave no usable intent. */
 export const FALLBACK_TEAM: Team = "general";
