@@ -36,10 +36,10 @@ const CSS = `
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--surface-1); color: var(--text-primary);
   font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-main { max-width: 980px; margin: 0 auto; padding: 24px 16px 48px; }
+main { max-width: 980px; margin: 0 auto; padding: 24px 16px 48px; min-width: 0; }
 h1 { font-size: 22px; margin: 0 0 4px; overflow-wrap: anywhere; }
 h2 { font-size: 18px; margin: 36px 0 12px; }
-p, li { color: var(--text-secondary); }
+p, li { color: var(--text-secondary); overflow-wrap: anywhere; }
 .muted { color: var(--text-muted); font-size: 13px; }
 .settings { display: grid; grid-template-columns: max-content 1fr; gap: 2px 16px; margin: 12px 0; font-size: 14px; }
 .settings dt { color: var(--text-muted); } .settings dd { margin: 0; overflow-wrap: anywhere; }
@@ -100,7 +100,7 @@ function intentBars(m: Metrics): string {
   return (
     `<div class="legend"><span><span class="swatch" style="background:var(--series-1)"></span>Precision</span>` +
     `<span><span class="swatch" style="background:var(--series-2)"></span>Recall</span></div>` +
-    `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Precision and recall per intent">${grid}${bars}</svg>`
+    `<svg viewBox="0 0 ${width} ${height}" style="max-width:${width}px" role="img" aria-label="Precision and recall per intent">${grid}${bars}</svg>`
   );
 }
 
@@ -139,14 +139,14 @@ function confusionHeatmap(m: Metrics): string {
       return `<text x="${left - 8}" y="${top + i * cell + cell / 2 + 4}" text-anchor="end">${r}</text>${cells}`;
     })
     .join("");
-  return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Confusion matrix, rows labelled intents, columns predicted">${head}${rows}</svg>`;
+  return `<svg viewBox="0 0 ${width} ${height}" style="max-width:${width}px;min-width:420px" role="img" aria-label="Confusion matrix, rows labelled intents, columns predicted">${head}${rows}</svg>`;
 }
 
 /** Intent accuracy per confidence band: one series, so no legend; n under each bar. */
 function confidenceBars(m: Metrics): string {
   const width = 480;
-  const height = 200;
-  const plotTop = 10;
+  const height = 216;
+  const plotTop = 26;
   const plotH = 140;
   const bandW = (width - 40) / m.confidence.bands.length;
   const y = (v: number) => plotTop + plotH - v * plotH;
@@ -167,7 +167,7 @@ function confidenceBars(m: Metrics): string {
       return `${bar}<text x="${cx}" y="${plotTop + plotH + 18}" text-anchor="middle">${b.band}</text><text x="${cx}" y="${plotTop + plotH + 34}" text-anchor="middle" style="font-size:11px;fill:var(--text-muted)">n=${b.n}</text>`;
     })
     .join("");
-  return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Intent accuracy by confidence band">${grid}${bars}</svg>`;
+  return `<svg viewBox="0 0 ${width} ${height}" style="max-width:${width}px" role="img" aria-label="Intent accuracy by confidence band">${grid}${bars}</svg>`;
 }
 
 export function renderHtml(run: RunInfo, m: Metrics): string {
