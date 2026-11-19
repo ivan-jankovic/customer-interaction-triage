@@ -120,6 +120,28 @@ npm run process -- msg-011                      # the whole pipeline for one mes
 
 The design and its reasons are in the [P08 spec](specs/phases/009-p08-asynchronous-processing/requirements.md).
 
+## Reviewing cases
+
+Cases that need review wait in a queue until a person confirms or corrects them. `npm run review` walks the queue one case at a time, oldest first (free, no model).
+
+```sh
+npm run review -- --reviewer reviewer-1               # or set REVIEWER in .env
+npm run review -- --team billing --reason low_confidence   # narrow the queue
+npm run review -- --spot-check                         # auto-routed cases, to check what routing gets wrong
+```
+
+Each case shows its team and reasons, the classification and summary, the **masked** message, what the CRM lookup found (customer, candidates, unmatched keys, outages) and the decision log. Then:
+
+| Key | Action |
+| --- | --- |
+| `c` | Confirm, with an optional note. |
+| `r` | Correct: pick the intent (the team defaults to its team, or pick another) and write a note saying why. |
+| `s` | Skip for this session. |
+| `u` | Unmask: show the raw message. Asks for a reason, and every unmask is recorded in `unmask_log` and listed on the case. |
+| `q` | Quit. |
+
+A review is stored in `reviews`, one per case, and is final: if someone else got there first, the loop says who and moves on. The case itself is never changed; a correction records the intent and team that should have been chosen. Reviewer handles are recorded, not verified (there is no login). The design is in the [P09 spec](specs/phases/010-p09-review-queue-cli/requirements.md).
+
 ## Evaluating
 
 `npm run eval` classifies the labelled dataset with the same understanding step, grades each summary with a separate judge model, and writes a report. It calls paid models: it prints an estimate and asks before any call, and stops at `--max-cost` (default $3).
@@ -140,7 +162,7 @@ Each run lands in `eval/results/<run-id>/` with `report.md` and `report.html` (i
 | Command | What it does |
 | --- | --- |
 | `npm test` | Unit tests. No Docker, no network, never calls a model. |
-| `npm run test:integration` | Tests against the Compose services (migrations, API with PostgreSQL, loader, masking, mock CRM and enrichment, routing, the queue and worker). The Redis outage tests stop and start the Compose Redis, so they run last. |
+| `npm run test:integration` | Tests against the Compose services (migrations, API with PostgreSQL, loader, masking, mock CRM and enrichment, routing, the queue and worker, the review queue). The Redis outage tests stop and start the Compose Redis, so they run last. |
 | `npm run lint` | ESLint with type-aware rules. |
 | `npm run format` / `format:check` | Prettier. |
 | `npm run typecheck` | TypeScript 7 type check. |
