@@ -49,13 +49,13 @@ How each check is marked:
 - [x] `npm run mask` shows before/after for one message per identifier type (free). **(manual)**
 - [x] After the user's go-ahead: one `npm run classify` on a masked message, and the small-subset eval. **(manual)**
 - [x] After a second go-ahead: the full eval with masking completes (`n = 100`) and is kept in `eval/results/kept/`. **(manual)**
-- [ ] `eval:compare` between the P04 baseline and the masked run is in the PR description, and the findings are in requirements.md. **(manual)**
+- [x] `eval:compare` between the P04 baseline and the masked run is in the PR description, and the findings are in requirements.md. **(manual)**
 
 ## Specs updated
 
 - [x] [tech-stack.md](../../tech-stack.md) describes the masking rules, placeholders, mapping table, versioning and the unmasked names/addresses limitation, and the data model has the new columns and table. **(manual)**
 - [x] `README.md` has a Masking section and `eval:compare`. **(manual)**
-- [ ] P05 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
+- [x] P05 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 

@@ -60,7 +60,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** the first baseline report.
 **Done when:** the report is reproducible from the command.
 
-## P05: Masking
+## ✅ P05: Masking
 
 - Rule-based masking of personal data with typed placeholders and a stored mapping.
 - The understanding step only receives masked text.
