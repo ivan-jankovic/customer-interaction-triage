@@ -98,6 +98,8 @@ npm run route -- msg-011    # team, review flag, reason codes and the decision l
 
 On the kept `classify.v2` run, routing sends every message to its labelled team, catches **all 38** messages labelled must-review (recall 100%, precision 67.9%), and sends 56 of the 100 messages to review. The rules and their reasons are in the [P07 spec](specs/phases/008-p07-routing-rules-decision-log/requirements.md).
 
+The review rate reflects the test set, not real traffic. The dataset gives every intent an equal share, so cancellations and complaints, which are always reviewed, make up a third of it. The mock CRM was also seeded with not-found and ambiguous customers on purpose. Among routine messages (all intents except cancellation and complaint), 34% go to review. The rules are conservative on purpose: a missed review costs more than an extra check. They are meant to be tuned later with reviewers' corrections (P09) and the confidence-gate comparison (P17). The breakdown is in the P07 spec, under Results.
+
 ## Evaluating
 
 `npm run eval` classifies the labelled dataset with the same understanding step, grades each summary with a separate judge model, and writes a report. It calls paid models: it prints an estimate and asks before any call, and stops at `--max-cost` (default $3).

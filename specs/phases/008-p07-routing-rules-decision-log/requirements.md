@@ -224,6 +224,16 @@ Added to `metrics.json`, `report.md` and `report.html`, overall and per language
   | `crm_mismatch_service_type` | 0 |
 
   Every `unclear` message got `low_confidence`. The 56 reviews match the spec's estimate of 55–58.
+- **The review rate measures the test set, not real traffic.** The dataset was built to exercise every review path, not to match how often each one happens. Of the 56 reviews:
+  - 33 are cancellations and complaints, reviewed by policy. The dataset gives every intent an equal share, so these are a third of it; real traffic has far fewer.
+  - 10 are customers not found, ambiguous or with an unmatched key. The P06 seed generator planted these on purpose.
+  - 9 are technical faults with no account identifiers. How common these are depends on the channel: a logged-in chat or a call with caller ID would usually carry an ID.
+  - 4 are reviewed for low confidence alone. The dataset includes deliberately unclear messages.
+
+  Among the 67 routine messages (all intents except cancellation and complaint), 23 go to review (34%). This dataset can't estimate the rate on real traffic.
+
+  `route.v1` stays conservative on purpose: missing a needed review (for example a cancellation) costs more than an extra check, and a review here is a quick confirmation of a classified, enriched case, not a cold read. Decided during review: keep `route.v1` as it is, and tune it with data from review corrections (P09) and the confidence-gate comparison (P17).
+- **Open question for later: double handling of cancellations and complaints.** These go to the retention and complaints teams, whose people handle them anyway, so a review before them may be one step too many. Routing them straight to those teams, with review only when another reason applies, would cut the review rate on this dataset from 56% to about 23%. [mission.md](../../mission.md) says they always go to review, so this would be a change to the constitution; it was not made in P07.
 - **Demo** (a separate `triage_demo` database with its own API on port 3001, dropped afterwards; the development database was not touched). After `crm:seed` and `dataset:load`, six paid `classify` calls ($0.049 in total), then `enrich` and `route`:
 
   | Message | Team | Review reasons |
