@@ -30,6 +30,11 @@ export interface AppOptions {
   apiKey: string;
   /** Resolves when the database answers; used by GET /health. */
   checkDb: () => Promise<void>;
+  /**
+   * Queues a stored interaction for processing (P08); never throws. Best effort: when it fails
+   * (Redis down), the request still succeeds and the worker's sweep enqueues the message later.
+   */
+  enqueue: (interactionId: string) => Promise<"queued" | "failed">;
   logger?: FastifyServerOptions["logger"];
 }
 
@@ -63,7 +68,7 @@ function sameKey(given: string, expected: string): boolean {
   return timingSafeEqual(a, b);
 }
 
-export function buildApp({ store, apiKey, checkDb, logger = false }: AppOptions): FastifyInstance {
+export function buildApp({ store, apiKey, checkDb, enqueue, logger = false }: AppOptions): FastifyInstance {
   const app = Fastify({ logger, bodyLimit: BODY_LIMIT_BYTES }).withTypeProvider<JsonSchemaToTsProvider>();
 
   app.setValidatorCompiler(({ schema, httpPart }) => (httpPart === "body" ? bodyAjv : textAjv).compile(schema));
@@ -122,6 +127,14 @@ export function buildApp({ store, apiKey, checkDb, logger = false }: AppOptions)
           text: body.text,
           received_at: body.received_at ? new Date(body.received_at) : null,
         });
+        // A repeat (`existing`) is enqueued too: if the first request's enqueue failed, this one
+        // may succeed, and BullMQ ignores the duplicate job ID otherwise.
+        if (result.kind !== "conflict") {
+          const id = result.interaction.id;
+          if ((await enqueue(id)) === "failed") {
+            request.log.warn({ interactionId: id }, "enqueue failed; the sweep will pick the interaction up");
+          }
+        }
         switch (result.kind) {
           case "created":
             return reply

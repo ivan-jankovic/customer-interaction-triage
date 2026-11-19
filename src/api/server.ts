@@ -6,6 +6,7 @@ import { sql } from "kysely";
 import { loadApiConfig } from "../config.js";
 import { createDb } from "../db/database.js";
 import { KyselyInteractionStore } from "../db/interactions.js";
+import { createQueue, enqueue } from "../queue.js";
 import { buildApp } from "./app.js";
 
 /**
@@ -21,12 +22,16 @@ export const LOGGER_OPTIONS = {
 async function main(): Promise<void> {
   const config = loadApiConfig();
   const db = createDb(config.databaseUrl);
+  // BullMQ needs Redis up when the queue is created; after that, intake tolerates outages.
+  const { queue, close: closeQueue } = createQueue(config.redisUrl, { forIntake: true });
+  await queue.waitUntilReady();
   const app = buildApp({
     store: new KyselyInteractionStore(db),
     apiKey: config.intakeApiKey,
     checkDb: async () => {
       await sql`select 1`.execute(db);
     },
+    enqueue: (id) => enqueue(queue, id),
     logger: LOGGER_OPTIONS,
   });
 
@@ -34,6 +39,7 @@ async function main(): Promise<void> {
     app.log.info(`${signal} received, shutting down`);
     app
       .close()
+      .then(() => closeQueue())
       .then(() => db.destroy())
       .then(
         () => process.exit(0),

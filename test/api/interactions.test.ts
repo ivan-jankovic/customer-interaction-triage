@@ -15,13 +15,26 @@ const valid = { external_id: "msg-001", channel: "chat", language: "cs", text: "
 
 let app: FastifyInstance;
 let store: MemoryInteractionStore;
+/** Interaction IDs passed to enqueue, in order. */
+let enqueued: string[];
 
-function setup(options: { checkDb?: () => Promise<void>; logStream?: Writable } = {}): FastifyInstance {
+function setup(
+  options: {
+    checkDb?: () => Promise<void>;
+    logStream?: Writable;
+    enqueue?: (id: string) => Promise<"queued" | "failed">;
+  } = {},
+): FastifyInstance {
   store = new MemoryInteractionStore(() => NOW);
+  enqueued = [];
   app = buildApp({
     store,
     apiKey: KEY,
     checkDb: options.checkDb ?? (() => Promise.resolve()),
+    enqueue: (id) => {
+      enqueued.push(id);
+      return options.enqueue ? options.enqueue(id) : Promise.resolve("queued");
+    },
     logger: options.logStream ? { ...LOGGER_OPTIONS, level: "trace", stream: options.logStream } : false,
   });
   return app;
@@ -226,6 +239,42 @@ describe("GET /health", () => {
     const res = await app.inject({ method: "GET", url: "/health" });
     expect(res.statusCode).toBe(503);
     expect(res.json()).toEqual({ status: "unavailable" });
+  });
+});
+
+describe("enqueueing (P08)", () => {
+  it("enqueues each stored interaction once, and a repeat again; a conflict is not enqueued", async () => {
+    setup();
+    const first = (await post(valid)).json<{ id: string }>();
+    expect(enqueued).toEqual([first.id]);
+    expect((await post(valid)).statusCode).toBe(200);
+    expect(enqueued).toEqual([first.id, first.id]);
+    expect((await post({ ...valid, text: "different" })).statusCode).toBe(409);
+    expect(enqueued).toHaveLength(2);
+  });
+
+  it("still answers 201 when enqueueing fails, and logs the ID only", async () => {
+    const lines: string[] = [];
+    const stream = new Writable({
+      write(chunk: Buffer, _enc, done) {
+        lines.push(chunk.toString());
+        done();
+      },
+    });
+    setup({ enqueue: () => Promise.resolve("failed"), logStream: stream });
+    const res = await post(valid);
+    expect(res.statusCode).toBe(201);
+    const log = lines.join("");
+    expect(log).toContain("enqueue failed");
+    expect(log).toContain(res.json<{ id: string }>().id);
+    expect(log).not.toContain(valid.text);
+  });
+
+  it("does not enqueue rejected requests", async () => {
+    setup();
+    await post({ channel: "fax", text: "x" });
+    await post(valid, {});
+    expect(enqueued).toEqual([]);
   });
 });
 
