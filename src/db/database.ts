@@ -2,7 +2,7 @@ import { Kysely, PostgresDialect, type ColumnType, type Generated, type Selectab
 import pg from "pg";
 import type { Classification } from "../llm/schemas/classification.schema.js";
 import type { AreaSource, CrmServiceType, EnrichmentOutcome, ServiceStatus } from "../pipeline/enrich.js";
-import type { Channel, IdentifierType, Intent, Language, Urgency } from "../taxonomy.js";
+import type { Channel, IdentifierType, Intent, Language, ReasonCode, Team, Urgency } from "../taxonomy.js";
 
 /** Lifecycle of an interaction. Only `received` until the queue arrives in P08. */
 export const INTERACTION_STATUSES = ["received"] as const;
@@ -143,6 +143,39 @@ export interface EnrichmentsTable {
 
 export type EnrichmentRow = Selectable<EnrichmentsTable>;
 
+/** Table `cases` (migration 0006, P07): one per interaction, written once. */
+export interface CasesTable {
+  id: Generated<string>;
+  interaction_id: Immutable<string>;
+  classification_id: Immutable<string>;
+  enrichment_id: Immutable<string | null>;
+  customer_id: Immutable<string | null>;
+  target_team: Immutable<Team>;
+  needs_review: Immutable<boolean>;
+  reason_codes: Json<ReasonCode[]>;
+  router_version: Immutable<string>;
+  created_at: ColumnType<Date, never, never>;
+}
+
+export type CaseRow = Selectable<CasesTable>;
+
+export const DECISION_STEPS = ["mask", "classify", "enrich", "route"] as const;
+export type DecisionStep = (typeof DECISION_STEPS)[number];
+
+/** Table `decision_log` (migration 0006, P07): one entry per pipeline step of a case. */
+export interface DecisionLogTable {
+  id: Generated<string>;
+  case_id: Immutable<string>;
+  seq: Immutable<number>;
+  step: Immutable<DecisionStep>;
+  input_summary: Json<Record<string, unknown>>;
+  output: Json<Record<string, unknown>>;
+  rule_applied: Immutable<string>;
+  created_at: ColumnType<Date, never, never>;
+}
+
+export type DecisionLogRow = Selectable<DecisionLogTable>;
+
 /** Table types for Kysely; each phase adds the tables it owns together with their migration. */
 export interface Database {
   interactions: InteractionsTable;
@@ -153,6 +186,8 @@ export interface Database {
   crm_tickets: CrmTicketsTable;
   outages: OutagesTable;
   enrichments: EnrichmentsTable;
+  cases: CasesTable;
+  decision_log: DecisionLogTable;
 }
 
 export function createDb(databaseUrl: string): Kysely<Database> {

@@ -42,7 +42,8 @@
     "eval:compare": "tsx eval/compare.ts",
     "crm:generate": "tsx eval/crm/generate.ts",
     "crm:seed": "tsx --env-file-if-exists=.env src/cli/crm-seed.ts",
-    "enrich": "tsx --env-file-if-exists=.env src/cli/enrich.ts"
+    "enrich": "tsx --env-file-if-exists=.env src/cli/enrich.ts",
+    "route": "tsx --env-file-if-exists=.env src/cli/route.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",
