@@ -12,6 +12,23 @@
 // m7  cs   technical_fault/normal/internet/Brno, []          complaint; area Praha (wrong), 0.92             judge invalid
 // m8  cs   complaint/normal/mobile/null, [MR2, account]      urgency high, service tv (wrong); finds MR2 only, 0.88  4/4
 
+//
+// Routing (P07), against FIXTURE_SEED: customer MR10000001 has internet in Kolín, MR20000002 has
+// mobile in Praha. Labels follow the rules: must_review for cancellation, complaint and the two
+// messages labelled unclear (m3, m5); expected_team from the intent.
+//
+// id  enrichment       routed to          reason codes                              label must-review
+// m1  found            technical_support  —                                         no   (team right)
+// m2  not_found        billing            customer_not_found                        yes  (team wrong)
+// m3  no_identifiers   billing            — (0.70 is not below 0.7)                 yes, unclear: MISSED
+// m4  — (invalid)      general            invalid_output                            yes  (team wrong)
+// m5  no_identifiers   sales              low_confidence                            yes, unclear: caught
+// m6  — (error)        general            classification_error                      no   (team right)
+// m7  no_identifiers   complaints         complaint                                 no   (team wrong)
+// m8  found            complaints         complaint, crm_mismatch_service_type (tv) yes  (team right)
+
+import type { CrmSeed } from "../../../src/db/crm-seed.js";
+import { INTENT_TO_TEAM } from "../../../src/taxonomy.js";
 import type { Labels } from "../../../eval/schema/labels.schema.js";
 import type { JudgeResult, OutputLine } from "../../../eval/metrics/types.js";
 import type { ClassificationAttempt } from "../../../src/pipeline/understand.js";
@@ -25,13 +42,18 @@ function labels(
   service_type: Labels["fields"]["service_type"],
   area: string | null,
   identifiers: Ids = [],
+  unclear = false,
 ): Labels {
+  const reasons: Labels["review_reasons"] = [
+    ...(intent === "cancellation" || intent === "complaint" ? [intent] : []),
+    ...(unclear ? (["unclear"] as const) : []),
+  ];
   return {
     intent,
     urgency,
-    must_review: false,
-    review_reasons: [],
-    expected_team: "general",
+    must_review: reasons.length > 0,
+    review_reasons: reasons,
+    expected_team: INTENT_TO_TEAM[intent],
     fields: { identifiers, service_type, area },
   };
 }
@@ -89,6 +111,8 @@ export interface FixtureMessage {
   id: string;
   language: Language;
   channel: "email" | "chat" | "call";
+  /** The message itself: routing masks it to find the identifiers it enriches with. */
+  text: string;
   labels: Labels;
   line: OutputLine;
 }
@@ -101,6 +125,7 @@ export const FIXTURE: FixtureMessage[] = [
     id: "m1",
     language: "cs",
     channel: "chat",
+    text: "Zákaznické číslo MR10000001, v Kolíně mi nejde internet.",
     labels: labels("technical_fault", "high", "internet", "Kolín", [MR1]),
     line: {
       id: "m1",
@@ -124,6 +149,7 @@ export const FIXTURE: FixtureMessage[] = [
     id: "m2",
     language: "cs",
     channel: "email",
+    text: "Volám z +420 001 111 111, chci si stěžovat na poslední vyúčtování.",
     labels: labels("complaint", "normal", "mobile", null, [{ type: "phone", value: "+420 001 111 111" }]),
     line: {
       id: "m2",
@@ -147,7 +173,8 @@ export const FIXTURE: FixtureMessage[] = [
     id: "m3",
     language: "sk",
     channel: "chat",
-    labels: labels("billing_question", "low", "internet", null),
+    text: "Dobrý deň, neviem, či je moja faktúra správna.",
+    labels: labels("billing_question", "low", "internet", null, [], true),
     line: {
       id: "m3",
       attempt: valid(
@@ -171,6 +198,7 @@ export const FIXTURE: FixtureMessage[] = [
     id: "m4",
     language: "sk",
     channel: "call",
+    text: "Zmluva SML-2024-00001, chcem zrušiť televíziu v Bratislave.",
     labels: labels("cancellation", "normal", "tv", "Bratislava", [
       { type: "contract_number", value: "SML-2024-00001" },
     ]),
@@ -190,7 +218,8 @@ export const FIXTURE: FixtureMessage[] = [
     id: "m5",
     language: "en",
     channel: "email",
-    labels: labels("tariff_change", "low", "mobile", null),
+    text: "Hi, maybe I want a different mobile plan? Not sure yet.",
+    labels: labels("tariff_change", "low", "mobile", null, [], true),
     line: {
       id: "m5",
       attempt: valid(
@@ -206,6 +235,7 @@ export const FIXTURE: FixtureMessage[] = [
     id: "m6",
     language: "en",
     channel: "call",
+    text: "Hello, I have a general question about your shops.",
     labels: labels("other", "low", "unknown", null),
     line: {
       id: "m6",
@@ -224,6 +254,7 @@ export const FIXTURE: FixtureMessage[] = [
     id: "m7",
     language: "cs",
     channel: "chat",
+    text: "V Brně mi od rána nejde internet.",
     labels: labels("technical_fault", "normal", "internet", "Brno"),
     line: {
       id: "m7",
@@ -240,6 +271,7 @@ export const FIXTURE: FixtureMessage[] = [
     id: "m8",
     language: "cs",
     channel: "email",
+    text: "Číslo MR20000002, účet 1234567890/0042. Reklamuji vyúčtování.",
     labels: labels("complaint", "normal", "mobile", null, [MR2, { type: "bank_account", value: "1234567890/0042" }]),
     line: {
       id: "m8",
@@ -253,3 +285,76 @@ export const FIXTURE: FixtureMessage[] = [
     },
   },
 ];
+
+const fixtureId = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
+
+/** The mock CRM the fixture's routing is scored against (see the table at the top). */
+export const FIXTURE_SEED: CrmSeed = {
+  generator: "test fixture",
+  dataset_hash: "fixture",
+  customers: [
+    {
+      id: fixtureId(1),
+      customer_number: "MR10000001",
+      email: null,
+      segment: "residential",
+      created_at: "2020-01-01T00:00:00.000Z",
+    },
+    {
+      id: fixtureId(2),
+      customer_number: "MR20000002",
+      email: null,
+      segment: "residential",
+      created_at: "2020-01-01T00:00:00.000Z",
+    },
+  ],
+  services: [
+    {
+      id: fixtureId(11),
+      customer_id: fixtureId(1),
+      service_type: "internet",
+      tariff: "Merelo Fiber 300",
+      contract_number: "SML-2020-00011",
+      phone: null,
+      area: "Kolín",
+      status: "active",
+      started_at: "2020-01-01T00:00:00.000Z",
+    },
+    {
+      id: fixtureId(12),
+      customer_id: fixtureId(2),
+      service_type: "mobile",
+      tariff: "Merelo Mobil S",
+      contract_number: "SML-2020-00012",
+      phone: "+420601000002",
+      area: "Praha",
+      status: "active",
+      started_at: "2020-01-01T00:00:00.000Z",
+    },
+  ],
+  tickets: [],
+  outages: [],
+  // Expectations are the enrichment with the labelled area and service type; the eval tests
+  // don't check them, but they keep the fixture a valid seed.
+  messages: FIXTURE.map((m) => ({
+    message_id: m.id,
+    received_at: "2026-11-03T10:00:00.000Z",
+    design: "eval fixture",
+    expected:
+      m.id === "m1" || m.id === "m8"
+        ? {
+            outcome: "found" as const,
+            customer_id: fixtureId(m.id === "m1" ? 1 : 2),
+            area: m.id === "m1" ? "Kolín" : "Praha",
+            area_source: m.id === "m1" ? ("message" as const) : ("customer" as const),
+            outage_ids: [],
+          }
+        : {
+            outcome: m.id === "m2" || m.id === "m4" ? ("not_found" as const) : ("no_identifiers" as const),
+            customer_id: null,
+            area: m.labels.fields.area,
+            area_source: m.labels.fields.area ? ("message" as const) : null,
+            outage_ids: [],
+          },
+  })),
+};

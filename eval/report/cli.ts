@@ -16,14 +16,14 @@ export function resolveRunDir(ref: string, resultsDir = PATHS.results): string {
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
-  try {
+  (async () => {
     const ref = process.argv[2];
     if (!ref) throw new Error("Usage: npm run eval:report -- <run-id>");
     const dir = resolveRunDir(ref);
-    const m = writeReports(dir, { datasetPath: PATHS.dataset });
+    const m = await writeReports(dir, { datasetPath: PATHS.dataset });
     console.log(`Rewrote metrics.json, report.md and report.html in ${dir} (n=${m.n}).`);
-  } catch (error) {
+  })().catch((error: unknown) => {
     console.error(error instanceof Error ? error.message : error);
     process.exitCode = 1;
-  }
+  });
 }

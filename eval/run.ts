@@ -64,6 +64,8 @@ export interface EvalDeps {
   env?: NodeJS.ProcessEnv;
   resultsDir?: string;
   datasetPath?: string;
+  /** The CRM seed routing is scored against (P07); eval/data/crm/seed.json by default. */
+  crmSeedPath?: string;
   clock?: () => Date;
   git?: () => { commit: string; dirty: boolean };
   confirm?: Confirm;
@@ -250,7 +252,7 @@ export async function runEval(argv: string[], deps: EvalDeps = {}): Promise<stri
     guard,
   };
   writeFileSync(join(runDir, "run.json"), JSON.stringify(finalInfo, null, 2) + "\n");
-  writeReports(runDir, { datasetPath, log });
+  await writeReports(runDir, { datasetPath, crmSeedPath: deps.crmSeedPath, log });
   log(`Run folder: ${relative(process.cwd(), runDir)}`);
   return runDir;
 }

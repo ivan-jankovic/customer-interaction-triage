@@ -2,14 +2,19 @@
 // is worked out by hand in the comments; the code must agree with the arithmetic.
 
 import { describe, expect, it } from "vitest";
+import { makeMessageRouter } from "../../eval/lib/route-message.js";
 import { computeMetrics, percentile } from "../../eval/metrics/aggregate.js";
 import { compareIdentifiers, scoreMessage } from "../../eval/metrics/score.js";
-import { FIXTURE } from "./fixtures/eval-fixture.js";
+import { FIXTURE, FIXTURE_SEED } from "./fixtures/eval-fixture.js";
 
-const scores = FIXTURE.map((m) => scoreMessage(m.id, m.language, m.labels, m.line.attempt));
+const router = makeMessageRouter(FIXTURE_SEED);
+const routes = await Promise.all(FIXTURE.map((m) => router(m, m.line.attempt)));
+const scores = FIXTURE.map((m, i) => scoreMessage(m.id, m.language, m.labels, m.line.attempt, routes[i]!));
+const ROUTING_INFO = { enricherVersion: "enrich.v1", routerVersion: "route.v1", seedSha256: "e".repeat(64) };
 const metrics = computeMetrics(
   scores,
   FIXTURE.map((m) => m.line),
+  ROUTING_INFO,
 );
 
 describe("identifier comparison", () => {
@@ -48,6 +53,7 @@ describe("computeMetrics on the fixture", () => {
         recall: 0.4, // tp 2 / expected 5 (m1, m2, m4, m8 ×2)
         exactListRate: 0.375, // m1, m5, m7
       },
+      routing: metrics.overall.routing, // checked in "routing on the fixture" below
     });
   });
 
@@ -160,5 +166,58 @@ describe("computeMetrics on the fixture", () => {
       ["m7", "technical_fault", "complaint", 0.92],
       ["m2", "complaint", "billing_question", 0.85],
     ]);
+  });
+});
+
+describe("routing on the fixture (table at the top of eval-fixture.ts)", () => {
+  it("routes each message as worked out by hand", () => {
+    expect(
+      Object.fromEntries(scores.map((s) => [s.id, [s.routing.predictedTeam, s.routing.reasonCodes.join("+")]])),
+    ).toEqual({
+      m1: ["technical_support", ""],
+      m2: ["billing", "customer_not_found"],
+      m3: ["billing", ""],
+      m4: ["general", "invalid_output"],
+      m5: ["sales", "low_confidence"],
+      m6: ["general", "classification_error"],
+      m7: ["complaints", "complaint"],
+      m8: ["complaints", "complaint+crm_mismatch_service_type"],
+    });
+  });
+
+  it("computes routing accuracy and the must-review counts", () => {
+    // Team right: m1, m3, m5, m6, m8 = 5/8. Labelled must-review: m2, m3, m4, m5, m8 (5).
+    // Reviewed: m2, m4, m5, m6, m7, m8 (6). TP 4 (m2, m4, m5, m8), FP 2 (m6, m7), FN 1 (m3).
+    expect(metrics.overall.routing).toEqual({
+      accuracy: 0.625,
+      mustReview: { labelled: 5, reviewed: 6, tp: 4, fp: 2, fn: 1, recall: 0.8, precision: 0.6667 },
+      reviewRate: 0.75,
+    });
+    // sk: m3 (missed), m4 (caught).
+    expect(metrics.byLanguage.sk.routing.mustReview).toMatchObject({ tp: 1, fn: 1, recall: 0.5 });
+  });
+
+  it("counts reason codes, labelled reasons and the missed messages", () => {
+    const n = Object.fromEntries(metrics.routing.reasonCodes.map((r) => [r.code, r.n]));
+    expect(n).toMatchObject({ complaint: 2, customer_not_found: 1, low_confidence: 1, crm_mismatch_service_type: 1 });
+    expect(n.investigation_inconclusive).toBe(0);
+    expect(metrics.routing.labelledReasons).toEqual([
+      // m4 is labelled cancellation but its output was invalid, so it got invalid_output instead.
+      { reason: "cancellation", caughtBy: "cancellation", labelled: 1, caught: 0, rate: 0 },
+      // m2 (predicted billing_question) and m8; only m8 got `complaint`.
+      { reason: "complaint", caughtBy: "complaint", labelled: 2, caught: 1, rate: 0.5 },
+      { reason: "unclear", caughtBy: "low_confidence", labelled: 2, caught: 1, rate: 0.5 },
+    ]);
+    expect(metrics.routing.missed).toEqual([
+      {
+        id: "m3",
+        language: "sk",
+        label: "billing_question",
+        labelReasons: ["unclear"],
+        predictedTeam: "billing",
+        confidence: 0.7,
+      },
+    ]);
+    expect(metrics.routing).toMatchObject(ROUTING_INFO);
   });
 });

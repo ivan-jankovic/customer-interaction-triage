@@ -6,20 +6,22 @@ import { join } from "node:path";
 import { sha256File } from "../../../eval/lib/hash.js";
 import type { OutputLine } from "../../../eval/metrics/types.js";
 import type { RunInfo } from "../../../eval/run.js";
-import { FIXTURE } from "./eval-fixture.js";
+import { FIXTURE, FIXTURE_SEED } from "./eval-fixture.js";
 
 /** A run folder and dataset file built from the fixture, in a fresh temp folder. */
 export function fixtureRun(
   options: { runId?: string; run?: Partial<RunInfo>; lines?: (line: OutputLine) => OutputLine } = {},
-): { runDir: string; datasetPath: string } {
+): { runDir: string; datasetPath: string; crmSeedPath: string } {
   const dir = mkdtempSync(join(tmpdir(), "eval-report-"));
   const datasetPath = join(dir, "dataset.jsonl");
   writeFileSync(
     datasetPath,
-    FIXTURE.map((m) => JSON.stringify({ id: m.id, channel: m.channel, language: m.language, final: m.labels })).join(
-      "\n",
-    ) + "\n",
+    FIXTURE.map((m) =>
+      JSON.stringify({ id: m.id, channel: m.channel, language: m.language, text: m.text, final: m.labels }),
+    ).join("\n") + "\n",
   );
+  const crmSeedPath = join(dir, "seed.json");
+  writeFileSync(crmSeedPath, JSON.stringify(FIXTURE_SEED, null, 2) + "\n");
   const run: RunInfo = {
     runId: options.runId ?? "20261119-120000-full-claude-opus-5-5-classify.v1",
     set: "full",
@@ -48,5 +50,5 @@ export function fixtureRun(
     join(runDir, "outputs.jsonl"),
     FIXTURE.map((m) => JSON.stringify((options.lines ?? ((l) => l))(m.line))).join("\n") + "\n",
   );
-  return { runDir, datasetPath };
+  return { runDir, datasetPath, crmSeedPath };
 }

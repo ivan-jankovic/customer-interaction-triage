@@ -179,6 +179,10 @@ export function renderHtml(run: RunInfo, m: Metrics): string {
     ["Classifier", `${run.classifier.model}, effort ${run.classifier.effort}, ${run.classifier.promptVersion}`],
     ["Summary judge", `${run.judge.model}, effort ${run.judge.effort}, ${run.judge.promptVersion}`],
     ["Masking", run.masker ? run.masker.version : "none (raw text sent to the model)"],
+    [
+      "Routing",
+      `${m.routing.enricherVersion}, ${m.routing.routerVersion}, CRM seed ${m.routing.seedSha256.slice(0, 12)}`,
+    ],
     ["Dataset", `${run.dataset.file} (${run.dataset.sha256.slice(0, 12)})`],
     ["Code", `${run.git.commit.slice(0, 12)}${run.git.dirty ? " (uncommitted changes)" : ""}`],
     ["Started", run.startedAt],
@@ -194,6 +198,11 @@ export function renderHtml(run: RunInfo, m: Metrics): string {
     tile("Intent accuracy", pct(o.intentAccuracy), `n=${m.n}`),
     tile("Intent macro F1", num(m.macroF1, 3)),
     tile("Valid outputs", pct(o.validRate), `invalid: ${m.outcomes.invalid}, errors: ${m.outcomes.error}`),
+    tile(
+      "Must-review recall",
+      pct(o.routing.mustReview.recall),
+      `${o.routing.mustReview.fn} missed; ${pct(o.routing.reviewRate)} sent to review`,
+    ),
     tile("Summary faithful", num(m.summaries.faithfulMean), `complete ${num(m.summaries.completeMean)} (1–5)`),
     tile("Cost", usd(m.cost.totalUsd, 2), `${usd(m.cost.perMessageUsd)} per message`),
     tile("Latency p50", ms(m.latencyMs.p50), `p95 ${ms(m.latencyMs.p95)}`),
@@ -220,6 +229,18 @@ export function renderHtml(run: RunInfo, m: Metrics): string {
           pct(o.identifiers.exactListRate),
           ...LANGUAGES.map((l) => pct(lang(l).identifiers.exactListRate)),
         ],
+        ["Routing (team)", pct(o.routing.accuracy), ...LANGUAGES.map((l) => pct(lang(l).routing.accuracy))],
+        [
+          "Must-review recall",
+          pct(o.routing.mustReview.recall),
+          ...LANGUAGES.map((l) => pct(lang(l).routing.mustReview.recall)),
+        ],
+        [
+          "Must-review precision",
+          pct(o.routing.mustReview.precision),
+          ...LANGUAGES.map((l) => pct(lang(l).routing.mustReview.precision)),
+        ],
+        ["Sent to review", pct(o.routing.reviewRate), ...LANGUAGES.map((l) => pct(lang(l).routing.reviewRate))],
         [
           "Summary faithful",
           num(m.summaries.faithfulMean),
@@ -254,6 +275,50 @@ export function renderHtml(run: RunInfo, m: Metrics): string {
     `<h2>Confusion matrix</h2>`,
     `<p class="muted">Rows: labelled intent. Columns: predicted intent; <code>invalid</code> collects invalid outputs and errors. Shade = share of the row; the diagonal (bold) is correct.</p>`,
     `<div class="scroll">${confusionHeatmap(m)}</div>`,
+
+    `<h2>Routing</h2>`,
+    `<p class="muted">Each message is masked, enriched against the mock CRM (${esc(m.routing.enricherVersion)}) with the classified area and service type, and routed (${esc(m.routing.routerVersion)}). No model is called. Invalid outputs and errors go to <code>general</code> and to review.</p>`,
+    tableHtml(
+      ["Must-review", "Value"],
+      [
+        ["Labelled must-review", String(o.routing.mustReview.labelled)],
+        ["Sent to review", `${o.routing.mustReview.reviewed} (${pct(o.routing.reviewRate)} of all messages)`],
+        ["Caught (true positives)", String(o.routing.mustReview.tp)],
+        ["Reviewed but not labelled (false positives)", String(o.routing.mustReview.fp)],
+        ["Missed (false negatives)", String(o.routing.mustReview.fn)],
+      ],
+      [1],
+    ),
+    tableHtml(
+      ["Reason code", "Messages"],
+      m.routing.reasonCodes.map((r) => [`<code>${r.code}</code>`, String(r.n)]),
+      [1],
+    ),
+    tableHtml(
+      ["Labelled reason", "Caught by", "Labelled", "Caught", "Rate"],
+      m.routing.labelledReasons.map((r) => [
+        `<code>${r.reason}</code>`,
+        `<code>${r.caughtBy}</code>`,
+        String(r.labelled),
+        String(r.caught),
+        pct(r.rate),
+      ]),
+      [2, 3, 4],
+    ),
+    m.routing.missed.length === 0
+      ? `<p>No missed must-review messages.</p>`
+      : tableHtml(
+          ["Missed", "Lang", "Label", "Labelled reasons", "Routed to", "Confidence"],
+          m.routing.missed.map((x) => [
+            esc(x.id),
+            x.language,
+            `<code>${x.label}</code>`,
+            x.labelReasons.map((r) => `<code>${r}</code>`).join(", "),
+            `<code>${x.predictedTeam}</code>`,
+            num(x.confidence),
+          ]),
+          [5],
+        ),
 
     `<h2>Confidence</h2>`,
     `<p>Mean confidence ${num(m.confidence.meanCorrect)} when the intent was right, ${num(m.confidence.meanWrong)} when it was wrong.</p>`,

@@ -3,7 +3,17 @@
 // to 4 decimals and money to 6, so metrics.json is stable across machines.
 
 import type { LlmUsage } from "../../src/llm/client.js";
-import { INTENTS, LANGUAGES, type Intent, type Language } from "../../src/taxonomy.js";
+import {
+  INTENTS,
+  LANGUAGES,
+  REASON_CODES,
+  REVIEW_REASONS,
+  type Intent,
+  type Language,
+  type ReasonCode,
+  type ReviewReason,
+  type Team,
+} from "../../src/taxonomy.js";
 import type { MessageScore } from "./score.js";
 import type { OutputLine } from "./types.js";
 
@@ -31,7 +41,55 @@ export interface Breakdown {
   serviceTypeAccuracy: number | null;
   areaAccuracy: number | null;
   identifiers: { precision: number | null; recall: number | null; exactListRate: number | null };
+  routing: RoutingBreakdown;
 }
+
+/** Routing against the labels (P07): team accuracy and the must-review confusion counts. */
+export interface RoutingBreakdown {
+  /** Share of messages routed to the label's expected_team; invalid outputs go to general. */
+  accuracy: number | null;
+  mustReview: {
+    labelled: number;
+    reviewed: number;
+    tp: number;
+    fp: number;
+    fn: number;
+    recall: number | null;
+    precision: number | null;
+  };
+  /** Share of all messages sent to review. */
+  reviewRate: number | null;
+}
+
+export function routingBreakdown(scores: readonly MessageScore[]): RoutingBreakdown {
+  const r = scores.map((s) => s.routing);
+  const tp = r.filter((x) => x.labelMustReview && x.needsReview).length;
+  const fp = r.filter((x) => !x.labelMustReview && x.needsReview).length;
+  const fn = r.filter((x) => x.labelMustReview && !x.needsReview).length;
+  return {
+    accuracy: rate(r.filter((x) => x.team).length, r.length),
+    mustReview: {
+      labelled: tp + fn,
+      reviewed: tp + fp,
+      tp,
+      fp,
+      fn,
+      recall: rate(tp, tp + fn),
+      precision: rate(tp, tp + fp),
+    },
+    reviewRate: rate(tp + fp, r.length),
+  };
+}
+
+/**
+ * Which reason code is meant to catch each labelled review reason. `unclear` has no code of
+ * its own: at runtime the model's low confidence stands in for it.
+ */
+export const REASON_CAUGHT_BY: Readonly<Record<ReviewReason, ReasonCode>> = {
+  cancellation: "cancellation",
+  complaint: "complaint",
+  unclear: "low_confidence",
+};
 
 export function breakdown(scores: readonly MessageScore[]): Breakdown {
   const n = scores.length;
@@ -74,6 +132,7 @@ export function breakdown(scores: readonly MessageScore[]): Breakdown {
         n,
       ),
     },
+    routing: routingBreakdown(scores),
   };
 }
 
@@ -180,9 +239,45 @@ export interface Metrics {
     confidence: number;
     summary: string;
   }[];
+  routing: {
+    enricherVersion: string;
+    routerVersion: string;
+    /** sha256 of the CRM seed the messages were enriched against. */
+    seedSha256: string;
+    /** How many messages each code fired on, in REASON_CODES order. */
+    reasonCodes: { code: ReasonCode; n: number }[];
+    /** For each labelled review reason: how many messages have it, and how many got its code. */
+    labelledReasons: {
+      reason: ReviewReason;
+      caughtBy: ReasonCode;
+      labelled: number;
+      caught: number;
+      rate: number | null;
+    }[];
+    /** Messages labelled must_review that were not sent to review. */
+    missed: {
+      id: string;
+      language: Language;
+      label: Intent;
+      labelReasons: ReviewReason[];
+      predictedTeam: Team;
+      confidence: number | null;
+    }[];
+  };
 }
 
-export function computeMetrics(scores: readonly MessageScore[], lines: readonly OutputLine[]): Metrics {
+/** What the routing scores were computed with, for the report's settings (P07). */
+export interface RoutingInfo {
+  enricherVersion: string;
+  routerVersion: string;
+  seedSha256: string;
+}
+
+export function computeMetrics(
+  scores: readonly MessageScore[],
+  lines: readonly OutputLine[],
+  routingInfo: RoutingInfo,
+): Metrics {
   const n = scores.length;
   const intents = perIntent(scores);
   const f1s = intents.map((i) => i.f1).filter((f): f is number => f !== null);
@@ -274,5 +369,28 @@ export function computeMetrics(scores: readonly MessageScore[], lines: readonly 
         confidence: s.confidence!,
         summary: s.summary!,
       })),
+    routing: {
+      ...routingInfo,
+      reasonCodes: REASON_CODES.map((code) => ({
+        code,
+        n: scores.filter((s) => s.routing.reasonCodes.includes(code)).length,
+      })),
+      labelledReasons: REVIEW_REASONS.map((reason) => {
+        const caughtBy = REASON_CAUGHT_BY[reason];
+        const withReason = scores.filter((s) => s.routing.labelReasons.includes(reason));
+        const caught = withReason.filter((s) => s.routing.reasonCodes.includes(caughtBy)).length;
+        return { reason, caughtBy, labelled: withReason.length, caught, rate: rate(caught, withReason.length) };
+      }),
+      missed: scores
+        .filter((s) => s.routing.labelMustReview && !s.routing.needsReview)
+        .map((s) => ({
+          id: s.id,
+          language: s.language,
+          label: s.labelIntent,
+          labelReasons: s.routing.labelReasons,
+          predictedTeam: s.routing.predictedTeam,
+          confidence: s.confidence,
+        })),
+    },
   };
 }

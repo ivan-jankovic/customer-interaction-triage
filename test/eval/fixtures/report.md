@@ -6,7 +6,8 @@
 | Classifier | claude-opus-5-5, effort low, prompt classify.v1 |
 | Summary judge | claude-haiku-5-5, effort low, prompt summary-judge.v1 |
 | Masking | none (raw text sent to the model) |
-| Dataset | eval/data/dataset.jsonl (sha256 f4e50c3762ff) |
+| Routing | enrich.v1, route.v1, CRM seed sha256 56a37232d543 |
+| Dataset | eval/data/dataset.jsonl (sha256 5c8d651aff3d) |
 | Code | 0123456789ab |
 | Started | 2026-11-19T12:00:00.000Z |
 | Complete | yes |
@@ -27,6 +28,9 @@ The scoring is deterministic: `npm run eval:report -- 20261119-120000-full-claud
 | Area accuracy | 62.5% |
 | Identifiers precision / recall | 50.0% / 40.0% |
 | Identifier lists exactly right | 37.5% |
+| Routing accuracy (team) | 62.5% |
+| Must-review recall / precision | 80.0% / 66.7% |
+| Sent to review | 75.0% |
 | Summary faithful / complete (1–5) | 4.20 / 4.00 |
 | Summaries with personal data | 20.0% |
 
@@ -43,6 +47,9 @@ Invalid outputs and errors count as wrong in every accuracy.
 | Service type | 75.0% | 50.0% | 50.0% |
 | Area | 75.0% | 50.0% | 50.0% |
 | Identifiers P / R | 66.7% / 50.0% | 0.0% / 0.0% | – / – |
+| Routing | 50.0% | 50.0% | 100.0% |
+| Must-review R / P | 100.0% / 66.7% | 50.0% / 100.0% | 100.0% / 50.0% |
+| Sent to review | 75.0% | 50.0% | 100.0% |
 | Summary faithful / complete | 4.33 / 3.67 | 5.00 / 5.00 | 3.00 / 4.00 |
 
 Groups under 30 messages are indicative only: one message moves their accuracy by several points.
@@ -70,6 +77,53 @@ Rows are the labelled intents, columns the predicted ones; `invalid` collects in
 | `cancellation` | 0 | 0 | 0 | **0** | 0 | 0 | 1 |
 | `complaint` | 1 | 0 | 0 | 0 | **1** | 0 | 0 |
 | `other` | 0 | 0 | 0 | 0 | 0 | **0** | 1 |
+
+## Routing
+
+Each message is masked, enriched against the mock CRM (enrich.v1) with the classified area and service type, and routed (route.v1), as the pipeline would. No model is called. Invalid outputs and errors go to `general` and to review.
+
+| Must-review | Value |
+| --- | --- |
+| Labelled must-review | 5 |
+| Sent to review | 6 (75.0% of all messages) |
+| Caught (true positives) | 4 |
+| Reviewed but not labelled (false positives) | 2 |
+| Missed (false negatives) | 1 |
+| Recall / precision | 80.0% / 66.7% |
+
+### Reason codes
+
+Messages each code fired on; a message can have several.
+
+| Code | Messages |
+| --- | --- |
+| `invalid_output` | 1 |
+| `classification_error` | 1 |
+| `cancellation` | 0 |
+| `complaint` | 2 |
+| `low_confidence` | 1 |
+| `customer_not_found` | 1 |
+| `customer_ambiguous` | 0 |
+| `customer_unidentified` | 0 |
+| `crm_mismatch_unmatched_key` | 0 |
+| `crm_mismatch_service_type` | 1 |
+| `investigation_inconclusive` | 0 |
+
+### Labelled reasons
+
+Whether each labelled review reason got its own code. A message caught by another code still counts for must-review recall.
+
+| Labelled reason | Caught by | Labelled | Caught | Rate |
+| --- | --- | --- | --- | --- |
+| `cancellation` | `cancellation` | 1 | 0 | 0.0% |
+| `complaint` | `complaint` | 2 | 1 | 50.0% |
+| `unclear` | `low_confidence` | 2 | 1 | 50.0% |
+
+### Missed must-review messages
+
+| Message | Lang | Label | Labelled reasons | Routed to | Confidence |
+| --- | --- | --- | --- | --- | --- |
+| m3 | sk | `billing_question` | `unclear` | `billing` | 0.70 |
 
 ## Confidence
 

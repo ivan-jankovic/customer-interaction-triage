@@ -31,6 +31,10 @@ export function renderMarkdown(run: RunInfo, m: Metrics): string {
         ],
         ["Summary judge", `${run.judge.model}, effort ${run.judge.effort}, prompt ${run.judge.promptVersion}`],
         ["Masking", run.masker ? run.masker.version : "none (raw text sent to the model)"],
+        [
+          "Routing",
+          `${m.routing.enricherVersion}, ${m.routing.routerVersion}, CRM seed sha256 ${m.routing.seedSha256.slice(0, 12)}`,
+        ],
         ["Dataset", `${run.dataset.file} (sha256 ${run.dataset.sha256.slice(0, 12)})`],
         ["Code", `${run.git.commit.slice(0, 12)}${run.git.dirty ? " (with uncommitted changes)" : ""}`],
         ["Started", run.startedAt],
@@ -63,6 +67,12 @@ export function renderMarkdown(run: RunInfo, m: Metrics): string {
         ["Area accuracy", pct(o.areaAccuracy)],
         ["Identifiers precision / recall", `${pct(o.identifiers.precision)} / ${pct(o.identifiers.recall)}`],
         ["Identifier lists exactly right", pct(o.identifiers.exactListRate)],
+        ["Routing accuracy (team)", pct(o.routing.accuracy)],
+        [
+          "Must-review recall / precision",
+          `${pct(o.routing.mustReview.recall)} / ${pct(o.routing.mustReview.precision)}`,
+        ],
+        ["Sent to review", pct(o.routing.reviewRate)],
         ["Summary faithful / complete (1–5)", `${num(m.summaries.faithfulMean)} / ${num(m.summaries.completeMean)}`],
         ["Summaries with personal data", pct(m.summaries.personalDataShare)],
       ],
@@ -90,6 +100,15 @@ export function renderMarkdown(run: RunInfo, m: Metrics): string {
             (l) => `${pct(m.byLanguage[l].identifiers.precision)} / ${pct(m.byLanguage[l].identifiers.recall)}`,
           ),
         ],
+        ["Routing", ...LANGUAGES.map((l) => pct(m.byLanguage[l].routing.accuracy))],
+        [
+          "Must-review R / P",
+          ...LANGUAGES.map(
+            (l) =>
+              `${pct(m.byLanguage[l].routing.mustReview.recall)} / ${pct(m.byLanguage[l].routing.mustReview.precision)}`,
+          ),
+        ],
+        ["Sent to review", ...LANGUAGES.map((l) => pct(m.byLanguage[l].routing.reviewRate))],
         [
           "Summary faithful / complete",
           ...LANGUAGES.map(
@@ -127,6 +146,59 @@ export function renderMarkdown(run: RunInfo, m: Metrics): string {
       ]),
     ),
   );
+
+  push("## Routing");
+  const mr = o.routing.mustReview;
+  push(
+    `Each message is masked, enriched against the mock CRM (${m.routing.enricherVersion}) with the classified area and service type, and routed (${m.routing.routerVersion}), as the pipeline would. No model is called. Invalid outputs and errors go to \`general\` and to review.`,
+  );
+  push(
+    table(
+      ["Must-review", "Value"],
+      [
+        ["Labelled must-review", mr.labelled],
+        ["Sent to review", `${mr.reviewed} (${pct(o.routing.reviewRate)} of all messages)`],
+        ["Caught (true positives)", mr.tp],
+        ["Reviewed but not labelled (false positives)", mr.fp],
+        ["Missed (false negatives)", mr.fn],
+        ["Recall / precision", `${pct(mr.recall)} / ${pct(mr.precision)}`],
+      ],
+    ),
+  );
+  push("### Reason codes");
+  push("Messages each code fired on; a message can have several.");
+  push(
+    table(
+      ["Code", "Messages"],
+      m.routing.reasonCodes.map((r) => [`\`${r.code}\``, r.n]),
+    ),
+  );
+  push("### Labelled reasons");
+  push(
+    "Whether each labelled review reason got its own code. A message caught by another code still counts for must-review recall.",
+  );
+  push(
+    table(
+      ["Labelled reason", "Caught by", "Labelled", "Caught", "Rate"],
+      m.routing.labelledReasons.map((r) => [`\`${r.reason}\``, `\`${r.caughtBy}\``, r.labelled, r.caught, pct(r.rate)]),
+    ),
+  );
+  push("### Missed must-review messages");
+  if (m.routing.missed.length === 0) push("None: every message labelled must-review was sent to review.");
+  else
+    push(
+      table(
+        ["Message", "Lang", "Label", "Labelled reasons", "Routed to", "Confidence"],
+        m.routing.missed.map((x) => [
+          x.id,
+          x.language,
+          `\`${x.label}\``,
+          x.labelReasons.map((r) => `\`${r}\``).join(", "),
+          `\`${x.predictedTeam}\``,
+          num(x.confidence),
+        ]),
+      ),
+    );
 
   push("## Confidence");
   push(
