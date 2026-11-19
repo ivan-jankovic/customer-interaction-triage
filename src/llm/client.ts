@@ -71,9 +71,70 @@ export interface LlmClient {
   complete(request: LlmRequest): Promise<LlmResult>;
 }
 
+// --- Multi-turn calls with tools (P10, the investigating agent) ---------------------------------
+
+/** A tool the model may call; sent with `strict: true`, its schema stripped like output schemas. */
+export interface ToolDefinition {
+  name: string;
+  description: string;
+  input_schema: Record<string, unknown> | object;
+}
+
+/** Content the loop sends: text, or the results of the tools the model asked for. */
+export type UserContent =
+  { type: "text"; text: string } | { type: "tool_result"; tool_use_id: string; content: string; is_error?: boolean };
+
+/**
+ * A conversation message. Assistant content is passed back exactly as the API returned it
+ * (`ConverseResult.content`): with thinking on, its blocks carry signatures the API checks.
+ */
+export type ConverseMessage =
+  { role: "user"; content: string | UserContent[] } | { role: "assistant"; content: readonly unknown[] };
+
+export interface ConverseRequest {
+  model: string;
+  system: string;
+  messages: readonly ConverseMessage[];
+  tools: readonly ToolDefinition[];
+  /** The final answer's JSON Schema, sent as output_config.format together with the tools. */
+  schema?: Record<string, unknown>;
+  maxTokens: number;
+  effort: Effort;
+}
+
+export interface ToolUse {
+  id: string;
+  name: string;
+  input: unknown;
+}
+
+export type ConverseResult =
+  | {
+      ok: true;
+      /** The assistant content blocks as returned, to append to the conversation unchanged. */
+      content: readonly unknown[];
+      toolUses: ToolUse[];
+      /** The text blocks joined: the final answer when the model stopped without tool calls. */
+      text: string;
+      stopReason: string | null;
+      model: string;
+      usage: LlmUsage;
+    }
+  | Extract<LlmResult, { ok: false }>;
+
+/** The client's second method (P10): one turn of a conversation with tools. */
+export interface ConverseClient {
+  converse(request: ConverseRequest): Promise<ConverseResult>;
+}
+
 /** Free token counting (`messages.countTokens`), used by `classify --dry-run`. */
 export interface TokenCounter {
   countTokens(request: LlmRequest): Promise<number>;
+}
+
+/** Free token counting for a conversation turn, used by `investigate --dry-run`. */
+export interface ConverseTokenCounter {
+  countConverseTokens(request: ConverseRequest): Promise<number>;
 }
 
 export const ZERO_USAGE: LlmUsage = {
@@ -132,6 +193,50 @@ export function toCreateParams(request: LlmRequest): CreateParams {
   };
 }
 
+/**
+ * The request body for one conversation turn (exported for tests). Strict tools, the answer
+ * schema as output_config.format, the system prompt cached (with the tools before it, the
+ * cache covers both), and no fallbacks: the stored model must be the one that used the tools.
+ */
+export function toConverseParams(request: ConverseRequest): CreateParams {
+  return {
+    model: request.model,
+    max_tokens: request.maxTokens,
+    system: [{ type: "text", text: request.system, cache_control: { type: "ephemeral" } }],
+    messages: request.messages as CreateParams["messages"],
+    tools: request.tools.map((t) => ({
+      name: t.name,
+      description: t.description,
+      input_schema: toApiSchema(t.input_schema) as Anthropic.Beta.Messages.BetaTool.InputSchema,
+      strict: true,
+    })),
+    output_config: {
+      effort: request.effort,
+      ...(request.schema
+        ? { format: { type: "json_schema", schema: toApiSchema(request.schema) as Record<string, unknown> } }
+        : {}),
+    },
+  };
+}
+
+/** Converts one conversation turn's response (exported for tests). */
+export function toConverseResult(response: Anthropic.Beta.Messages.BetaMessage): ConverseResult {
+  const base = toResult(response);
+  if (!base.ok) return base;
+  const toolUses = response.content
+    .filter((b): b is Anthropic.Beta.Messages.BetaToolUseBlock => b.type === "tool_use")
+    .map((b) => ({ id: b.id, name: b.name, input: b.input }));
+  return {
+    ok: true,
+    content: response.content,
+    toolUses,
+    text: base.text,
+    stopReason: response.stop_reason,
+    model: base.model,
+    usage: base.usage,
+  };
+}
+
 /** The part of the SDK the client uses, so tests can pass a fake. */
 export interface MessagesApi {
   beta: {
@@ -170,25 +275,45 @@ export function toResult(response: Anthropic.Beta.Messages.BetaMessage): LlmResu
   return { ok: true, text, model, usage, fellBack };
 }
 
-export function createAnthropicClient(sdk: MessagesApi = new Anthropic({ maxRetries: 3 })): LlmClient & TokenCounter {
+/** An API error as a result (non-retryable errors and exhausted retries); anything else rethrows. */
+function apiErrorResult(error: unknown, model: string): Extract<LlmResult, { ok: false }> {
+  if (error instanceof Anthropic.APIError) {
+    return {
+      ok: false,
+      error: `API error ${error.status ?? "?"}: ${error.message}`,
+      failure: "api_error",
+      status: typeof error.status === "number" ? error.status : null,
+      model,
+      usage: ZERO_USAGE,
+    };
+  }
+  throw error;
+}
+
+export function createAnthropicClient(
+  sdk: MessagesApi = new Anthropic({ maxRetries: 3 }),
+): LlmClient & TokenCounter & ConverseClient & ConverseTokenCounter {
   return {
     async complete(request) {
       try {
         return toResult(await sdk.beta.messages.create(toCreateParams(request)));
       } catch (error) {
-        // Non-retryable API errors (400, 401, 404) and exhausted retries end here.
-        if (error instanceof Anthropic.APIError) {
-          return {
-            ok: false,
-            error: `API error ${error.status ?? "?"}: ${error.message}`,
-            failure: "api_error",
-            status: typeof error.status === "number" ? error.status : null,
-            model: request.model,
-            usage: ZERO_USAGE,
-          };
-        }
-        throw error;
+        return apiErrorResult(error, request.model);
       }
+    },
+
+    async converse(request) {
+      try {
+        return toConverseResult(await sdk.beta.messages.create(toConverseParams(request)));
+      } catch (error) {
+        return apiErrorResult(error, request.model);
+      }
+    },
+
+    async countConverseTokens(request) {
+      const { model, system, messages, tools, output_config } = toConverseParams(request);
+      const result = await sdk.beta.messages.countTokens({ model, system, messages, tools, output_config });
+      return result.input_tokens;
     },
 
     async countTokens(request) {
