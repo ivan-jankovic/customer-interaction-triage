@@ -53,7 +53,7 @@ describe("npm run eval", () => {
     expect(calls).toHaveLength(0);
     expect(readdirSync(resultsDir)).toEqual([]);
     expect(log.join("\n")).toMatch(/18 jobs, 36 model calls/);
-    expect(log.join("\n")).toMatch(/Estimated cost: \$\d+\.\d\d/);
+    expect(log.join("\n")).toMatch(/Estimated cost: \$\d+\.\d\d .*Cap: \$3\.00\./);
   });
 
   it("classifies and grades the subset and writes every file", async () => {

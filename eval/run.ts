@@ -36,6 +36,7 @@ import { readSmallSubset, SMALL_SUBSET_PATH } from "./subsets.js";
 const CLASSIFY_OUTPUT_ESTIMATE = 600;
 const JUDGE_OUTPUT_ESTIMATE = 300;
 const SUMMARY_TOKENS_ESTIMATE = 100;
+export const EVAL_MAX_COST = 3;
 
 export interface RunInfo {
   runId: string;
@@ -98,7 +99,8 @@ export async function runEval(argv: string[], deps: EvalDeps = {}): Promise<stri
   const datasetPath = deps.datasetPath ?? PATHS.dataset;
   const resultsDir = deps.resultsDir ?? PATHS.results;
 
-  const options = parseRunOptions(argv);
+  // The eval's own cap default is $3 (P04 requirements.md); the P00 scripts keep theirs.
+  const options = { ...parseRunOptions(argv), ...(argv.includes("--max-cost") ? {} : { maxCost: EVAL_MAX_COST }) };
   const subsetIndex = argv.indexOf("--subset");
   const subsetName = subsetIndex >= 0 ? argv[subsetIndex + 1] : undefined;
   if (subsetName !== undefined && subsetName !== "small")
