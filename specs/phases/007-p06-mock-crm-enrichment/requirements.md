@@ -155,3 +155,15 @@ Synthetic values (customer numbers, phones, e-mails, contract numbers) that the 
 - **One lookup method.** `CrmLookup` has a single `customersByKey(type, key)` instead of one method per key type; both implementations compare keys with the same `lookupKey`.
 - **E-mail domains.** The spec said `example.net`/`example.com`; the generator reuses the dataset's identifier functions, which also use `example.org` (all three are reserved by RFC 2606).
 - **Area fallback wording.** The rule was clarified while writing the tests (see "Outage check"): services of the classified type when the customer has any, otherwise all, active ones preferred, and only when they share one area.
+
+## Results (recorded during implementation)
+
+- **Seed:** 77 customers, 121 services, 82 tickets, 15 outages. Of the 100 dataset messages, 47 are `found` (3 with an unknown key), 5 `not_found`, 5 `ambiguous` and 43 `no_identifiers`. 8 of the 15 technical faults with an area have a matching outage, and 4 have a near miss. Details are in [`eval/data/crm/README.md`](../../../eval/data/crm/README.md).
+- **The rules agree with the design** for all 100 messages, both in memory (unit test) and through PostgreSQL (integration test). The PostgreSQL lookup gives the same answer as the in-memory one for every key, customer and outage window in the seed.
+- **Demo** (a separate `triage_demo` database, dropped afterwards; the development database was not touched): after `crm:seed` and `dataset:load`, three paid `classify` calls ($0.034 in total), then `enrich`:
+  - msg-011: `found` by `[CUSTOMER_NUMBER_1]`, area Opava from the message, one ongoing mobile outage;
+  - msg-097: `not_found`, `[CONTRACT_NUMBER_1]` not in the CRM, no area;
+  - msg-022: `ambiguous`, two customers matched by `[EMAIL_1]`, no area.
+
+  The model's area and service type equalled the labels for all three, so the results equal the seed's expectations.
+- **Finding for P07: tariffs are random.** The generator picks each service's tariff at random from `src/company.ts`, so it often differs from the tariff a message names (msg-011 says "Merelo Mobil S"; the CRM has "Merelo Data Only 50"). This doesn't affect P06, which never compares tariffs. If P07's "CRM mismatch" rule compares tariffs or service details, the generator must first take them from the messages (a new generator version).
