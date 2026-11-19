@@ -95,6 +95,31 @@ export const REASON_CODES = [
 ] as const;
 export type ReasonCode = (typeof REASON_CODES)[number];
 
+/**
+ * Likely causes the investigating agent (P10) can return for a technical fault. Each one has
+ * evidence a tool can show; `inconclusive` is the answer when the tools show none.
+ */
+export const LIKELY_CAUSES = [
+  "area_outage",
+  "line_fault",
+  "customer_equipment",
+  "service_inactive",
+  "inconclusive",
+] as const;
+export type LikelyCause = (typeof LIKELY_CAUSES)[number];
+
+/** How an investigation attempt ended (P10): only `valid` carries a cause. */
+export const INVESTIGATION_OUTCOMES = ["valid", "step_limit", "invalid", "error"] as const;
+export type InvestigationOutcome = (typeof INVESTIGATION_OUTCOMES)[number];
+
+/** The mock CRM's line state per service (P10, crm_line_status). */
+export const LINE_STATES = ["up", "degraded", "down"] as const;
+export type LineState = (typeof LINE_STATES)[number];
+
+/** The investigating agent's tools: read-only, and the only ones it has (P10). */
+export const INVESTIGATE_TOOLS = ["check_outages", "get_line_status", "get_recent_tickets"] as const;
+export type InvestigateTool = (typeof INVESTIGATE_TOOLS)[number];
+
 export const CHANNELS = ["email", "chat", "call"] as const;
 export type Channel = (typeof CHANNELS)[number];
 

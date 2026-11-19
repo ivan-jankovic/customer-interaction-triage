@@ -20,6 +20,10 @@
     "classify.v2": {
       "file": "src/llm/prompts/classify.v2.md",
       "sha256": "1be65fa847d0c24e8d3640dd49ad996711e43ab3130334b8b071c8f3b85865ff"
+    },
+    "investigate.v1": {
+      "file": "src/llm/prompts/investigate.v1.md",
+      "sha256": "a78a5415aa138befb2ed58b08fcc4ee9abd9bbd42c17958b7d4af7f2db4870fe"
     }
   }
 }

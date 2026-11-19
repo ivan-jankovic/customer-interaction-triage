@@ -30,6 +30,7 @@ const promptFiles = PROMPT_DIRS.flatMap((dir) =>
 const PUBLISHED = {
   "classify.v1": "5cbe9e96e1f574927aad9a5f66d095be6ff6aab97367ee56a1f2b20e5ccbe4b6", // P03
   "summary-judge.v1": "84168ebd849a278d0d7f5d0f96ca5edfb52c0a4e6e66a662066a9a38e9d9d6ca", // P04; P05 keeps it unchanged
+  "classify.v2": "1be65fa847d0c24e8d3640dd49ad996711e43ab3130334b8b071c8f3b85865ff", // P05; P10 keeps it unchanged
 };
 
 describe("prompt version registry", () => {
@@ -53,7 +54,7 @@ describe("prompt version registry", () => {
   });
 });
 
-describe.each(["classify.v1", "classify.v2"])("%s", (version) => {
+describe.each(["classify.v1", "classify.v2", "investigate.v1"])("%s", (version) => {
   const raw = readFileSync(join(ROOT, `src/llm/prompts/${version}.md`), "utf8");
   const normalize = (s: string) => s.replace(/\s+/g, " ").toLowerCase();
   const prompt = normalize(raw);
@@ -61,7 +62,7 @@ describe.each(["classify.v1", "classify.v2"])("%s", (version) => {
   it("has system and user sections with the channel and message placeholders", () => {
     const template = loadPrompt(version);
     expect(template.user).toContain("{{channel}}");
-    expect(template.user).toMatch(/<customer_message>\n\{\{message\}\}\n<\/customer_message>/);
+    expect(template.user).toMatch(/<customer_message[^>]*>\n\{\{message\}\}\n<\/customer_message>/);
   });
 
   it("contains no dataset or injection message, not even a 40-character excerpt", () => {
