@@ -1,0 +1,278 @@
+{
+  "n": 100,
+  "outcomes": {
+    "valid": 100,
+    "invalid": 0,
+    "error": 0,
+    "fellBack": 0
+  },
+  "overall": {
+    "n": 100,
+    "indicative": false,
+    "validRate": 1,
+    "intentAccuracy": 1,
+    "urgencyAccuracy": 0.89,
+    "languageAccuracy": 1,
+    "serviceTypeAccuracy": 0.99,
+    "areaAccuracy": 0.99,
+    "identifiers": {
+      "precision": 1,
+      "recall": 1,
+      "exactListRate": 1
+    }
+  },
+  "byLanguage": {
+    "cs": {
+      "n": 60,
+      "indicative": false,
+      "validRate": 1,
+      "intentAccuracy": 1,
+      "urgencyAccuracy": 0.9,
+      "languageAccuracy": 1,
+      "serviceTypeAccuracy": 1,
+      "areaAccuracy": 0.9833,
+      "identifiers": {
+        "precision": 1,
+        "recall": 1,
+        "exactListRate": 1
+      }
+    },
+    "sk": {
+      "n": 20,
+      "indicative": true,
+      "validRate": 1,
+      "intentAccuracy": 1,
+      "urgencyAccuracy": 0.9,
+      "languageAccuracy": 1,
+      "serviceTypeAccuracy": 1,
+      "areaAccuracy": 1,
+      "identifiers": {
+        "precision": 1,
+        "recall": 1,
+        "exactListRate": 1
+      }
+    },
+    "en": {
+      "n": 20,
+      "indicative": true,
+      "validRate": 1,
+      "intentAccuracy": 1,
+      "urgencyAccuracy": 0.85,
+      "languageAccuracy": 1,
+      "serviceTypeAccuracy": 0.95,
+      "areaAccuracy": 1,
+      "identifiers": {
+        "precision": 1,
+        "recall": 1,
+        "exactListRate": 1
+      }
+    }
+  },
+  "perIntent": [
+    {
+      "intent": "billing_question",
+      "support": 17,
+      "predicted": 17,
+      "correct": 17,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    {
+      "intent": "technical_fault",
+      "support": 17,
+      "predicted": 17,
+      "correct": 17,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    {
+      "intent": "tariff_change",
+      "support": 17,
+      "predicted": 17,
+      "correct": 17,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    {
+      "intent": "cancellation",
+      "support": 16,
+      "predicted": 16,
+      "correct": 16,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    {
+      "intent": "complaint",
+      "support": 17,
+      "predicted": 17,
+      "correct": 17,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    {
+      "intent": "other",
+      "support": 16,
+      "predicted": 16,
+      "correct": 16,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    }
+  ],
+  "macroF1": 1,
+  "confusion": {
+    "rows": [
+      "billing_question",
+      "technical_fault",
+      "tariff_change",
+      "cancellation",
+      "complaint",
+      "other"
+    ],
+    "columns": [
+      "billing_question",
+      "technical_fault",
+      "tariff_change",
+      "cancellation",
+      "complaint",
+      "other",
+      "invalid"
+    ],
+    "counts": [
+      [
+        17,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        17,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        17,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        16,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        17,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        16,
+        0
+      ]
+    ]
+  },
+  "summaries": {
+    "graded": 97,
+    "notGraded": 3,
+    "faithfulMean": 4.8969,
+    "completeMean": 4.4124,
+    "personalDataShare": 0,
+    "byLanguage": {
+      "cs": {
+        "graded": 59,
+        "faithfulMean": 4.8983,
+        "completeMean": 4.3729
+      },
+      "sk": {
+        "graded": 19,
+        "faithfulMean": 4.7895,
+        "completeMean": 4.4211
+      },
+      "en": {
+        "graded": 19,
+        "faithfulMean": 5,
+        "completeMean": 4.5263
+      }
+    }
+  },
+  "confidence": {
+    "meanCorrect": 0.8648,
+    "meanWrong": null,
+    "bands": [
+      {
+        "band": "< 0.5",
+        "n": 2,
+        "intentAccuracy": 1
+      },
+      {
+        "band": "0.5–0.8",
+        "n": 10,
+        "intentAccuracy": 1
+      },
+      {
+        "band": "0.8–0.9",
+        "n": 33,
+        "intentAccuracy": 1
+      },
+      {
+        "band": "≥ 0.9",
+        "n": 55,
+        "intentAccuracy": 1
+      }
+    ]
+  },
+  "cost": {
+    "classifierUsd": 0.661972,
+    "judgeUsd": 0.011611,
+    "totalUsd": 0.673583,
+    "perMessageUsd": 0.006736,
+    "unpricedCalls": 0,
+    "classifierTokens": {
+      "input_tokens": 48428,
+      "output_tokens": 16901,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 325600
+    },
+    "judgeTokens": {
+      "input_tokens": 57550,
+      "output_tokens": 10001,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 85600
+    }
+  },
+  "latencyMs": {
+    "p50": 2179,
+    "p95": 3052,
+    "max": 4819
+  },
+  "worstErrors": []
+}

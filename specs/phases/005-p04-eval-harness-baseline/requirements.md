@@ -121,3 +121,14 @@ Ground truth is each record's `final` labels. `n` is the number of messages in t
 - **The judge sees personal data too.** The summary judge receives the message, including its synthetic identifiers, to check faithfulness. This falls under the same exception and is revisited in P05.
 - **The demo's urgency differences** (msg-006 and msg-059 labelled `normal`, predicted `low`) are the kind of finding the baseline will quantify; P04 does not change the prompt.
 - **The prompt files and the build.** `dist/` still doesn't include prompt files (a P03 note for P08); the eval runs with tsx, so this doesn't affect P04.
+
+## Baseline findings
+
+The baseline is `eval/results/kept/20261119-002345-full-claude-opus-5-5-classify.v1` (`claude-opus-5-5`, effort `low`, `classify.v1`, judge `claude-haiku-5-5`, `summary-judge.v1`). Recorded during implementation, for the phases that build on it:
+
+- **Intent reaches the ceiling.** All 100 intents are correct (macro F1 1.000), including the 15 designed-ambiguous messages. On this dataset, intent accuracy can't tell two prompts or models apart. P12's comparisons will need harder or new messages, or should compare on urgency, fields, summaries, confidence and cost instead. The labels were built from the same labelling guide that `classify.v1` condenses, so some agreement is expected; the dataset is synthetic and has no messy real-world noise.
+- **Urgency is the weakest field (89%), and its errors all go one way.** All 11 errors are `normal` labelled but `low` predicted, on routine `billing_question` and `tariff_change` messages; the guide counts "most change requests" as `normal`. This is a candidate for `classify.v2` (P12). The prompt is not changed in P04.
+- **Confidence separates unclear messages.** The six messages labelled `unclear` got the six lowest confidences (0.45–0.60); every other message scored higher. That is a basis for P07's review threshold (e.g. below about 0.65), to be confirmed there. The bands can't show calibration yet, because no intent was wrong.
+- **Three summaries were not graded because of a harness limit.** The judge schema allows 300 characters for `reason`. That limit is stripped from the API schema, and three judge answers exceeded it, so Ajv rejected them (msg-019, msg-030, msg-092). Their scores were in range. The limit should be raised (with a new judge version, since the schema is part of what the judge is asked for) before the next comparison; the baseline reports 97 graded, as it is.
+- **Cost and latency.** The run cost $0.67 ($0.0067 per message), with $0.66 for the classifier. Classifier latency was p50 2.2 s and p95 3.1 s. There were no fallbacks, invalid outputs or errors. The cache was warm from the subset run minutes earlier (no cache writes), so a cold run costs a few cents more.
+
