@@ -68,7 +68,7 @@ After a message is classified, the enrichment step looks up the customer in a **
 - **Customer:** found by the masked customer number, contract number, phone or e-mail (never by birth number, bank account or IBAN). The outcome is `found`, `not_found`, `ambiguous` (the keys point at more than one customer) or `no_identifiers`.
 - **Outages:** in the message's area, or the found customer's area when the message names none; of the message's service type; covering the time the message was received.
 
-Every attempt is stored in `enrichments` with the candidates and the placeholders that matched them, the area and where it came from, and the matching outages. Deciding what an ambiguous or unknown customer means for routing comes in P07.
+Every attempt is stored in `enrichments` with the candidates and the placeholders that matched them, the area and where it came from, and the matching outages. What an ambiguous or unknown customer means for the case is decided by the routing rules (below).
 
 The mock CRM is generated from the dataset by code, so it matches the messages, including some deliberately not-found and ambiguous ones; see [eval/data/crm/README.md](eval/data/crm/README.md).
 
@@ -80,6 +80,25 @@ npm run enrich -- msg-011   # customer, area and outages for the latest classifi
 ```
 
 `crm:seed` refuses to replace the CRM once enrichments point at its customers; to reseed, start from a fresh database (`docker compose down -v`, then `docker compose up -d --wait`).
+
+## Routing and cases
+
+The routing step turns the classification and the enrichment into a **case**: the target team, whether a person must review it, and the reason codes. The rules are plain code (`route.v1` in [src/pipeline/route.ts](src/pipeline/route.ts)), no model, and free to run.
+
+- **Team** by intent (billing, technical support, sales, retention, complaints, general); `general` when the model's output was invalid or the call failed.
+- **Review** when any rule applies, with all the codes kept: invalid output or a failed call, a cancellation or complaint, confidence below 0.7, a customer not found or ambiguous, a technical fault with no account identifiers, or a CRM mismatch (a key that matched no one, or a service type the customer doesn't have).
+
+Each interaction gets **one case**, written together with a **decision log**: one entry per step (mask, classify, enrich, route) with the IDs it read, what it produced and the version that decided. The log holds no message text and no identifier values.
+
+```sh
+npm run classify -- msg-011 # costs money
+npm run enrich -- msg-011   # free
+npm run route -- msg-011    # team, review flag, reason codes and the decision log (free); a second run writes nothing
+```
+
+On the kept `classify.v2` run, routing sends every message to its labelled team, catches **all 38** messages labelled must-review (recall 100%, precision 67.9%), and sends 56 of the 100 messages to review. The rules and their reasons are in the [P07 spec](specs/phases/008-p07-routing-rules-decision-log/requirements.md).
+
+The review rate reflects the test set, not real traffic. The dataset gives every intent an equal share, so cancellations and complaints, which are always reviewed, make up a third of it. The mock CRM was also seeded with not-found and ambiguous customers on purpose. Among routine messages (all intents except cancellation and complaint), 34% go to review. The rules are conservative on purpose: a missed review costs more than an extra check. They are meant to be tuned later with reviewers' corrections (P09) and the confidence-gate comparison (P17). The breakdown is in the P07 spec, under Results.
 
 ## Evaluating
 
@@ -94,7 +113,7 @@ npm run eval:keep -- <run-id>              # move a run to eval/results/kept/ so
 npm run eval:compare -- <run A> <run B>    # two runs side by side, with the change in each metric
 ```
 
-Each run lands in `eval/results/<run-id>/` with `report.md` and `report.html` (intent accuracy, per-intent precision and recall, confusion matrix, field accuracy, summary scores, confidence, cost and latency, overall and per language). The format is described in [eval/results/README.md](eval/results/README.md); kept runs, including the baseline, are in [eval/results/kept/](eval/results/kept/).
+Each run lands in `eval/results/<run-id>/` with `report.md` and `report.html` (intent accuracy, per-intent precision and recall, confusion matrix, field accuracy, routing accuracy and must-review recall, summary scores, confidence, cost and latency, overall and per language). Routing is scored from the stored outputs against the mock CRM seed, without a model, so `eval:report` adds it to older runs too. The format is described in [eval/results/README.md](eval/results/README.md); kept runs, including the baseline, are in [eval/results/kept/](eval/results/kept/).
 
 ## Checks
 

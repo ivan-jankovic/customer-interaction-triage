@@ -61,9 +61,33 @@ export const IDENTIFIER_TYPES = [
 ] as const;
 export type IdentifierType = (typeof IDENTIFIER_TYPES)[number];
 
-/** Review reasons that can be labelled in the dataset. Runtime-only reasons are added in P07. */
+/**
+ * Review reasons that can be labelled in the dataset. The runtime routing rules use their own
+ * list, REASON_CODES, because a label and a reason code are different things (P07).
+ */
 export const REVIEW_REASONS = ["cancellation", "complaint", "unclear"] as const;
 export type ReviewReason = (typeof REVIEW_REASONS)[number];
+
+/**
+ * Reason codes the routing rules (src/pipeline/route.ts) give a case, in the order they are
+ * listed on it. A case needs review exactly when it has at least one. The dataset's `unclear`
+ * label has no code of its own: at runtime it is caught by `low_confidence`.
+ */
+export const REASON_CODES = [
+  "invalid_output",
+  "classification_error",
+  "cancellation",
+  "complaint",
+  "low_confidence",
+  "customer_not_found",
+  "customer_ambiguous",
+  "customer_unidentified",
+  "crm_mismatch_unmatched_key",
+  "crm_mismatch_service_type",
+  /** Produced from P10 (the investigating agent); never produced by route.v1. */
+  "investigation_inconclusive",
+] as const;
+export type ReasonCode = (typeof REASON_CODES)[number];
 
 export const CHANNELS = ["email", "chat", "call"] as const;
 export type Channel = (typeof CHANNELS)[number];

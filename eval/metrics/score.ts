@@ -1,7 +1,9 @@
-// Scores one message's classification against its final labels (P04 requirements.md, Metrics).
+// Scores one message's classification against its final labels (P04 requirements.md, Metrics),
+// and its routing decision against the labelled team and must-review flag (P07).
 
+import type { RouteResult } from "../../src/pipeline/route.js";
 import type { ClassificationAttempt } from "../../src/pipeline/understand.js";
-import type { Intent, Language } from "../../src/taxonomy.js";
+import type { Intent, Language, ReasonCode, ReviewReason, Team } from "../../src/taxonomy.js";
 import { normaliseArea } from "../dataset/mismatch.js";
 import type { Labels } from "../schema/labels.schema.js";
 
@@ -21,6 +23,18 @@ export interface MessageScore {
   identifiers: { tp: number; fp: number; fn: number; exact: boolean };
   confidence: number | null;
   summary: string | null;
+  routing: RoutingScore;
+}
+
+/** The routing decision (route.v1, computed by eval/lib/route-message.ts) against the labels. */
+export interface RoutingScore {
+  labelTeam: Team;
+  predictedTeam: Team;
+  team: boolean;
+  labelMustReview: boolean;
+  needsReview: boolean;
+  labelReasons: ReviewReason[];
+  reasonCodes: ReasonCode[];
 }
 
 const key = (i: { type: string; value: string }) => `${i.type}\u0000${i.value}`;
@@ -50,6 +64,7 @@ export function scoreMessage(
   language: Language,
   labels: Labels,
   attempt: ClassificationAttempt,
+  routed: Pick<RouteResult, "targetTeam" | "needsReview" | "reasonCodes">,
 ): MessageScore {
   const c = attempt.outcome === "valid" ? attempt.classification : null;
   const expectedIds = labels.fields.identifiers;
@@ -70,5 +85,14 @@ export function scoreMessage(
     identifiers: { ...ids, exact: c !== null && ids.exact },
     confidence: c?.confidence ?? null,
     summary: c?.summary ?? null,
+    routing: {
+      labelTeam: labels.expected_team,
+      predictedTeam: routed.targetTeam,
+      team: routed.targetTeam === labels.expected_team,
+      labelMustReview: labels.must_review,
+      needsReview: routed.needsReview,
+      labelReasons: [...labels.review_reasons],
+      reasonCodes: [...routed.reasonCodes],
+    },
   };
 }

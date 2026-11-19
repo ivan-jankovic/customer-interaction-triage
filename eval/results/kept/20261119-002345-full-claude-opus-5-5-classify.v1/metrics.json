@@ -19,6 +19,19 @@
       "precision": 1,
       "recall": 1,
       "exactListRate": 1
+    },
+    "routing": {
+      "accuracy": 1,
+      "mustReview": {
+        "labelled": 38,
+        "reviewed": 58,
+        "tp": 38,
+        "fp": 20,
+        "fn": 0,
+        "recall": 1,
+        "precision": 0.6552
+      },
+      "reviewRate": 0.58
     }
   },
   "byLanguage": {
@@ -35,6 +48,19 @@
         "precision": 1,
         "recall": 1,
         "exactListRate": 1
+      },
+      "routing": {
+        "accuracy": 1,
+        "mustReview": {
+          "labelled": 23,
+          "reviewed": 37,
+          "tp": 23,
+          "fp": 14,
+          "fn": 0,
+          "recall": 1,
+          "precision": 0.6216
+        },
+        "reviewRate": 0.6167
       }
     },
     "sk": {
@@ -50,6 +76,19 @@
         "precision": 1,
         "recall": 1,
         "exactListRate": 1
+      },
+      "routing": {
+        "accuracy": 1,
+        "mustReview": {
+          "labelled": 8,
+          "reviewed": 10,
+          "tp": 8,
+          "fp": 2,
+          "fn": 0,
+          "recall": 1,
+          "precision": 0.8
+        },
+        "reviewRate": 0.5
       }
     },
     "en": {
@@ -65,6 +104,19 @@
         "precision": 1,
         "recall": 1,
         "exactListRate": 1
+      },
+      "routing": {
+        "accuracy": 1,
+        "mustReview": {
+          "labelled": 7,
+          "reviewed": 11,
+          "tp": 7,
+          "fp": 4,
+          "fn": 0,
+          "recall": 1,
+          "precision": 0.6364
+        },
+        "reviewRate": 0.55
       }
     }
   },
@@ -274,5 +326,80 @@
     "p95": 3052,
     "max": 4819
   },
-  "worstErrors": []
+  "worstErrors": [],
+  "routing": {
+    "enricherVersion": "enrich.v1",
+    "routerVersion": "route.v1",
+    "seedSha256": "b411896f811086a14db32bd79ba87d3984f7eda4fe11e61227f8bfda596a8a83",
+    "reasonCodes": [
+      {
+        "code": "invalid_output",
+        "n": 0
+      },
+      {
+        "code": "classification_error",
+        "n": 0
+      },
+      {
+        "code": "cancellation",
+        "n": 16
+      },
+      {
+        "code": "complaint",
+        "n": 17
+      },
+      {
+        "code": "low_confidence",
+        "n": 10
+      },
+      {
+        "code": "customer_not_found",
+        "n": 5
+      },
+      {
+        "code": "customer_ambiguous",
+        "n": 5
+      },
+      {
+        "code": "customer_unidentified",
+        "n": 9
+      },
+      {
+        "code": "crm_mismatch_unmatched_key",
+        "n": 3
+      },
+      {
+        "code": "crm_mismatch_service_type",
+        "n": 0
+      },
+      {
+        "code": "investigation_inconclusive",
+        "n": 0
+      }
+    ],
+    "labelledReasons": [
+      {
+        "reason": "cancellation",
+        "caughtBy": "cancellation",
+        "labelled": 16,
+        "caught": 16,
+        "rate": 1
+      },
+      {
+        "reason": "complaint",
+        "caughtBy": "complaint",
+        "labelled": 17,
+        "caught": 17,
+        "rate": 1
+      },
+      {
+        "reason": "unclear",
+        "caughtBy": "low_confidence",
+        "labelled": 6,
+        "caught": 6,
+        "rate": 1
+      }
+    ],
+    "missed": []
+  }
 }

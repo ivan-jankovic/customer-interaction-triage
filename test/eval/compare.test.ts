@@ -9,7 +9,7 @@ import { fixtureRun } from "./fixtures/fixture-run.js";
 
 const GOLDEN = join(import.meta.dirname, "fixtures", "compare.md");
 
-function runs() {
+async function runs() {
   const a = fixtureRun();
   const b = fixtureRun({
     runId: "20261119-130000-full-claude-opus-5-5-classify.v2",
@@ -30,13 +30,14 @@ function runs() {
           }
         : l,
   });
-  for (const r of [a, b]) writeReports(r.runDir, { datasetPath: r.datasetPath, log: () => {} });
+  for (const r of [a, b])
+    await writeReports(r.runDir, { datasetPath: r.datasetPath, crmSeedPath: r.crmSeedPath, log: () => {} });
   return { a, b };
 }
 
 describe("eval:compare", () => {
-  it("renders settings, headline metrics with changes and per-language rows (golden)", () => {
-    const { a, b } = runs();
+  it("renders settings, headline metrics with changes and per-language rows (golden)", async () => {
+    const { a, b } = await runs();
     const md = compareRunDirs(a.runDir, b.runDir);
     if (process.env.UPDATE_GOLDEN) writeFileSync(GOLDEN, md);
     expect(md).toBe(readFileSync(GOLDEN, "utf8"));
@@ -46,10 +47,10 @@ describe("eval:compare", () => {
     expect(md).not.toContain("**Warning:**");
   });
 
-  it("warns when the runs cover different messages or datasets", () => {
-    const { a } = runs();
+  it("warns when the runs cover different messages or datasets", async () => {
+    const { a } = await runs();
     const other = fixtureRun({ run: { ids: ["m1", "m2"], dataset: { file: "x", sha256: "d".repeat(64) } } });
-    writeReports(other.runDir, { datasetPath: other.datasetPath, log: () => {} });
+    await writeReports(other.runDir, { datasetPath: other.datasetPath, crmSeedPath: other.crmSeedPath, log: () => {} });
     const md = compareRunDirs(a.runDir, other.runDir);
     expect(md).toContain("**Warning:** the runs cover different messages (8 vs 2)");
     expect(md).toContain("**Warning:** the runs used different dataset files");
