@@ -143,6 +143,26 @@ export class KyselyCrm implements CrmLookup, InvestigationCrm {
   }
 }
 
+/**
+ * Runs `fn` in a READ ONLY transaction: PostgreSQL refuses any write inside it, whatever the
+ * code does. The agent's tools read the CRM only through this (P10 requirements.md, "Tools").
+ */
+export function inReadOnlyTransaction<T>(db: Kysely<Database>, fn: (trx: Kysely<Database>) => Promise<T>): Promise<T> {
+  return db.transaction().setAccessMode("read only").execute(fn);
+}
+
+/** The investigation reads, each in its own read-only transaction. */
+export function readOnlyCrm(db: Kysely<Database>): InvestigationCrm {
+  return {
+    lineStatusOfCustomer: (customerId) =>
+      inReadOnlyTransaction(db, (trx) => new KyselyCrm(trx).lineStatusOfCustomer(customerId)),
+    recentTickets: (customerId, at, days, limit) =>
+      inReadOnlyTransaction(db, (trx) => new KyselyCrm(trx).recentTickets(customerId, at, days, limit)),
+    outagesInArea: (area, serviceType, at, resolvedWithinDays) =>
+      inReadOnlyTransaction(db, (trx) => new KyselyCrm(trx).outagesInArea(area, serviceType, at, resolvedWithinDays)),
+  };
+}
+
 export interface SeedCounts {
   customers: number;
   services: number;
