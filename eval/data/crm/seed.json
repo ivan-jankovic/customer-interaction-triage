@@ -1,0 +1,3958 @@
+{
+  "generator": "crm-generate.v1",
+  "dataset_hash": "94ee3b2f479d1187005ce434d2e09fbd890447e7ba02ff25641d88261f6c77a9",
+  "customers": [
+    {
+      "id": "89ee7ed0-e07e-4b00-93e2-e973c3e885a0",
+      "customer_number": "MR74236467",
+      "email": "katka_h69@example.com",
+      "segment": "residential",
+      "created_at": "2021-08-21T09:00:00.000Z"
+    },
+    {
+      "id": "6595d859-eade-4fdb-b9f3-50006c9320dc",
+      "customer_number": "MR62544390",
+      "email": "jozef.d71@example.org",
+      "segment": "residential",
+      "created_at": "2020-03-22T09:00:00.000Z"
+    },
+    {
+      "id": "23dc1a61-6832-476b-bea5-8a71a1af68ad",
+      "customer_number": "MR26825625",
+      "email": "tomas_h68@example.org",
+      "segment": "residential",
+      "created_at": "2019-02-19T09:00:00.000Z"
+    },
+    {
+      "id": "26994cd6-5b76-4093-a2a1-2fbbad8ff9ea",
+      "customer_number": "MR39268260",
+      "email": "tomas_n45@example.org",
+      "segment": "residential",
+      "created_at": "2021-07-19T09:00:00.000Z"
+    },
+    {
+      "id": "2ab81aef-4a47-4686-9755-eca31d4de553",
+      "customer_number": "MR70094482",
+      "email": "zuzanad71@example.com",
+      "segment": "residential",
+      "created_at": "2024-01-22T09:00:00.000Z"
+    },
+    {
+      "id": "29f0547d-bd9f-445e-b486-9a881334d612",
+      "customer_number": "MR68561209",
+      "email": "tomas.h87@example.net",
+      "segment": "residential",
+      "created_at": "2024-06-10T09:00:00.000Z"
+    },
+    {
+      "id": "4253de87-fc24-41f3-8c77-d14f60589d38",
+      "customer_number": "MR52688705",
+      "email": "martin_m73@example.org",
+      "segment": "residential",
+      "created_at": "2018-03-31T09:00:00.000Z"
+    },
+    {
+      "id": "dc3000c9-a604-4bcb-bd8c-3bc599d51a27",
+      "customer_number": "MR78356839",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2018-07-07T09:00:00.000Z"
+    },
+    {
+      "id": "a8e1afb0-2c38-43c2-a4f7-10a203fc2ad2",
+      "customer_number": "MR96892979",
+      "email": "petr.s93@example.org",
+      "segment": "residential",
+      "created_at": "2018-03-12T09:00:00.000Z"
+    },
+    {
+      "id": "9da7008d-4d2f-42bd-883f-634b9b92daf4",
+      "customer_number": "MR38735101",
+      "email": "tomash49@example.com",
+      "segment": "residential",
+      "created_at": "2019-11-26T09:00:00.000Z"
+    },
+    {
+      "id": "0f4b5a00-2686-4af5-a2fb-f4fecf8400c7",
+      "customer_number": "MR77327896",
+      "email": "evah70@example.org",
+      "segment": "residential",
+      "created_at": "2021-03-19T09:00:00.000Z"
+    },
+    {
+      "id": "4a3ac96e-c245-46b5-9bf6-16b9ff35651e",
+      "customer_number": "MR49390707",
+      "email": "tomas.n13@example.net",
+      "segment": "business",
+      "created_at": "2019-01-05T09:00:00.000Z"
+    },
+    {
+      "id": "3d70791d-842a-4c93-a124-f4bc41b25137",
+      "customer_number": "MR34087574",
+      "email": "tomas.n13@example.net",
+      "segment": "business",
+      "created_at": "2018-08-01T09:00:00.000Z"
+    },
+    {
+      "id": "877e0b71-4d42-4609-89a4-434ab7d47c90",
+      "customer_number": "MR36378293",
+      "email": "luciem86@example.org",
+      "segment": "residential",
+      "created_at": "2025-07-17T09:00:00.000Z"
+    },
+    {
+      "id": "84567818-8e08-4821-b61f-06f0e811be3e",
+      "customer_number": "MR43230737",
+      "email": "martind15@example.com",
+      "segment": "residential",
+      "created_at": "2021-06-11T09:00:00.000Z"
+    },
+    {
+      "id": "45f7f145-22fd-492f-bb3d-5e0bad160973",
+      "customer_number": "MR24100819",
+      "email": "petrd50@example.net",
+      "segment": "residential",
+      "created_at": "2023-07-01T09:00:00.000Z"
+    },
+    {
+      "id": "0a0710e1-92cc-4ca8-8a65-397b8fb9a6fb",
+      "customer_number": "MR49011813",
+      "email": "zuzanam34@example.net",
+      "segment": "residential",
+      "created_at": "2020-04-19T09:00:00.000Z"
+    },
+    {
+      "id": "7f867363-548f-491b-af61-a58a8b16a53d",
+      "customer_number": "MR63225047",
+      "email": "tomash67@example.org",
+      "segment": "residential",
+      "created_at": "2024-09-24T09:00:00.000Z"
+    },
+    {
+      "id": "1deb7533-0d4c-47b0-bd57-e9098f6ef814",
+      "customer_number": "MR25193532",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2021-09-15T09:00:00.000Z"
+    },
+    {
+      "id": "783c7c9e-9bca-49ef-a03d-190e1d864804",
+      "customer_number": "MR43907987",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2018-02-12T09:00:00.000Z"
+    },
+    {
+      "id": "fee7c1ae-4b5d-4468-beb0-08f89e1f44b2",
+      "customer_number": "MR40102807",
+      "email": "milan.k55@example.com",
+      "segment": "residential",
+      "created_at": "2023-12-07T09:00:00.000Z"
+    },
+    {
+      "id": "922a13b3-9b5e-4763-87c1-9bcd2a78ef8f",
+      "customer_number": "MR36517369",
+      "email": "honza_h46@example.net",
+      "segment": "business",
+      "created_at": "2021-11-16T09:00:00.000Z"
+    },
+    {
+      "id": "119c0784-9c67-42c3-beb4-691211e596e9",
+      "customer_number": "MR67233399",
+      "email": "honza_h46@example.net",
+      "segment": "residential",
+      "created_at": "2023-01-01T09:00:00.000Z"
+    },
+    {
+      "id": "686902d7-6a61-4c47-a0b0-8414fef645eb",
+      "customer_number": "MR37988786",
+      "email": "petrs42@example.net",
+      "segment": "residential",
+      "created_at": "2020-07-27T09:00:00.000Z"
+    },
+    {
+      "id": "edf57132-1781-4964-8ffc-342d28248d9e",
+      "customer_number": "MR61859463",
+      "email": "janad69@example.org",
+      "segment": "business",
+      "created_at": "2025-04-17T09:00:00.000Z"
+    },
+    {
+      "id": "a2601a89-70c3-4d1e-b721-5aa0c548b787",
+      "customer_number": "MR34747249",
+      "email": "lucie.k34@example.net",
+      "segment": "residential",
+      "created_at": "2023-04-17T09:00:00.000Z"
+    },
+    {
+      "id": "ca31c240-4080-4f28-8f8e-22e8d528616d",
+      "customer_number": "MR50874783",
+      "email": "tomas_s89@example.com",
+      "segment": "residential",
+      "created_at": "2022-12-09T09:00:00.000Z"
+    },
+    {
+      "id": "0e706b57-59f0-492a-bd23-84b2c58a0632",
+      "customer_number": "MR41565287",
+      "email": "milann31@example.com",
+      "segment": "residential",
+      "created_at": "2022-06-21T09:00:00.000Z"
+    },
+    {
+      "id": "e2ec7294-bfa9-4622-816d-dcd18d6e2702",
+      "customer_number": "MR81369379",
+      "email": "zuzanam96@example.net",
+      "segment": "residential",
+      "created_at": "2022-04-22T09:00:00.000Z"
+    },
+    {
+      "id": "50493faa-f7ce-400d-a50b-e30479f191d3",
+      "customer_number": "MR57695003",
+      "email": "tomas_n30@example.com",
+      "segment": "residential",
+      "created_at": "2024-04-12T09:00:00.000Z"
+    },
+    {
+      "id": "f921d20b-0abd-4c0c-87fd-06556a88348d",
+      "customer_number": "MR80352797",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2018-04-09T09:00:00.000Z"
+    },
+    {
+      "id": "7689587c-6d97-4bd6-920f-76c26bdd3619",
+      "customer_number": "MR92334051",
+      "email": "jozef.n90@example.net",
+      "segment": "residential",
+      "created_at": "2025-08-07T09:00:00.000Z"
+    },
+    {
+      "id": "47a965e2-319b-4f13-9dea-63f2a89cedb9",
+      "customer_number": "MR47614181",
+      "email": "eva.h98@example.com",
+      "segment": "residential",
+      "created_at": "2022-01-12T09:00:00.000Z"
+    },
+    {
+      "id": "a28b7c3b-5645-4542-8451-50dbb490b07a",
+      "customer_number": "MR63089785",
+      "email": "katka_d34@example.com",
+      "segment": "residential",
+      "created_at": "2025-05-03T09:00:00.000Z"
+    },
+    {
+      "id": "03754aed-244d-4525-b9a5-a910d035a336",
+      "customer_number": "MR77707639",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2024-01-17T09:00:00.000Z"
+    },
+    {
+      "id": "15f6c598-6c14-4184-b2b5-b8593e79bf3f",
+      "customer_number": "MR60323913",
+      "email": "eva.d28@example.net",
+      "segment": "business",
+      "created_at": "2024-02-03T09:00:00.000Z"
+    },
+    {
+      "id": "1c2ab0cc-7eb2-4c12-b639-7dffc430ac4f",
+      "customer_number": "MR29624290",
+      "email": "lucie.k45@example.com",
+      "segment": "residential",
+      "created_at": "2018-09-20T09:00:00.000Z"
+    },
+    {
+      "id": "82178ee0-3865-4c99-912d-2071be9a3b2c",
+      "customer_number": "MR90713791",
+      "email": null,
+      "segment": "business",
+      "created_at": "2019-12-23T09:00:00.000Z"
+    },
+    {
+      "id": "d948b07e-ad46-4709-997b-bc2ebaecad3e",
+      "customer_number": "MR48936314",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2022-05-17T09:00:00.000Z"
+    },
+    {
+      "id": "c4a1a15f-fea7-49da-9a25-4bf013e53111",
+      "customer_number": "MR91827650",
+      "email": "jozefd60@example.org",
+      "segment": "residential",
+      "created_at": "2025-04-21T09:00:00.000Z"
+    },
+    {
+      "id": "a888974c-8c8f-4e00-bfce-09a8b32b9ceb",
+      "customer_number": "MR51482238",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2023-11-02T09:00:00.000Z"
+    },
+    {
+      "id": "b09c01df-dadc-48d9-916d-cd38eb1b47be",
+      "customer_number": "MR31072454",
+      "email": null,
+      "segment": "business",
+      "created_at": "2023-04-09T09:00:00.000Z"
+    },
+    {
+      "id": "5834e77d-14cf-4f65-a451-4857690374da",
+      "customer_number": "MR63980703",
+      "email": "lucie_h62@example.com",
+      "segment": "business",
+      "created_at": "2023-04-10T09:00:00.000Z"
+    },
+    {
+      "id": "b40a0d36-f9a6-49e0-9456-792a54b30cb2",
+      "customer_number": "MR99456431",
+      "email": "eva.k47@example.net",
+      "segment": "residential",
+      "created_at": "2020-10-17T09:00:00.000Z"
+    },
+    {
+      "id": "d6d9f64b-7700-48cc-9cda-91536f5e51d9",
+      "customer_number": "MR54093531",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2019-09-13T09:00:00.000Z"
+    },
+    {
+      "id": "253a1a5c-aa5f-4725-a5c2-db364fbb711f",
+      "customer_number": "MR11052028",
+      "email": "jozefd93@example.com",
+      "segment": "business",
+      "created_at": "2020-12-20T09:00:00.000Z"
+    },
+    {
+      "id": "a7685718-ebbf-4fac-b5b1-9b8a2d40717a",
+      "customer_number": "MR30368770",
+      "email": "honza.h14@example.net",
+      "segment": "residential",
+      "created_at": "2018-03-24T09:00:00.000Z"
+    },
+    {
+      "id": "b6b26c79-526f-4386-aa8d-4c6d722bb49d",
+      "customer_number": "MR87097192",
+      "email": null,
+      "segment": "business",
+      "created_at": "2025-03-18T09:00:00.000Z"
+    },
+    {
+      "id": "58b5067b-0d07-4259-a2b7-9e7cca029c38",
+      "customer_number": "MR67949360",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2026-08-24T09:00:00.000Z"
+    },
+    {
+      "id": "79264483-8dc0-485c-81dc-a6c75ddb9945",
+      "customer_number": "MR22011734",
+      "email": "milan.h89@example.com",
+      "segment": "residential",
+      "created_at": "2022-10-01T09:00:00.000Z"
+    },
+    {
+      "id": "f900fe36-8f59-433b-ad3b-4dcf02e29217",
+      "customer_number": "MR67436902",
+      "email": "petrs77@example.org",
+      "segment": "residential",
+      "created_at": "2018-04-26T09:00:00.000Z"
+    },
+    {
+      "id": "d4cf678e-0f48-4c60-b043-ceaa46ac6848",
+      "customer_number": "MR39817127",
+      "email": "honza_m21@example.com",
+      "segment": "residential",
+      "created_at": "2018-03-20T09:00:00.000Z"
+    },
+    {
+      "id": "535fff7a-fafa-430f-9345-e62263c80eed",
+      "customer_number": "MR63432774",
+      "email": "jozef.m92@example.org",
+      "segment": "residential",
+      "created_at": "2019-05-24T09:00:00.000Z"
+    },
+    {
+      "id": "5d13c652-3e0d-487b-8a8a-43ae4b37dec9",
+      "customer_number": "MR30754469",
+      "email": "milank77@example.net",
+      "segment": "residential",
+      "created_at": "2026-10-01T23:00:00.000Z"
+    },
+    {
+      "id": "15fa0575-491e-4b02-9145-c6430020ded2",
+      "customer_number": "MR54920984",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2022-09-04T09:00:00.000Z"
+    },
+    {
+      "id": "2c9082d0-cded-4d39-a9ea-eb369eafd867",
+      "customer_number": "MR58061284",
+      "email": "jozef_m32@example.com",
+      "segment": "residential",
+      "created_at": "2024-05-04T09:00:00.000Z"
+    },
+    {
+      "id": "d158f331-2176-43ac-8b5d-b2b39401dd4a",
+      "customer_number": "MR91552071",
+      "email": "martin.k18@example.net",
+      "segment": "residential",
+      "created_at": "2023-03-06T09:00:00.000Z"
+    },
+    {
+      "id": "0e91a72e-fe48-47a2-966b-21f6e2e4dc71",
+      "customer_number": "MR96047220",
+      "email": "honzan63@example.com",
+      "segment": "residential",
+      "created_at": "2025-07-10T09:00:00.000Z"
+    },
+    {
+      "id": "c6e9a16e-5884-4b63-9298-0d311d50197b",
+      "customer_number": "MR25226752",
+      "email": null,
+      "segment": "business",
+      "created_at": "2021-02-09T09:00:00.000Z"
+    },
+    {
+      "id": "7d29868c-1750-47ec-8b31-5d484a174dab",
+      "customer_number": "MR16631470",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2024-10-20T09:00:00.000Z"
+    },
+    {
+      "id": "4044f47d-3bd6-434d-b3c9-adfca2695efe",
+      "customer_number": "MR65996888",
+      "email": "annas72@example.net",
+      "segment": "business",
+      "created_at": "2018-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "2bc292fc-a207-4a4d-87c3-cbf661d8956e",
+      "customer_number": "MR48691528",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2020-08-16T09:00:00.000Z"
+    },
+    {
+      "id": "aa3a4a20-63a4-49bc-99df-56735cd089ba",
+      "customer_number": "MR17898275",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2025-01-16T09:00:00.000Z"
+    },
+    {
+      "id": "f3ea674f-9f7d-49b4-b503-17a339801d9f",
+      "customer_number": "MR54162083",
+      "email": "jozef_n57@example.org",
+      "segment": "business",
+      "created_at": "2022-06-16T09:00:00.000Z"
+    },
+    {
+      "id": "4fbb972e-4af7-4fc3-b62e-8185603a4d7c",
+      "customer_number": "MR12525677",
+      "email": "zuzana_h40@example.org",
+      "segment": "residential",
+      "created_at": "2018-06-05T09:00:00.000Z"
+    },
+    {
+      "id": "4220808e-72fa-46d7-8932-42a40cdfc591",
+      "customer_number": "MR92625068",
+      "email": "zuzana.d43@example.net",
+      "segment": "residential",
+      "created_at": "2021-02-10T09:00:00.000Z"
+    },
+    {
+      "id": "a4f25545-327f-482c-b812-5e0e20a9a31a",
+      "customer_number": "MR72393531",
+      "email": "zuzanah37@example.net",
+      "segment": "residential",
+      "created_at": "2019-06-30T09:00:00.000Z"
+    },
+    {
+      "id": "028e5d0a-3010-4e41-9fa5-a2b8bdfa7d1e",
+      "customer_number": "MR78372566",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2020-12-08T09:00:00.000Z"
+    },
+    {
+      "id": "5eff34b8-ae89-48a4-ba8d-6ce11a159340",
+      "customer_number": "MR96316378",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2022-10-07T09:00:00.000Z"
+    },
+    {
+      "id": "f9b01b91-b12f-4c3e-90d1-d79218ad1da0",
+      "customer_number": "MR41645829",
+      "email": "honza_s68@example.net",
+      "segment": "residential",
+      "created_at": "2019-11-08T09:00:00.000Z"
+    },
+    {
+      "id": "d1bb0e07-35d4-4379-9175-340a313d9a00",
+      "customer_number": "MR92017096",
+      "email": "janah57@example.com",
+      "segment": "residential",
+      "created_at": "2022-12-10T09:00:00.000Z"
+    },
+    {
+      "id": "fad898c1-228a-407b-b328-51e4a07d0abb",
+      "customer_number": "MR27727076",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2019-10-17T09:00:00.000Z"
+    },
+    {
+      "id": "ba54cc37-0841-4b71-b58e-d02f47f51eb0",
+      "customer_number": "MR88246135",
+      "email": "anna.d67@example.com",
+      "segment": "residential",
+      "created_at": "2018-08-18T09:00:00.000Z"
+    },
+    {
+      "id": "77bc7212-ce76-4e2a-8461-a76375209082",
+      "customer_number": "MR54192689",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2021-04-09T09:00:00.000Z"
+    },
+    {
+      "id": "2d2b7f3e-889e-4070-a64d-0396169a97e4",
+      "customer_number": "MR71546202",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2024-06-11T09:00:00.000Z"
+    },
+    {
+      "id": "a4499f59-f90b-4f02-bed4-3a698e97056a",
+      "customer_number": "MR35868765",
+      "email": null,
+      "segment": "residential",
+      "created_at": "2022-12-06T09:00:00.000Z"
+    },
+    {
+      "id": "88a74c88-4df3-494b-9ee6-4626a234ce21",
+      "customer_number": "MR75425232",
+      "email": "anna.d94@example.com",
+      "segment": "residential",
+      "created_at": "2018-03-10T09:00:00.000Z"
+    }
+  ],
+  "services": [
+    {
+      "id": "c6c4c2cd-92da-446d-ad39-f5c28effbd41",
+      "customer_id": "89ee7ed0-e07e-4b00-93e2-e973c3e885a0",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2021-81200",
+      "phone": null,
+      "area": "Košice",
+      "status": "active",
+      "started_at": "2021-08-22T09:00:00.000Z"
+    },
+    {
+      "id": "2955c550-507f-4a7e-8eed-e7ac4995075a",
+      "customer_id": "89ee7ed0-e07e-4b00-93e2-e973c3e885a0",
+      "service_type": "internet",
+      "tariff": "Merelo Home 5G",
+      "contract_number": "SML-2025-04407",
+      "phone": null,
+      "area": "Košice",
+      "status": "terminated",
+      "started_at": "2025-06-07T09:00:00.000Z"
+    },
+    {
+      "id": "dee2d908-b4ca-4ccd-b307-730d7fac1f6e",
+      "customer_id": "6595d859-eade-4fdb-b9f3-50006c9320dc",
+      "service_type": "internet",
+      "tariff": "Merelo Home 5G",
+      "contract_number": "SML-2020-98351",
+      "phone": null,
+      "area": "Brno-Žabovřesky",
+      "status": "active",
+      "started_at": "2020-03-23T09:00:00.000Z"
+    },
+    {
+      "id": "e9c45826-a33b-4bea-b6bd-56abb626b517",
+      "customer_id": "6595d859-eade-4fdb-b9f3-50006c9320dc",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil S",
+      "contract_number": "SML-2025-75843",
+      "phone": "+420037669666",
+      "area": "Brno-Žabovřesky",
+      "status": "active",
+      "started_at": "2025-11-18T09:00:00.000Z"
+    },
+    {
+      "id": "ff071e82-b49a-4527-8585-2c1581cc7083",
+      "customer_id": "6595d859-eade-4fdb-b9f3-50006c9320dc",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2023-79863",
+      "phone": "+420020612757",
+      "area": "Brno-Žabovřesky",
+      "status": "active",
+      "started_at": "2023-01-01T09:00:00.000Z"
+    },
+    {
+      "id": "271baa07-354f-4e68-9240-d8705ceb4538",
+      "customer_id": "23dc1a61-6832-476b-bea5-8a71a1af68ad",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2019-00913",
+      "phone": "+420061283438",
+      "area": "Brno-Žabovřesky",
+      "status": "active",
+      "started_at": "2019-02-20T09:00:00.000Z"
+    },
+    {
+      "id": "47cde2a6-6f07-46cf-bf6c-b9289d0ba17e",
+      "customer_id": "26994cd6-5b76-4093-a2a1-2fbbad8ff9ea",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2021-37370",
+      "phone": "+420005547195",
+      "area": "České Budějovice",
+      "status": "active",
+      "started_at": "2021-07-20T09:00:00.000Z"
+    },
+    {
+      "id": "757f347e-e351-445c-a08b-8d49c8ec0424",
+      "customer_id": "2ab81aef-4a47-4686-9755-eca31d4de553",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2024-68260",
+      "phone": "+420059184061",
+      "area": "Opava",
+      "status": "active",
+      "started_at": "2024-01-23T09:00:00.000Z"
+    },
+    {
+      "id": "99f2ce9a-8688-4d86-b3e0-8ae1d28fd68e",
+      "customer_id": "29f0547d-bd9f-445e-b486-9a881334d612",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 1000",
+      "contract_number": "SML-2024-71791",
+      "phone": null,
+      "area": "Trnava",
+      "status": "active",
+      "started_at": "2024-06-11T09:00:00.000Z"
+    },
+    {
+      "id": "044a7fc8-882c-45af-bb15-01ef5bee01bc",
+      "customer_id": "4253de87-fc24-41f3-8c77-d14f60589d38",
+      "service_type": "internet",
+      "tariff": "Merelo Home 5G",
+      "contract_number": "SML-2018-59623",
+      "phone": null,
+      "area": "Ostrava-Poruba",
+      "status": "active",
+      "started_at": "2018-04-01T09:00:00.000Z"
+    },
+    {
+      "id": "87e861ce-84a9-4719-94b9-db3e8ead93d6",
+      "customer_id": "4253de87-fc24-41f3-8c77-d14f60589d38",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2022-64412",
+      "phone": "+420009967315",
+      "area": "Ostrava-Poruba",
+      "status": "active",
+      "started_at": "2022-05-15T09:00:00.000Z"
+    },
+    {
+      "id": "ea340ce4-2903-472f-ab8c-c5e10b1ea835",
+      "customer_id": "4253de87-fc24-41f3-8c77-d14f60589d38",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2021-65617",
+      "phone": "+420097560111",
+      "area": "Ostrava-Poruba",
+      "status": "active",
+      "started_at": "2021-07-26T09:00:00.000Z"
+    },
+    {
+      "id": "0ee8e0e6-6916-43db-b86a-67aaa3001cc7",
+      "customer_id": "4253de87-fc24-41f3-8c77-d14f60589d38",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2025-83475",
+      "phone": null,
+      "area": "Ostrava-Poruba",
+      "status": "terminated",
+      "started_at": "2025-03-17T09:00:00.000Z"
+    },
+    {
+      "id": "920014a6-eb7b-4dab-ad47-b477e601de83",
+      "customer_id": "dc3000c9-a604-4bcb-bd8c-3bc599d51a27",
+      "service_type": "internet",
+      "tariff": "Merelo DSL 50",
+      "contract_number": "SML-2018-78937",
+      "phone": null,
+      "area": "Plzeň",
+      "status": "active",
+      "started_at": "2018-07-08T09:00:00.000Z"
+    },
+    {
+      "id": "cebdabc5-8085-4e6e-9325-c5cc604b0fff",
+      "customer_id": "dc3000c9-a604-4bcb-bd8c-3bc599d51a27",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2024-40450",
+      "phone": null,
+      "area": "Plzeň",
+      "status": "terminated",
+      "started_at": "2024-04-11T09:00:00.000Z"
+    },
+    {
+      "id": "93dac627-5759-4e7d-b12c-07199934fecf",
+      "customer_id": "a8e1afb0-2c38-43c2-a4f7-10a203fc2ad2",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil M",
+      "contract_number": "SML-2018-94536",
+      "phone": "+420083602977",
+      "area": "Plzeň",
+      "status": "active",
+      "started_at": "2018-03-13T09:00:00.000Z"
+    },
+    {
+      "id": "fc6e829a-a967-4eee-97ce-eebfef6de3df",
+      "customer_id": "9da7008d-4d2f-42bd-883f-634b9b92daf4",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil S",
+      "contract_number": "SML-2019-97920",
+      "phone": "+420017001801",
+      "area": "Praha 10",
+      "status": "active",
+      "started_at": "2019-11-27T09:00:00.000Z"
+    },
+    {
+      "id": "b064ace3-d413-4183-84dc-a2656d3a8399",
+      "customer_id": "0f4b5a00-2686-4af5-a2fb-f4fecf8400c7",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2025-56636",
+      "phone": null,
+      "area": "Nitra",
+      "status": "active",
+      "started_at": "2025-01-03T09:00:00.000Z"
+    },
+    {
+      "id": "92e6027c-689c-42fc-a86a-dd7e0f234646",
+      "customer_id": "0f4b5a00-2686-4af5-a2fb-f4fecf8400c7",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2021-03581",
+      "phone": null,
+      "area": "Nitra",
+      "status": "terminated",
+      "started_at": "2021-03-20T09:00:00.000Z"
+    },
+    {
+      "id": "ad18ade3-69b2-45d7-b134-aaeb3fda65d8",
+      "customer_id": "4a3ac96e-c245-46b5-9bf6-16b9ff35651e",
+      "service_type": "tv",
+      "tariff": "Merelo TV Plus",
+      "contract_number": "SML-2024-27833",
+      "phone": null,
+      "area": "Košice",
+      "status": "active",
+      "started_at": "2024-08-06T09:00:00.000Z"
+    },
+    {
+      "id": "ec31d3c1-de1f-4a73-9de9-973ed6de13a0",
+      "customer_id": "4a3ac96e-c245-46b5-9bf6-16b9ff35651e",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2019-41713",
+      "phone": null,
+      "area": "Košice",
+      "status": "terminated",
+      "started_at": "2019-01-06T09:00:00.000Z"
+    },
+    {
+      "id": "c70b3938-224a-43bd-818d-9c74da9dff8d",
+      "customer_id": "3d70791d-842a-4c93-a124-f4bc41b25137",
+      "service_type": "tv",
+      "tariff": "Merelo TV Plus",
+      "contract_number": "SML-2018-18603",
+      "phone": null,
+      "area": "Banská Bystrica",
+      "status": "active",
+      "started_at": "2018-08-02T09:00:00.000Z"
+    },
+    {
+      "id": "2c1f182a-22cd-4119-9661-2c87f3b01a74",
+      "customer_id": "877e0b71-4d42-4609-89a4-434ab7d47c90",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2026-12601",
+      "phone": "+420098715050",
+      "area": "Brno-Žabovřesky",
+      "status": "active",
+      "started_at": "2026-09-23T09:00:00.000Z"
+    },
+    {
+      "id": "3ff7716a-45dd-40dd-9d24-0859ac66ea6a",
+      "customer_id": "877e0b71-4d42-4609-89a4-434ab7d47c90",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2025-66192",
+      "phone": "+420042447739",
+      "area": "Brno-Žabovřesky",
+      "status": "terminated",
+      "started_at": "2025-07-18T09:00:00.000Z"
+    },
+    {
+      "id": "270c20e4-0ea4-46a9-97c1-e185e2401d22",
+      "customer_id": "84567818-8e08-4821-b61f-06f0e811be3e",
+      "service_type": "internet",
+      "tariff": "Merelo DSL 50",
+      "contract_number": "SML-2025-99737",
+      "phone": null,
+      "area": "České Budějovice",
+      "status": "active",
+      "started_at": "2025-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "6b12245c-2835-4945-a7f9-23cd62c28409",
+      "customer_id": "84567818-8e08-4821-b61f-06f0e811be3e",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2021-05626",
+      "phone": "+420065724217",
+      "area": "České Budějovice",
+      "status": "active",
+      "started_at": "2021-06-12T09:00:00.000Z"
+    },
+    {
+      "id": "554d6ad0-c0a5-4837-a4e3-fe1296975607",
+      "customer_id": "45f7f145-22fd-492f-bb3d-5e0bad160973",
+      "service_type": "internet",
+      "tariff": "Merelo Home 5G",
+      "contract_number": "SML-2023-21847",
+      "phone": null,
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2023-07-02T09:00:00.000Z"
+    },
+    {
+      "id": "828efb51-7097-4fb3-9069-851e58bdd698",
+      "customer_id": "45f7f145-22fd-492f-bb3d-5e0bad160973",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2024-77766",
+      "phone": null,
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2024-01-05T09:00:00.000Z"
+    },
+    {
+      "id": "b93540ed-f239-4326-a4a1-a06a627aee3e",
+      "customer_id": "0a0710e1-92cc-4ca8-8a65-397b8fb9a6fb",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil S",
+      "contract_number": "SML-2020-95560",
+      "phone": "+420091001847",
+      "area": "Opava",
+      "status": "active",
+      "started_at": "2020-04-20T09:00:00.000Z"
+    },
+    {
+      "id": "4441044e-449c-48c5-909c-bd92cedf54c3",
+      "customer_id": "7f867363-548f-491b-af61-a58a8b16a53d",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2024-53885",
+      "phone": null,
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2024-09-25T09:00:00.000Z"
+    },
+    {
+      "id": "ccee0466-c1b4-4334-9222-1bb98fdb3e64",
+      "customer_id": "7f867363-548f-491b-af61-a58a8b16a53d",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2025-41553",
+      "phone": null,
+      "area": "Hradec Králové",
+      "status": "terminated",
+      "started_at": "2025-06-05T09:00:00.000Z"
+    },
+    {
+      "id": "d0fecc32-f54e-462b-a18a-77c9a22b4c6a",
+      "customer_id": "1deb7533-0d4c-47b0-bd57-e9098f6ef814",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil S",
+      "contract_number": "SML-2022-24929",
+      "phone": "+420010418744",
+      "area": "Brno-Žabovřesky",
+      "status": "active",
+      "started_at": "2022-03-01T09:00:00.000Z"
+    },
+    {
+      "id": "c8b4fcb9-4d01-45e4-a475-f2050383013f",
+      "customer_id": "1deb7533-0d4c-47b0-bd57-e9098f6ef814",
+      "service_type": "internet",
+      "tariff": "Merelo DSL 50",
+      "contract_number": "SML-2021-55846",
+      "phone": null,
+      "area": "Brno-Žabovřesky",
+      "status": "active",
+      "started_at": "2021-09-16T09:00:00.000Z"
+    },
+    {
+      "id": "e9759667-f76d-46e6-8c6b-6d87c0c2e8bf",
+      "customer_id": "783c7c9e-9bca-49ef-a03d-190e1d864804",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 1000",
+      "contract_number": "SML-2022-50752",
+      "phone": null,
+      "area": "Ostrava-Poruba",
+      "status": "active",
+      "started_at": "2022-10-18T09:00:00.000Z"
+    },
+    {
+      "id": "cf69b74d-eb08-42d8-9e9d-2adcc9171fe7",
+      "customer_id": "783c7c9e-9bca-49ef-a03d-190e1d864804",
+      "service_type": "internet",
+      "tariff": "Merelo Home 5G",
+      "contract_number": "SML-2018-05875",
+      "phone": null,
+      "area": "Ostrava-Poruba",
+      "status": "terminated",
+      "started_at": "2018-02-13T09:00:00.000Z"
+    },
+    {
+      "id": "528642aa-7d32-4a27-9e51-5e12c8b7f627",
+      "customer_id": "fee7c1ae-4b5d-4468-beb0-08f89e1f44b2",
+      "service_type": "tv",
+      "tariff": "Merelo TV Plus",
+      "contract_number": "SML-2023-80739",
+      "phone": null,
+      "area": "Praha 4",
+      "status": "active",
+      "started_at": "2023-12-08T09:00:00.000Z"
+    },
+    {
+      "id": "e27df2de-0483-45fb-a44f-80acfdfa4ce5",
+      "customer_id": "922a13b3-9b5e-4763-87c1-9bcd2a78ef8f",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil M",
+      "contract_number": "SML-2021-73506",
+      "phone": "+420092801220",
+      "area": "Kolín",
+      "status": "active",
+      "started_at": "2021-11-17T09:00:00.000Z"
+    },
+    {
+      "id": "db2b6048-ab52-4d29-8e3c-60236a951bd5",
+      "customer_id": "119c0784-9c67-42c3-beb4-691211e596e9",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2023-83316",
+      "phone": null,
+      "area": "Kolín",
+      "status": "active",
+      "started_at": "2023-01-02T09:00:00.000Z"
+    },
+    {
+      "id": "82fccf3a-c4e9-4b1f-9bc3-846f88536bde",
+      "customer_id": "686902d7-6a61-4c47-a0b0-8414fef645eb",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 1000",
+      "contract_number": "SML-2020-44384",
+      "phone": null,
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2020-07-28T09:00:00.000Z"
+    },
+    {
+      "id": "62bb04e2-f95b-4425-8061-6268d3d5e2b7",
+      "customer_id": "686902d7-6a61-4c47-a0b0-8414fef645eb",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil S",
+      "contract_number": "SML-2025-62849",
+      "phone": "+420067575110",
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2025-10-28T09:00:00.000Z"
+    },
+    {
+      "id": "8f40477b-4ffe-468b-b366-8b29b3a7c682",
+      "customer_id": "edf57132-1781-4964-8ffc-342d28248d9e",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2025-55689",
+      "phone": "+421048437095",
+      "area": "Košice",
+      "status": "active",
+      "started_at": "2025-04-18T09:00:00.000Z"
+    },
+    {
+      "id": "a9e0cda5-f7cd-4772-931d-15f044f8c56d",
+      "customer_id": "edf57132-1781-4964-8ffc-342d28248d9e",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2026-32750",
+      "phone": null,
+      "area": "Košice",
+      "status": "active",
+      "started_at": "2026-05-20T09:00:00.000Z"
+    },
+    {
+      "id": "7434e140-98b2-4930-95e3-39ed3f0d58da",
+      "customer_id": "a2601a89-70c3-4d1e-b721-5aa0c548b787",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil S",
+      "contract_number": "SML-2023-47482",
+      "phone": "+420000265467",
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2023-04-18T09:00:00.000Z"
+    },
+    {
+      "id": "71e245de-f48a-49c7-a837-22ebce4d148e",
+      "customer_id": "a2601a89-70c3-4d1e-b721-5aa0c548b787",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2025-32032",
+      "phone": null,
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2025-09-12T09:00:00.000Z"
+    },
+    {
+      "id": "660e28b9-9f45-4a20-afb6-94b1024b52d9",
+      "customer_id": "ca31c240-4080-4f28-8f8e-22e8d528616d",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil S",
+      "contract_number": "SML-2022-85172",
+      "phone": "+421003148364",
+      "area": "Nitra",
+      "status": "active",
+      "started_at": "2022-12-10T09:00:00.000Z"
+    },
+    {
+      "id": "ab7548cb-1f08-4408-850c-b686a19cf929",
+      "customer_id": "0e706b57-59f0-492a-bd23-84b2c58a0632",
+      "service_type": "internet",
+      "tariff": "Merelo DSL 50",
+      "contract_number": "SML-2022-29695",
+      "phone": null,
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2022-06-22T09:00:00.000Z"
+    },
+    {
+      "id": "87f9d463-0a09-4391-98fd-5505becfd4d3",
+      "customer_id": "e2ec7294-bfa9-4622-816d-dcd18d6e2702",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2022-80353",
+      "phone": "+421035060556",
+      "area": "Žilina",
+      "status": "active",
+      "started_at": "2022-04-23T09:00:00.000Z"
+    },
+    {
+      "id": "bac4aa24-4dd8-4575-85d3-5a06e2ef9a89",
+      "customer_id": "e2ec7294-bfa9-4622-816d-dcd18d6e2702",
+      "service_type": "internet",
+      "tariff": "Merelo Home 5G",
+      "contract_number": "SML-2024-49750",
+      "phone": null,
+      "area": "Žilina",
+      "status": "active",
+      "started_at": "2024-11-18T09:00:00.000Z"
+    },
+    {
+      "id": "ada0c6b8-2508-4f88-afeb-c18cc4bdd4ee",
+      "customer_id": "50493faa-f7ce-400d-a50b-e30479f191d3",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2026-40300",
+      "phone": null,
+      "area": "Kolín",
+      "status": "active",
+      "started_at": "2026-03-20T09:00:00.000Z"
+    },
+    {
+      "id": "8e1e3204-6702-4cb7-a941-6daaecc9dcba",
+      "customer_id": "50493faa-f7ce-400d-a50b-e30479f191d3",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2024-62589",
+      "phone": "+420030266779",
+      "area": "Kolín",
+      "status": "active",
+      "started_at": "2024-04-13T09:00:00.000Z"
+    },
+    {
+      "id": "4803ec2e-94b7-4fce-b9d0-a2fa0b6e11ae",
+      "customer_id": "f921d20b-0abd-4c0c-87fd-06556a88348d",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2023-32591",
+      "phone": null,
+      "area": "Plzeň",
+      "status": "active",
+      "started_at": "2023-02-24T09:00:00.000Z"
+    },
+    {
+      "id": "b0c44bb9-a212-4b71-9348-20a89366fe65",
+      "customer_id": "f921d20b-0abd-4c0c-87fd-06556a88348d",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2018-03502",
+      "phone": null,
+      "area": "Plzeň",
+      "status": "active",
+      "started_at": "2018-04-10T09:00:00.000Z"
+    },
+    {
+      "id": "3c2e1dfa-0ee8-474d-b825-1b0825d2c4f2",
+      "customer_id": "7689587c-6d97-4bd6-920f-76c26bdd3619",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil S",
+      "contract_number": "SML-2025-91186",
+      "phone": "+420057226505",
+      "area": "Kladno",
+      "status": "active",
+      "started_at": "2025-08-08T09:00:00.000Z"
+    },
+    {
+      "id": "8cf71b61-8a09-4e6c-9495-0267bd701ca2",
+      "customer_id": "7689587c-6d97-4bd6-920f-76c26bdd3619",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil M",
+      "contract_number": "SML-2025-25995",
+      "phone": "+420076090294",
+      "area": "Kladno",
+      "status": "terminated",
+      "started_at": "2025-10-06T09:00:00.000Z"
+    },
+    {
+      "id": "88387e97-b899-4a90-b119-0d14801fb216",
+      "customer_id": "47a965e2-319b-4f13-9dea-63f2a89cedb9",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2022-76015",
+      "phone": "+420073597192",
+      "area": "Kolín",
+      "status": "active",
+      "started_at": "2022-01-13T09:00:00.000Z"
+    },
+    {
+      "id": "d0bb7fdd-56b9-4b60-be82-cdf23eeef80d",
+      "customer_id": "a28b7c3b-5645-4542-8451-50dbb490b07a",
+      "service_type": "internet",
+      "tariff": "Merelo Home 5G",
+      "contract_number": "SML-2025-87280",
+      "phone": null,
+      "area": "České Budějovice",
+      "status": "active",
+      "started_at": "2025-05-04T09:00:00.000Z"
+    },
+    {
+      "id": "9389680c-58ee-4277-a956-dd04174d2d56",
+      "customer_id": "03754aed-244d-4525-b9a5-a910d035a336",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2024-86932",
+      "phone": null,
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2024-01-18T09:00:00.000Z"
+    },
+    {
+      "id": "71735949-b98a-46c1-9d9f-73348d2526e8",
+      "customer_id": "15f6c598-6c14-4184-b2b5-b8593e79bf3f",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil S",
+      "contract_number": "SML-2025-26188",
+      "phone": "+420048355568",
+      "area": "Olomouc",
+      "status": "active",
+      "started_at": "2025-02-21T09:00:00.000Z"
+    },
+    {
+      "id": "d9dd87b2-0da6-4af3-9382-31c1039647a8",
+      "customer_id": "15f6c598-6c14-4184-b2b5-b8593e79bf3f",
+      "service_type": "internet",
+      "tariff": "Merelo DSL 50",
+      "contract_number": "SML-2024-83964",
+      "phone": null,
+      "area": "Olomouc",
+      "status": "active",
+      "started_at": "2024-02-04T09:00:00.000Z"
+    },
+    {
+      "id": "df5a909a-5fea-4178-9923-33dcd90ee15a",
+      "customer_id": "15f6c598-6c14-4184-b2b5-b8593e79bf3f",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil M",
+      "contract_number": "SML-2024-46083",
+      "phone": "+420074457174",
+      "area": "Olomouc",
+      "status": "terminated",
+      "started_at": "2024-02-28T09:00:00.000Z"
+    },
+    {
+      "id": "86bccac5-1103-4123-923f-3ee4cb05d06d",
+      "customer_id": "1c2ab0cc-7eb2-4c12-b639-7dffc430ac4f",
+      "service_type": "internet",
+      "tariff": "Merelo Home 5G",
+      "contract_number": "SML-2018-04688",
+      "phone": null,
+      "area": "Banská Bystrica",
+      "status": "active",
+      "started_at": "2018-09-21T09:00:00.000Z"
+    },
+    {
+      "id": "7359a011-2281-4adf-a817-c70c7e130746",
+      "customer_id": "82178ee0-3865-4c99-912d-2071be9a3b2c",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2019-22395",
+      "phone": "+420016182922",
+      "area": "České Budějovice",
+      "status": "active",
+      "started_at": "2019-12-24T09:00:00.000Z"
+    },
+    {
+      "id": "a4978a8d-81ca-4fc1-bdf5-f7c5e2605cad",
+      "customer_id": "d948b07e-ad46-4709-997b-bc2ebaecad3e",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2026-62423",
+      "phone": null,
+      "area": "Kolín",
+      "status": "active",
+      "started_at": "2026-04-18T09:00:00.000Z"
+    },
+    {
+      "id": "6a9abab4-63fa-4f7d-a24f-4703b4cc2425",
+      "customer_id": "d948b07e-ad46-4709-997b-bc2ebaecad3e",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2022-98663",
+      "phone": "+420066040813",
+      "area": "Kolín",
+      "status": "active",
+      "started_at": "2022-05-18T09:00:00.000Z"
+    },
+    {
+      "id": "a5136fcd-7e59-4996-9f59-e247d6ab343b",
+      "customer_id": "c4a1a15f-fea7-49da-9a25-4bf013e53111",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2025-92311",
+      "phone": null,
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2025-04-22T09:00:00.000Z"
+    },
+    {
+      "id": "27fd771d-2613-4728-a11b-5528b56b3438",
+      "customer_id": "a888974c-8c8f-4e00-bfce-09a8b32b9ceb",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2023-97811",
+      "phone": "+420016631963",
+      "area": "Kolín",
+      "status": "active",
+      "started_at": "2023-11-03T09:00:00.000Z"
+    },
+    {
+      "id": "b7dc77b1-4cfc-472d-be29-16f8c10ed40b",
+      "customer_id": "b09c01df-dadc-48d9-916d-cd38eb1b47be",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil M",
+      "contract_number": "SML-2023-33707",
+      "phone": "+420074724743",
+      "area": "České Budějovice",
+      "status": "terminated",
+      "started_at": "2023-04-10T09:00:00.000Z"
+    },
+    {
+      "id": "1f9e4014-24e2-42b2-9a50-bf9a1531b677",
+      "customer_id": "b09c01df-dadc-48d9-916d-cd38eb1b47be",
+      "service_type": "tv",
+      "tariff": "Merelo TV Plus",
+      "contract_number": "SML-2023-30613",
+      "phone": null,
+      "area": "České Budějovice",
+      "status": "active",
+      "started_at": "2023-11-19T09:00:00.000Z"
+    },
+    {
+      "id": "f78c978a-b091-46d1-bb98-89f4c9178847",
+      "customer_id": "5834e77d-14cf-4f65-a451-4857690374da",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil M",
+      "contract_number": "SML-2023-31715",
+      "phone": "+420074724743",
+      "area": "Plzeň",
+      "status": "active",
+      "started_at": "2023-04-11T09:00:00.000Z"
+    },
+    {
+      "id": "c4852181-8a84-4194-8b6b-d9458cc95365",
+      "customer_id": "b40a0d36-f9a6-49e0-9456-792a54b30cb2",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil S",
+      "contract_number": "SML-2020-12526",
+      "phone": "+421021358246",
+      "area": "Žilina",
+      "status": "active",
+      "started_at": "2020-10-18T09:00:00.000Z"
+    },
+    {
+      "id": "b92c1cbf-49e4-405a-9b96-c11a04a0fd36",
+      "customer_id": "d6d9f64b-7700-48cc-9cda-91536f5e51d9",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil M",
+      "contract_number": "SML-2019-89663",
+      "phone": "+421084986072",
+      "area": "Košice",
+      "status": "active",
+      "started_at": "2019-09-14T09:00:00.000Z"
+    },
+    {
+      "id": "b1024047-a98e-4525-90c1-881c98fa7173",
+      "customer_id": "d6d9f64b-7700-48cc-9cda-91536f5e51d9",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil M",
+      "contract_number": "SML-2021-48186",
+      "phone": "+421043677171",
+      "area": "Košice",
+      "status": "terminated",
+      "started_at": "2021-09-24T09:00:00.000Z"
+    },
+    {
+      "id": "13862aa6-931c-4707-b1af-6e4ab0eec1ac",
+      "customer_id": "253a1a5c-aa5f-4725-a5c2-db364fbb711f",
+      "service_type": "tv",
+      "tariff": "Merelo TV Plus",
+      "contract_number": "SML-2020-10679",
+      "phone": null,
+      "area": "Plzeň",
+      "status": "active",
+      "started_at": "2020-12-21T09:00:00.000Z"
+    },
+    {
+      "id": "a5d02569-2e38-41c3-b0c8-8b31d1be6702",
+      "customer_id": "a7685718-ebbf-4fac-b5b1-9b8a2d40717a",
+      "service_type": "internet",
+      "tariff": "Merelo DSL 50",
+      "contract_number": "SML-2018-19794",
+      "phone": null,
+      "area": "Nitra",
+      "status": "active",
+      "started_at": "2018-03-25T09:00:00.000Z"
+    },
+    {
+      "id": "a53db3f6-85a0-49e3-95f0-b537e2772c29",
+      "customer_id": "a7685718-ebbf-4fac-b5b1-9b8a2d40717a",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil M",
+      "contract_number": "SML-2022-24063",
+      "phone": "+421067701537",
+      "area": "Nitra",
+      "status": "active",
+      "started_at": "2022-02-16T09:00:00.000Z"
+    },
+    {
+      "id": "58341ddb-fb4b-4a69-8174-026d6a1740fe",
+      "customer_id": "a7685718-ebbf-4fac-b5b1-9b8a2d40717a",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil S",
+      "contract_number": "SML-2022-14260",
+      "phone": "+421003864290",
+      "area": "Nitra",
+      "status": "active",
+      "started_at": "2022-08-05T09:00:00.000Z"
+    },
+    {
+      "id": "5eb626ee-d012-44cd-b766-32fa1cd67d99",
+      "customer_id": "b6b26c79-526f-4386-aa8d-4c6d722bb49d",
+      "service_type": "tv",
+      "tariff": "Merelo TV Plus",
+      "contract_number": "SML-2025-41450",
+      "phone": null,
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2025-10-01T09:00:00.000Z"
+    },
+    {
+      "id": "fa11f734-7fde-47c8-a7db-f634d91eb42c",
+      "customer_id": "b6b26c79-526f-4386-aa8d-4c6d722bb49d",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2025-84223",
+      "phone": "+420007508776",
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2025-03-19T09:00:00.000Z"
+    },
+    {
+      "id": "05aae58e-d0d5-4c42-9b6b-e1d06dea2ede",
+      "customer_id": "b6b26c79-526f-4386-aa8d-4c6d722bb49d",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2025-87053",
+      "phone": "+420078883460",
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2025-09-13T09:00:00.000Z"
+    },
+    {
+      "id": "d8e029f2-4567-48f9-aee5-2b6c6a713e57",
+      "customer_id": "58b5067b-0d07-4259-a2b7-9e7cca029c38",
+      "service_type": "tv",
+      "tariff": "Merelo TV Plus",
+      "contract_number": "SML-2026-77122",
+      "phone": null,
+      "area": "Nitra",
+      "status": "active",
+      "started_at": "2026-08-25T09:00:00.000Z"
+    },
+    {
+      "id": "12aa010b-da94-4e41-b82e-4793857fe626",
+      "customer_id": "79264483-8dc0-485c-81dc-a6c75ddb9945",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2022-37735",
+      "phone": "+421066729575",
+      "area": "Nitra",
+      "status": "active",
+      "started_at": "2022-10-02T09:00:00.000Z"
+    },
+    {
+      "id": "d5d33565-a96e-4024-8131-ff74a28df59e",
+      "customer_id": "f900fe36-8f59-433b-ad3b-4dcf02e29217",
+      "service_type": "internet",
+      "tariff": "Merelo Home 5G",
+      "contract_number": "SML-2023-87813",
+      "phone": null,
+      "area": "Praha 4",
+      "status": "active",
+      "started_at": "2023-05-20T09:00:00.000Z"
+    },
+    {
+      "id": "8f20cbea-126f-4e2d-b768-2f38316e0377",
+      "customer_id": "f900fe36-8f59-433b-ad3b-4dcf02e29217",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2018-56064",
+      "phone": "+420093635096",
+      "area": "Praha 4",
+      "status": "active",
+      "started_at": "2018-04-27T09:00:00.000Z"
+    },
+    {
+      "id": "1b7334b5-f95d-4c78-b9c8-dfaf5b42d767",
+      "customer_id": "d4cf678e-0f48-4c60-b043-ceaa46ac6848",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2026-81437",
+      "phone": null,
+      "area": "Bratislava-Petržalka",
+      "status": "active",
+      "started_at": "2026-10-02T23:00:00.000Z"
+    },
+    {
+      "id": "f98945f0-399b-40a8-8122-114ce1e02069",
+      "customer_id": "d4cf678e-0f48-4c60-b043-ceaa46ac6848",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2018-70427",
+      "phone": null,
+      "area": "Bratislava-Petržalka",
+      "status": "active",
+      "started_at": "2018-03-21T09:00:00.000Z"
+    },
+    {
+      "id": "9b9faaa6-5ddc-4508-8377-8983a3939e07",
+      "customer_id": "535fff7a-fafa-430f-9345-e62263c80eed",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 1000",
+      "contract_number": "SML-2025-51375",
+      "phone": null,
+      "area": "Liberec",
+      "status": "active",
+      "started_at": "2025-08-26T09:00:00.000Z"
+    },
+    {
+      "id": "ae018a77-b42e-43f4-b292-c67a68c219da",
+      "customer_id": "535fff7a-fafa-430f-9345-e62263c80eed",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2019-84431",
+      "phone": "+420092991127",
+      "area": "Liberec",
+      "status": "active",
+      "started_at": "2019-05-25T09:00:00.000Z"
+    },
+    {
+      "id": "0943d877-03b5-4310-b0d2-a84488cab91b",
+      "customer_id": "535fff7a-fafa-430f-9345-e62263c80eed",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2019-86944",
+      "phone": "+420048495838",
+      "area": "Liberec",
+      "status": "active",
+      "started_at": "2019-09-03T09:00:00.000Z"
+    },
+    {
+      "id": "053d20a4-c698-48a2-9d7e-c859ed071141",
+      "customer_id": "535fff7a-fafa-430f-9345-e62263c80eed",
+      "service_type": "internet",
+      "tariff": "Merelo DSL 50",
+      "contract_number": "SML-2025-92972",
+      "phone": null,
+      "area": "Liberec",
+      "status": "terminated",
+      "started_at": "2025-01-17T09:00:00.000Z"
+    },
+    {
+      "id": "6b5de217-9a35-4129-a650-6a006dfa81b8",
+      "customer_id": "5d13c652-3e0d-487b-8a8a-43ae4b37dec9",
+      "service_type": "tv",
+      "tariff": "Merelo TV Plus",
+      "contract_number": "SML-2026-77446",
+      "phone": null,
+      "area": "České Budějovice",
+      "status": "active",
+      "started_at": "2026-10-02T23:00:00.000Z"
+    },
+    {
+      "id": "32280099-82e5-4ca1-8bcd-3e4310bb5edb",
+      "customer_id": "15fa0575-491e-4b02-9145-c6430020ded2",
+      "service_type": "internet",
+      "tariff": "Merelo DSL 50",
+      "contract_number": "SML-2022-68609",
+      "phone": null,
+      "area": "Brno-Žabovřesky",
+      "status": "active",
+      "started_at": "2022-12-05T09:00:00.000Z"
+    },
+    {
+      "id": "a81ae322-e594-40ba-b948-eefcb7719fc1",
+      "customer_id": "15fa0575-491e-4b02-9145-c6430020ded2",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2022-98640",
+      "phone": "+420037508404",
+      "area": "Brno-Žabovřesky",
+      "status": "active",
+      "started_at": "2022-09-05T09:00:00.000Z"
+    },
+    {
+      "id": "d3d17275-a78f-430d-b86f-f58b21594779",
+      "customer_id": "2c9082d0-cded-4d39-a9ea-eb369eafd867",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2024-80764",
+      "phone": null,
+      "area": "Kolín",
+      "status": "active",
+      "started_at": "2024-05-05T09:00:00.000Z"
+    },
+    {
+      "id": "61dbb2cf-423c-4616-8d1b-3133f687bf1d",
+      "customer_id": "d158f331-2176-43ac-8b5d-b2b39401dd4a",
+      "service_type": "internet",
+      "tariff": "Merelo DSL 50",
+      "contract_number": "SML-2023-66644",
+      "phone": null,
+      "area": "Plzeň",
+      "status": "active",
+      "started_at": "2023-03-07T09:00:00.000Z"
+    },
+    {
+      "id": "c6365124-b248-4fa7-832d-8f385c2b5a68",
+      "customer_id": "0e91a72e-fe48-47a2-966b-21f6e2e4dc71",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2025-95292",
+      "phone": null,
+      "area": "Ostrava-Poruba",
+      "status": "active",
+      "started_at": "2025-07-11T09:00:00.000Z"
+    },
+    {
+      "id": "cf98f889-ee21-4be1-b6c5-0aa40c7477fa",
+      "customer_id": "c6e9a16e-5884-4b63-9298-0d311d50197b",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2023-32556",
+      "phone": null,
+      "area": "Zlín",
+      "status": "active",
+      "started_at": "2023-03-16T09:00:00.000Z"
+    },
+    {
+      "id": "6c55b197-5f55-4a43-922d-fff73210ef46",
+      "customer_id": "c6e9a16e-5884-4b63-9298-0d311d50197b",
+      "service_type": "tv",
+      "tariff": "Merelo TV Plus",
+      "contract_number": "SML-2021-05115",
+      "phone": null,
+      "area": "Zlín",
+      "status": "active",
+      "started_at": "2021-02-10T09:00:00.000Z"
+    },
+    {
+      "id": "15008ec5-2ad4-4323-a339-f4d896165ef5",
+      "customer_id": "7d29868c-1750-47ec-8b31-5d484a174dab",
+      "service_type": "internet",
+      "tariff": "Merelo DSL 50",
+      "contract_number": "SML-2024-02002",
+      "phone": null,
+      "area": "Kladno",
+      "status": "active",
+      "started_at": "2024-10-21T09:00:00.000Z"
+    },
+    {
+      "id": "dfa270f6-430c-4d98-948b-3955b6fafe4f",
+      "customer_id": "4044f47d-3bd6-434d-b3c9-adfca2695efe",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 1000",
+      "contract_number": "SML-2018-34094",
+      "phone": null,
+      "area": "Žilina",
+      "status": "active",
+      "started_at": "2018-03-16T09:00:00.000Z"
+    },
+    {
+      "id": "3c025507-4a40-412b-9917-594d6d3e1047",
+      "customer_id": "2bc292fc-a207-4a4d-87c3-cbf661d8956e",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 1000",
+      "contract_number": "SML-2020-60272",
+      "phone": null,
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2020-08-17T09:00:00.000Z"
+    },
+    {
+      "id": "f513a2d1-f61d-42ea-9db3-3f39cdb18063",
+      "customer_id": "2bc292fc-a207-4a4d-87c3-cbf661d8956e",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2024-50463",
+      "phone": "+420034692022",
+      "area": "Hradec Králové",
+      "status": "active",
+      "started_at": "2024-12-15T09:00:00.000Z"
+    },
+    {
+      "id": "2582c033-6c36-4fa9-ae00-7fd937c6ad0f",
+      "customer_id": "aa3a4a20-63a4-49bc-99df-56735cd089ba",
+      "service_type": "internet",
+      "tariff": "Merelo Home 5G",
+      "contract_number": "SML-2025-61746",
+      "phone": null,
+      "area": "Kladno",
+      "status": "active",
+      "started_at": "2025-01-17T09:00:00.000Z"
+    },
+    {
+      "id": "6bd36ac7-d52d-4cce-9e82-68021623ebce",
+      "customer_id": "f3ea674f-9f7d-49b4-b503-17a339801d9f",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2022-44171",
+      "phone": "+420019508241",
+      "area": "Opava",
+      "status": "active",
+      "started_at": "2022-06-17T09:00:00.000Z"
+    },
+    {
+      "id": "57f279c5-cfef-4a39-a9d5-25fb5b702e25",
+      "customer_id": "4fbb972e-4af7-4fc3-b62e-8185603a4d7c",
+      "service_type": "tv",
+      "tariff": "Merelo TV Plus",
+      "contract_number": "SML-2018-80978",
+      "phone": null,
+      "area": "Pardubice",
+      "status": "active",
+      "started_at": "2018-06-06T09:00:00.000Z"
+    },
+    {
+      "id": "ea3a30ec-bc51-48b3-a6e6-d10d25d5b254",
+      "customer_id": "4220808e-72fa-46d7-8932-42a40cdfc591",
+      "service_type": "internet",
+      "tariff": "Merelo Fiber 300",
+      "contract_number": "SML-2021-58813",
+      "phone": null,
+      "area": "Liberec",
+      "status": "active",
+      "started_at": "2021-02-11T09:00:00.000Z"
+    },
+    {
+      "id": "a458f488-fb8a-4414-bbde-338385fc8fce",
+      "customer_id": "4220808e-72fa-46d7-8932-42a40cdfc591",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil M",
+      "contract_number": "SML-2025-09988",
+      "phone": "+420037941417",
+      "area": "Liberec",
+      "status": "active",
+      "started_at": "2025-01-22T09:00:00.000Z"
+    },
+    {
+      "id": "79cc4452-2e07-4d3e-b7b7-aa5636974a35",
+      "customer_id": "a4f25545-327f-482c-b812-5e0e20a9a31a",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2021-96749",
+      "phone": "+421043476637",
+      "area": "Banská Bystrica",
+      "status": "active",
+      "started_at": "2021-07-18T09:00:00.000Z"
+    },
+    {
+      "id": "2a3513c1-0505-45d4-8311-dbb9cb659aa6",
+      "customer_id": "a4f25545-327f-482c-b812-5e0e20a9a31a",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2019-09302",
+      "phone": null,
+      "area": "Banská Bystrica",
+      "status": "active",
+      "started_at": "2019-07-01T09:00:00.000Z"
+    },
+    {
+      "id": "cdb21224-db14-4769-bbf7-44c828e3f69b",
+      "customer_id": "028e5d0a-3010-4e41-9fa5-a2b8bdfa7d1e",
+      "service_type": "tv",
+      "tariff": "Merelo TV Plus",
+      "contract_number": "SML-2020-72184",
+      "phone": null,
+      "area": "Nitra",
+      "status": "active",
+      "started_at": "2020-12-09T09:00:00.000Z"
+    },
+    {
+      "id": "f51a7ed9-a836-4c0e-9681-354ae4e65a73",
+      "customer_id": "028e5d0a-3010-4e41-9fa5-a2b8bdfa7d1e",
+      "service_type": "internet",
+      "tariff": "Merelo DSL 50",
+      "contract_number": "SML-2023-05253",
+      "phone": null,
+      "area": "Nitra",
+      "status": "active",
+      "started_at": "2023-10-18T09:00:00.000Z"
+    },
+    {
+      "id": "fae34d4a-776a-4218-96fd-a4972ff908b2",
+      "customer_id": "5eff34b8-ae89-48a4-ba8d-6ce11a159340",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2022-10530",
+      "phone": null,
+      "area": "Brno-Žabovřesky",
+      "status": "active",
+      "started_at": "2022-10-08T09:00:00.000Z"
+    },
+    {
+      "id": "4cfb16ef-ecbb-408f-acef-2255ded705d5",
+      "customer_id": "f9b01b91-b12f-4c3e-90d1-d79218ad1da0",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2020-76863",
+      "phone": null,
+      "area": "Kladno",
+      "status": "active",
+      "started_at": "2020-04-15T09:00:00.000Z"
+    },
+    {
+      "id": "9f00a872-c41b-4f96-8a20-73e1cbfc9d73",
+      "customer_id": "f9b01b91-b12f-4c3e-90d1-d79218ad1da0",
+      "service_type": "mobile",
+      "tariff": "Merelo Data Only 50",
+      "contract_number": "SML-2019-00081",
+      "phone": "+420035258703",
+      "area": "Kladno",
+      "status": "active",
+      "started_at": "2019-11-09T09:00:00.000Z"
+    },
+    {
+      "id": "2f7b0d78-b7f1-4e06-9b80-14da416eab3e",
+      "customer_id": "d1bb0e07-35d4-4379-9175-340a313d9a00",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2022-87766",
+      "phone": null,
+      "area": "Pardubice",
+      "status": "active",
+      "started_at": "2022-12-11T09:00:00.000Z"
+    },
+    {
+      "id": "5cf4f2e8-4e0b-4e17-a236-c5fb51be886f",
+      "customer_id": "fad898c1-228a-407b-b328-51e4a07d0abb",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2019-60322",
+      "phone": null,
+      "area": "Jihlava",
+      "status": "active",
+      "started_at": "2019-10-18T09:00:00.000Z"
+    },
+    {
+      "id": "73d6f8f7-3dd0-422d-8912-7d8ffde03146",
+      "customer_id": "ba54cc37-0841-4b71-b58e-d02f47f51eb0",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil Neomezeně",
+      "contract_number": "SML-2026-84369",
+      "phone": "+420076474882",
+      "area": "Praha 10",
+      "status": "active",
+      "started_at": "2026-10-02T23:00:00.000Z"
+    },
+    {
+      "id": "7c7f34c1-0867-4c08-a982-e2e0ed958a1f",
+      "customer_id": "ba54cc37-0841-4b71-b58e-d02f47f51eb0",
+      "service_type": "internet",
+      "tariff": "Merelo DSL 50",
+      "contract_number": "SML-2018-10598",
+      "phone": null,
+      "area": "Praha 10",
+      "status": "active",
+      "started_at": "2018-08-19T09:00:00.000Z"
+    },
+    {
+      "id": "8a3cb9ec-a99f-4c7a-9a97-3974b8dca0d1",
+      "customer_id": "77bc7212-ce76-4e2a-8461-a76375209082",
+      "service_type": "tv",
+      "tariff": "Merelo TV Start",
+      "contract_number": "SML-2021-49163",
+      "phone": null,
+      "area": "Jihlava",
+      "status": "active",
+      "started_at": "2021-04-10T09:00:00.000Z"
+    },
+    {
+      "id": "aa626ed5-5fe3-4221-a90d-d0a804c84f21",
+      "customer_id": "2d2b7f3e-889e-4070-a64d-0396169a97e4",
+      "service_type": "mobile",
+      "tariff": "Merelo Mobil M",
+      "contract_number": "SML-2024-82117",
+      "phone": "+420095705378",
+      "area": "Plzeň",
+      "status": "active",
+      "started_at": "2024-06-12T09:00:00.000Z"
+    },
+    {
+      "id": "15938835-12ca-4491-9c26-c9d8acab1fcb",
+      "customer_id": "a4499f59-f90b-4f02-bed4-3a698e97056a",
+      "service_type": "internet",
+      "tariff": "Merelo DSL 50",
+      "contract_number": "SML-2022-88585",
+      "phone": null,
+      "area": "Praha 4",
+      "status": "active",
+      "started_at": "2022-12-07T09:00:00.000Z"
+    },
+    {
+      "id": "027961c6-742d-4264-a4a1-4a76d1581f48",
+      "customer_id": "88a74c88-4df3-494b-9ee6-4626a234ce21",
+      "service_type": "internet",
+      "tariff": "Merelo Home 5G",
+      "contract_number": "SML-2018-19588",
+      "phone": null,
+      "area": "České Budějovice",
+      "status": "active",
+      "started_at": "2018-03-11T09:00:00.000Z"
+    }
+  ],
+  "tickets": [
+    {
+      "id": "f7f6e869-8ea7-4a48-ad55-0c3552d68f86",
+      "customer_id": "89ee7ed0-e07e-4b00-93e2-e973c3e885a0",
+      "service_id": "c6c4c2cd-92da-446d-ad39-f5c28effbd41",
+      "category": "other",
+      "summary": "Customer asked for a copy of the contract; sent by e-mail.",
+      "opened_at": "2022-03-19T09:00:00.000Z",
+      "closed_at": "2022-03-21T21:00:00.000Z"
+    },
+    {
+      "id": "03757345-2217-406c-98f9-b5d3680c8ff8",
+      "customer_id": "6595d859-eade-4fdb-b9f3-50006c9320dc",
+      "service_id": "e9c45826-a33b-4bea-b6bd-56abb626b517",
+      "category": "cancellation",
+      "summary": "Customer asked about the notice period; information given.",
+      "opened_at": "2021-05-03T09:00:00.000Z",
+      "closed_at": "2021-05-03T18:00:00.000Z"
+    },
+    {
+      "id": "192949e7-80bb-4315-9481-03087b27d0ae",
+      "customer_id": "23dc1a61-6832-476b-bea5-8a71a1af68ad",
+      "service_id": "271baa07-354f-4e68-9240-d8705ceb4538",
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2021-03-26T09:00:00.000Z",
+      "closed_at": "2021-03-26T14:00:00.000Z"
+    },
+    {
+      "id": "72dc00ff-9c21-47f5-ab99-0e5536259f82",
+      "customer_id": "26994cd6-5b76-4093-a2a1-2fbbad8ff9ea",
+      "service_id": "47cde2a6-6f07-46cf-bf6c-b9289d0ba17e",
+      "category": "tariff_change",
+      "summary": "Tariff changed at the customer's request.",
+      "opened_at": "2023-09-16T09:00:00.000Z",
+      "closed_at": "2023-09-19T00:00:00.000Z"
+    },
+    {
+      "id": "0afb1b63-b57f-46df-b137-912e2077fb5f",
+      "customer_id": "26994cd6-5b76-4093-a2a1-2fbbad8ff9ea",
+      "service_id": null,
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2024-01-13T09:00:00.000Z",
+      "closed_at": "2024-01-13T17:00:00.000Z"
+    },
+    {
+      "id": "1b48b655-e83b-412f-83de-6e37bcd2174e",
+      "customer_id": "29f0547d-bd9f-445e-b486-9a881334d612",
+      "service_id": "99f2ce9a-8688-4d86-b3e0-8ae1d28fd68e",
+      "category": "cancellation",
+      "summary": "Customer asked about the notice period; information given.",
+      "opened_at": "2025-04-11T09:00:00.000Z",
+      "closed_at": "2025-04-13T02:00:00.000Z"
+    },
+    {
+      "id": "80f1d614-4b71-47ac-afdc-316ef95599a5",
+      "customer_id": "dc3000c9-a604-4bcb-bd8c-3bc599d51a27",
+      "service_id": "cebdabc5-8085-4e6e-9325-c5cc604b0fff",
+      "category": "tariff_change",
+      "summary": "Tariff changed at the customer's request.",
+      "opened_at": "2018-12-21T09:00:00.000Z",
+      "closed_at": "2018-12-21T22:00:00.000Z"
+    },
+    {
+      "id": "5a21be41-c6f0-42ed-8e38-938246ce249b",
+      "customer_id": "dc3000c9-a604-4bcb-bd8c-3bc599d51a27",
+      "service_id": "920014a6-eb7b-4dab-ad47-b477e601de83",
+      "category": "other",
+      "summary": "Customer asked for a copy of the contract; sent by e-mail.",
+      "opened_at": "2025-04-27T09:00:00.000Z",
+      "closed_at": "2025-04-30T09:00:00.000Z"
+    },
+    {
+      "id": "5a7cac5b-b839-4416-990b-ff8e08f59217",
+      "customer_id": "a8e1afb0-2c38-43c2-a4f7-10a203fc2ad2",
+      "service_id": "93dac627-5759-4e7d-b12c-07199934fecf",
+      "category": "technical_fault",
+      "summary": "Slow speeds reported in the evenings; line checked, no fault found.",
+      "opened_at": "2024-09-08T09:00:00.000Z",
+      "closed_at": "2024-09-08T10:00:00.000Z"
+    },
+    {
+      "id": "975566da-b631-4e2a-96b0-cfba32358fec",
+      "customer_id": "a8e1afb0-2c38-43c2-a4f7-10a203fc2ad2",
+      "service_id": "93dac627-5759-4e7d-b12c-07199934fecf",
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2019-09-16T09:00:00.000Z",
+      "closed_at": "2019-09-18T13:00:00.000Z"
+    },
+    {
+      "id": "c30efc26-9e17-4a3e-94de-ca1ff522b6fb",
+      "customer_id": "9da7008d-4d2f-42bd-883f-634b9b92daf4",
+      "service_id": "fc6e829a-a967-4eee-97ce-eebfef6de3df",
+      "category": "technical_fault",
+      "summary": "Intermittent dropouts reported; technician visit offered.",
+      "opened_at": "2022-04-02T09:00:00.000Z",
+      "closed_at": "2022-04-05T05:00:00.000Z"
+    },
+    {
+      "id": "0337bd39-f13e-4d8f-8ed2-0c462a018279",
+      "customer_id": "0f4b5a00-2686-4af5-a2fb-f4fecf8400c7",
+      "service_id": null,
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2025-10-10T09:00:00.000Z",
+      "closed_at": "2025-10-10T13:00:00.000Z"
+    },
+    {
+      "id": "1752b870-5ec7-4560-9f01-ab68cda61d38",
+      "customer_id": "4a3ac96e-c245-46b5-9bf6-16b9ff35651e",
+      "service_id": null,
+      "category": "tariff_change",
+      "summary": "Customer asked about a higher tariff; offer sent.",
+      "opened_at": "2019-12-12T09:00:00.000Z",
+      "closed_at": "2019-12-14T12:00:00.000Z"
+    },
+    {
+      "id": "79de3f04-de49-489b-b125-94c6411fc3be",
+      "customer_id": "4a3ac96e-c245-46b5-9bf6-16b9ff35651e",
+      "service_id": "ad18ade3-69b2-45d7-b134-aaeb3fda65d8",
+      "category": "billing_question",
+      "summary": "Question about a payment that did not show up; payment matched.",
+      "opened_at": "2019-03-11T09:00:00.000Z",
+      "closed_at": "2019-03-13T22:00:00.000Z"
+    },
+    {
+      "id": "6692597e-50b5-46ac-9b4b-f64a8bfbb67c",
+      "customer_id": "7f867363-548f-491b-af61-a58a8b16a53d",
+      "service_id": "ccee0466-c1b4-4334-9222-1bb98fdb3e64",
+      "category": "tariff_change",
+      "summary": "Tariff changed at the customer's request.",
+      "opened_at": "2025-06-27T09:00:00.000Z",
+      "closed_at": "2025-06-30T06:00:00.000Z"
+    },
+    {
+      "id": "bfe235fe-d86c-41a4-96a9-9677476a293e",
+      "customer_id": "7f867363-548f-491b-af61-a58a8b16a53d",
+      "service_id": "ccee0466-c1b4-4334-9222-1bb98fdb3e64",
+      "category": "other",
+      "summary": "Customer asked for a copy of the contract; sent by e-mail.",
+      "opened_at": "2024-11-04T09:00:00.000Z",
+      "closed_at": "2024-11-05T23:00:00.000Z"
+    },
+    {
+      "id": "8d939278-fdc9-4eff-85be-c76226a5a156",
+      "customer_id": "1deb7533-0d4c-47b0-bd57-e9098f6ef814",
+      "service_id": "d0fecc32-f54e-462b-a18a-77c9a22b4c6a",
+      "category": "billing_question",
+      "summary": "Question about a payment that did not show up; payment matched.",
+      "opened_at": "2023-01-21T09:00:00.000Z",
+      "closed_at": "2023-01-23T12:00:00.000Z"
+    },
+    {
+      "id": "9d98a97c-71b9-4b2b-9414-3f4e3354c641",
+      "customer_id": "1deb7533-0d4c-47b0-bd57-e9098f6ef814",
+      "service_id": "d0fecc32-f54e-462b-a18a-77c9a22b4c6a",
+      "category": "tariff_change",
+      "summary": "Tariff changed at the customer's request.",
+      "opened_at": "2026-02-16T09:00:00.000Z",
+      "closed_at": "2026-02-16T12:00:00.000Z"
+    },
+    {
+      "id": "3ffa4144-9b6f-456a-a98c-bfcbc840320c",
+      "customer_id": "783c7c9e-9bca-49ef-a03d-190e1d864804",
+      "service_id": "e9759667-f76d-46e6-8c6b-6d87c0c2e8bf",
+      "category": "cancellation",
+      "summary": "Customer asked about the notice period; information given.",
+      "opened_at": "2021-01-30T09:00:00.000Z",
+      "closed_at": "2021-01-31T21:00:00.000Z"
+    },
+    {
+      "id": "ec3677ce-848c-44bb-bbac-bf529dd61f4b",
+      "customer_id": "922a13b3-9b5e-4763-87c1-9bcd2a78ef8f",
+      "service_id": "e27df2de-0483-45fb-a44f-80acfdfa4ce5",
+      "category": "cancellation",
+      "summary": "Customer asked about the notice period; information given.",
+      "opened_at": "2021-11-20T09:00:00.000Z",
+      "closed_at": "2021-11-21T09:00:00.000Z"
+    },
+    {
+      "id": "94179e1e-8f42-4a59-8899-57b65548b9eb",
+      "customer_id": "119c0784-9c67-42c3-beb4-691211e596e9",
+      "service_id": null,
+      "category": "other",
+      "summary": "Customer asked for a copy of the contract; sent by e-mail.",
+      "opened_at": "2025-04-10T09:00:00.000Z",
+      "closed_at": "2025-04-11T09:00:00.000Z"
+    },
+    {
+      "id": "c9728cc2-9da4-4ec0-bf83-ae0f1c2df4a5",
+      "customer_id": "a2601a89-70c3-4d1e-b721-5aa0c548b787",
+      "service_id": "7434e140-98b2-4930-95e3-39ed3f0d58da",
+      "category": "cancellation",
+      "summary": "Customer asked about the notice period; information given.",
+      "opened_at": "2026-07-10T09:00:00.000Z",
+      "closed_at": "2026-07-13T04:00:00.000Z"
+    },
+    {
+      "id": "68be0126-e9b4-42a6-91b6-1b0d43a111bc",
+      "customer_id": "ca31c240-4080-4f28-8f8e-22e8d528616d",
+      "service_id": null,
+      "category": "cancellation",
+      "summary": "Customer asked about the notice period; information given.",
+      "opened_at": "2026-01-10T09:00:00.000Z",
+      "closed_at": "2026-01-12T04:00:00.000Z"
+    },
+    {
+      "id": "5c71d5f5-6e1b-4018-bf6a-8d455160e7bd",
+      "customer_id": "ca31c240-4080-4f28-8f8e-22e8d528616d",
+      "service_id": null,
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2025-08-13T09:00:00.000Z",
+      "closed_at": "2025-08-13T14:00:00.000Z"
+    },
+    {
+      "id": "85597ab1-058c-4b2e-b544-3b2cb8e47e2d",
+      "customer_id": "0e706b57-59f0-492a-bd23-84b2c58a0632",
+      "service_id": null,
+      "category": "billing_question",
+      "summary": "Question about a payment that did not show up; payment matched.",
+      "opened_at": "2024-08-24T09:00:00.000Z",
+      "closed_at": "2024-08-26T00:00:00.000Z"
+    },
+    {
+      "id": "0b07374d-a615-41fc-9b86-fa201822f534",
+      "customer_id": "e2ec7294-bfa9-4622-816d-dcd18d6e2702",
+      "service_id": "bac4aa24-4dd8-4575-85d3-5a06e2ef9a89",
+      "category": "billing_question",
+      "summary": "Question about a payment that did not show up; payment matched.",
+      "opened_at": "2026-01-02T09:00:00.000Z",
+      "closed_at": "2026-01-04T03:00:00.000Z"
+    },
+    {
+      "id": "23c2c215-5332-44de-a541-778fe5ee41b5",
+      "customer_id": "47a965e2-319b-4f13-9dea-63f2a89cedb9",
+      "service_id": "88387e97-b899-4a90-b119-0d14801fb216",
+      "category": "cancellation",
+      "summary": "Customer asked about the notice period; information given.",
+      "opened_at": "2022-09-30T09:00:00.000Z",
+      "closed_at": "2022-09-30T22:00:00.000Z"
+    },
+    {
+      "id": "25756e73-6ce0-421c-9c00-795121b6059c",
+      "customer_id": "47a965e2-319b-4f13-9dea-63f2a89cedb9",
+      "service_id": "88387e97-b899-4a90-b119-0d14801fb216",
+      "category": "technical_fault",
+      "summary": "Slow speeds reported in the evenings; line checked, no fault found.",
+      "opened_at": "2025-06-10T09:00:00.000Z",
+      "closed_at": "2025-06-10T22:00:00.000Z"
+    },
+    {
+      "id": "d91a05e0-c308-419a-b38b-56daab9cb3d2",
+      "customer_id": "a28b7c3b-5645-4542-8451-50dbb490b07a",
+      "service_id": "d0bb7fdd-56b9-4b60-be82-cdf23eeef80d",
+      "category": "other",
+      "summary": "Customer asked for a copy of the contract; sent by e-mail.",
+      "opened_at": "2025-07-19T09:00:00.000Z",
+      "closed_at": "2025-07-20T01:00:00.000Z"
+    },
+    {
+      "id": "ef08beba-96f8-49be-9ee0-fda762d2de8a",
+      "customer_id": "a28b7c3b-5645-4542-8451-50dbb490b07a",
+      "service_id": null,
+      "category": "cancellation",
+      "summary": "Customer asked about the notice period; information given.",
+      "opened_at": "2025-11-17T09:00:00.000Z",
+      "closed_at": "2025-11-17T20:00:00.000Z"
+    },
+    {
+      "id": "a1b6c330-a2f7-47d3-8e13-5dc6bf5d8c7f",
+      "customer_id": "1c2ab0cc-7eb2-4c12-b639-7dffc430ac4f",
+      "service_id": null,
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2020-04-04T09:00:00.000Z",
+      "closed_at": "2020-04-06T14:00:00.000Z"
+    },
+    {
+      "id": "b0359999-1714-4aab-955a-6c1c6248342d",
+      "customer_id": "1c2ab0cc-7eb2-4c12-b639-7dffc430ac4f",
+      "service_id": "86bccac5-1103-4123-923f-3ee4cb05d06d",
+      "category": "cancellation",
+      "summary": "Customer asked about the notice period; information given.",
+      "opened_at": "2020-06-13T09:00:00.000Z",
+      "closed_at": "2020-06-16T04:00:00.000Z"
+    },
+    {
+      "id": "1b63e9c5-b2f6-4847-a942-d5b3e10da43d",
+      "customer_id": "82178ee0-3865-4c99-912d-2071be9a3b2c",
+      "service_id": "7359a011-2281-4adf-a817-c70c7e130746",
+      "category": "other",
+      "summary": "Postal address updated.",
+      "opened_at": "2025-09-11T09:00:00.000Z",
+      "closed_at": "2025-09-11T10:00:00.000Z"
+    },
+    {
+      "id": "0c8b3f72-da9d-4aaf-bba5-b279f410bcb7",
+      "customer_id": "d948b07e-ad46-4709-997b-bc2ebaecad3e",
+      "service_id": null,
+      "category": "billing_question",
+      "summary": "Customer asked about an item on the monthly invoice; explained.",
+      "opened_at": "2026-08-04T09:00:00.000Z",
+      "closed_at": "2026-08-06T16:00:00.000Z"
+    },
+    {
+      "id": "4078d8ab-b9a0-4d3b-a3a0-40b7b5a9da34",
+      "customer_id": "d948b07e-ad46-4709-997b-bc2ebaecad3e",
+      "service_id": "a4978a8d-81ca-4fc1-bdf5-f7c5e2605cad",
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2024-12-10T09:00:00.000Z",
+      "closed_at": "2024-12-13T09:00:00.000Z"
+    },
+    {
+      "id": "af191d9c-cf4f-4a18-9388-2ca1542c60af",
+      "customer_id": "c4a1a15f-fea7-49da-9a25-4bf013e53111",
+      "service_id": "a5136fcd-7e59-4996-9f59-e247d6ab343b",
+      "category": "tariff_change",
+      "summary": "Tariff changed at the customer's request.",
+      "opened_at": "2026-05-08T09:00:00.000Z",
+      "closed_at": "2026-05-09T15:00:00.000Z"
+    },
+    {
+      "id": "351fc1b5-630a-41ed-b2c0-da349344867d",
+      "customer_id": "a888974c-8c8f-4e00-bfce-09a8b32b9ceb",
+      "service_id": "27fd771d-2613-4728-a11b-5528b56b3438",
+      "category": "technical_fault",
+      "summary": "Intermittent dropouts reported; technician visit offered.",
+      "opened_at": "2024-09-27T09:00:00.000Z",
+      "closed_at": "2024-09-29T15:00:00.000Z"
+    },
+    {
+      "id": "df6ff7c5-1a68-4c50-be44-37a22bbf65db",
+      "customer_id": "a888974c-8c8f-4e00-bfce-09a8b32b9ceb",
+      "service_id": "27fd771d-2613-4728-a11b-5528b56b3438",
+      "category": "cancellation",
+      "summary": "Customer asked about the notice period; information given.",
+      "opened_at": "2026-02-05T09:00:00.000Z",
+      "closed_at": "2026-02-05T11:00:00.000Z"
+    },
+    {
+      "id": "e59e4866-c0ac-43b9-9403-e05093f820ce",
+      "customer_id": "b09c01df-dadc-48d9-916d-cd38eb1b47be",
+      "service_id": "1f9e4014-24e2-42b2-9a50-bf9a1531b677",
+      "category": "technical_fault",
+      "summary": "Customer reported no connection; router restarted remotely.",
+      "opened_at": "2026-09-24T09:00:00.000Z",
+      "closed_at": "2026-09-27T04:00:00.000Z"
+    },
+    {
+      "id": "749a4d3c-4d3c-4e0d-a1b1-a5f8d84b802f",
+      "customer_id": "b09c01df-dadc-48d9-916d-cd38eb1b47be",
+      "service_id": "1f9e4014-24e2-42b2-9a50-bf9a1531b677",
+      "category": "other",
+      "summary": "Postal address updated.",
+      "opened_at": "2025-02-09T09:00:00.000Z",
+      "closed_at": "2025-02-10T20:00:00.000Z"
+    },
+    {
+      "id": "846c3c9f-45ae-4d6d-bb85-be790465aab3",
+      "customer_id": "5834e77d-14cf-4f65-a451-4857690374da",
+      "service_id": "f78c978a-b091-46d1-bb98-89f4c9178847",
+      "category": "other",
+      "summary": "Postal address updated.",
+      "opened_at": "2025-11-21T09:00:00.000Z",
+      "closed_at": "2025-11-21T14:00:00.000Z"
+    },
+    {
+      "id": "4159e5e7-e494-471d-829a-0ca958cf846a",
+      "customer_id": "5834e77d-14cf-4f65-a451-4857690374da",
+      "service_id": "f78c978a-b091-46d1-bb98-89f4c9178847",
+      "category": "technical_fault",
+      "summary": "Customer reported no connection; router restarted remotely.",
+      "opened_at": "2025-02-25T09:00:00.000Z",
+      "closed_at": "2025-02-26T04:00:00.000Z"
+    },
+    {
+      "id": "0e60034d-4cd6-4521-9026-9707f815fb93",
+      "customer_id": "b40a0d36-f9a6-49e0-9456-792a54b30cb2",
+      "service_id": "c4852181-8a84-4194-8b6b-d9458cc95365",
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2026-08-05T09:00:00.000Z",
+      "closed_at": "2026-08-06T08:00:00.000Z"
+    },
+    {
+      "id": "6e195ce8-8a01-401c-89c4-66b92c2503c6",
+      "customer_id": "b40a0d36-f9a6-49e0-9456-792a54b30cb2",
+      "service_id": null,
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2022-05-14T09:00:00.000Z",
+      "closed_at": "2022-05-15T11:00:00.000Z"
+    },
+    {
+      "id": "444b8d50-71a0-4987-af56-207b2cf0c71f",
+      "customer_id": "d6d9f64b-7700-48cc-9cda-91536f5e51d9",
+      "service_id": "b1024047-a98e-4525-90c1-881c98fa7173",
+      "category": "other",
+      "summary": "Customer asked for a copy of the contract; sent by e-mail.",
+      "opened_at": "2020-05-11T09:00:00.000Z",
+      "closed_at": "2020-05-12T09:00:00.000Z"
+    },
+    {
+      "id": "80e1d19d-e90a-4c32-8c78-26c01c526496",
+      "customer_id": "d6d9f64b-7700-48cc-9cda-91536f5e51d9",
+      "service_id": "b1024047-a98e-4525-90c1-881c98fa7173",
+      "category": "tariff_change",
+      "summary": "Customer asked about a higher tariff; offer sent.",
+      "opened_at": "2024-05-06T09:00:00.000Z",
+      "closed_at": "2024-05-07T23:00:00.000Z"
+    },
+    {
+      "id": "d5f74468-9c3d-46cb-9028-33ced4ed0ad3",
+      "customer_id": "a7685718-ebbf-4fac-b5b1-9b8a2d40717a",
+      "service_id": "a53db3f6-85a0-49e3-95f0-b537e2772c29",
+      "category": "tariff_change",
+      "summary": "Customer asked about a higher tariff; offer sent.",
+      "opened_at": "2018-03-27T09:00:00.000Z",
+      "closed_at": "2018-03-28T12:00:00.000Z"
+    },
+    {
+      "id": "2c40c432-a7ba-46d0-8323-4992c8af5c09",
+      "customer_id": "b6b26c79-526f-4386-aa8d-4c6d722bb49d",
+      "service_id": "fa11f734-7fde-47c8-a7db-f634d91eb42c",
+      "category": "other",
+      "summary": "Customer asked for a copy of the contract; sent by e-mail.",
+      "opened_at": "2026-04-04T09:00:00.000Z",
+      "closed_at": "2026-04-06T02:00:00.000Z"
+    },
+    {
+      "id": "a5e655a8-e306-4c1f-973b-f0bad2c3d8c0",
+      "customer_id": "b6b26c79-526f-4386-aa8d-4c6d722bb49d",
+      "service_id": "5eb626ee-d012-44cd-b766-32fa1cd67d99",
+      "category": "other",
+      "summary": "Customer asked for a copy of the contract; sent by e-mail.",
+      "opened_at": "2026-05-26T09:00:00.000Z",
+      "closed_at": "2026-05-27T14:00:00.000Z"
+    },
+    {
+      "id": "3d3969c4-89d3-4ca7-83dc-be2158617950",
+      "customer_id": "79264483-8dc0-485c-81dc-a6c75ddb9945",
+      "service_id": "12aa010b-da94-4e41-b82e-4793857fe626",
+      "category": "tariff_change",
+      "summary": "Customer asked about a higher tariff; offer sent.",
+      "opened_at": "2022-11-17T09:00:00.000Z",
+      "closed_at": "2022-11-17T18:00:00.000Z"
+    },
+    {
+      "id": "62c02900-587f-4cb5-b439-528b51912c2e",
+      "customer_id": "79264483-8dc0-485c-81dc-a6c75ddb9945",
+      "service_id": null,
+      "category": "tariff_change",
+      "summary": "Tariff changed at the customer's request.",
+      "opened_at": "2026-03-20T09:00:00.000Z",
+      "closed_at": "2026-03-22T16:00:00.000Z"
+    },
+    {
+      "id": "72437f86-5fab-40aa-b474-7fa09702fad5",
+      "customer_id": "f900fe36-8f59-433b-ad3b-4dcf02e29217",
+      "service_id": "8f20cbea-126f-4e2d-b768-2f38316e0377",
+      "category": "cancellation",
+      "summary": "Customer asked about the notice period; information given.",
+      "opened_at": "2020-05-13T09:00:00.000Z",
+      "closed_at": "2020-05-13T16:00:00.000Z"
+    },
+    {
+      "id": "896704f6-35fc-4749-860d-ee015f997644",
+      "customer_id": "d4cf678e-0f48-4c60-b043-ceaa46ac6848",
+      "service_id": "1b7334b5-f95d-4c78-b9c8-dfaf5b42d767",
+      "category": "tariff_change",
+      "summary": "Customer asked about a higher tariff; offer sent.",
+      "opened_at": "2019-09-19T09:00:00.000Z",
+      "closed_at": "2019-09-19T22:00:00.000Z"
+    },
+    {
+      "id": "9e99e1f3-f80e-4482-a867-e24997437f28",
+      "customer_id": "d4cf678e-0f48-4c60-b043-ceaa46ac6848",
+      "service_id": "f98945f0-399b-40a8-8122-114ce1e02069",
+      "category": "billing_question",
+      "summary": "Question about a payment that did not show up; payment matched.",
+      "opened_at": "2019-12-23T09:00:00.000Z",
+      "closed_at": "2019-12-24T05:00:00.000Z"
+    },
+    {
+      "id": "de2a1bd9-6c49-43d3-8347-092749a7d786",
+      "customer_id": "535fff7a-fafa-430f-9345-e62263c80eed",
+      "service_id": "ae018a77-b42e-43f4-b292-c67a68c219da",
+      "category": "technical_fault",
+      "summary": "Intermittent dropouts reported; technician visit offered.",
+      "opened_at": "2026-08-01T09:00:00.000Z",
+      "closed_at": "2026-08-03T04:00:00.000Z"
+    },
+    {
+      "id": "501d4f60-4da2-4da7-93e6-1104a7434554",
+      "customer_id": "5d13c652-3e0d-487b-8a8a-43ae4b37dec9",
+      "service_id": null,
+      "category": "cancellation",
+      "summary": "Customer asked about the notice period; information given.",
+      "opened_at": "2026-10-02T23:00:00.000Z",
+      "closed_at": "2026-10-05T05:00:00.000Z"
+    },
+    {
+      "id": "25363a5a-66b2-469e-bd60-11568f21926a",
+      "customer_id": "5d13c652-3e0d-487b-8a8a-43ae4b37dec9",
+      "service_id": "6b5de217-9a35-4129-a650-6a006dfa81b8",
+      "category": "tariff_change",
+      "summary": "Customer asked about a higher tariff; offer sent.",
+      "opened_at": "2026-10-12T23:00:00.000Z",
+      "closed_at": "2026-10-15T10:00:00.000Z"
+    },
+    {
+      "id": "52ceccaf-449a-4116-87b8-1ff3d03d37b3",
+      "customer_id": "d158f331-2176-43ac-8b5d-b2b39401dd4a",
+      "service_id": null,
+      "category": "technical_fault",
+      "summary": "Slow speeds reported in the evenings; line checked, no fault found.",
+      "opened_at": "2025-10-20T09:00:00.000Z",
+      "closed_at": "2025-10-20T13:00:00.000Z"
+    },
+    {
+      "id": "90359d56-9b16-44ae-9896-ebce3d276f43",
+      "customer_id": "0e91a72e-fe48-47a2-966b-21f6e2e4dc71",
+      "service_id": null,
+      "category": "other",
+      "summary": "Postal address updated.",
+      "opened_at": "2025-10-07T09:00:00.000Z",
+      "closed_at": "2025-10-08T05:00:00.000Z"
+    },
+    {
+      "id": "8192810a-8330-42f7-9b1c-7bbc14364408",
+      "customer_id": "0e91a72e-fe48-47a2-966b-21f6e2e4dc71",
+      "service_id": "c6365124-b248-4fa7-832d-8f385c2b5a68",
+      "category": "other",
+      "summary": "Postal address updated.",
+      "opened_at": "2025-09-13T09:00:00.000Z",
+      "closed_at": "2025-09-14T06:00:00.000Z"
+    },
+    {
+      "id": "bc293e6f-0d75-41b6-a483-6bfd32b9776d",
+      "customer_id": "c6e9a16e-5884-4b63-9298-0d311d50197b",
+      "service_id": null,
+      "category": "tariff_change",
+      "summary": "Customer asked about a higher tariff; offer sent.",
+      "opened_at": "2025-02-12T09:00:00.000Z",
+      "closed_at": "2025-02-13T22:00:00.000Z"
+    },
+    {
+      "id": "ac9f9194-8b5f-4174-bcf4-d8a8c3e69e2f",
+      "customer_id": "c6e9a16e-5884-4b63-9298-0d311d50197b",
+      "service_id": "cf98f889-ee21-4be1-b6c5-0aa40c7477fa",
+      "category": "cancellation",
+      "summary": "Customer asked about the notice period; information given.",
+      "opened_at": "2023-07-14T09:00:00.000Z",
+      "closed_at": "2023-07-15T08:00:00.000Z"
+    },
+    {
+      "id": "23087cfa-9cd3-4d57-8713-4c2d988050e0",
+      "customer_id": "aa3a4a20-63a4-49bc-99df-56735cd089ba",
+      "service_id": "2582c033-6c36-4fa9-ae00-7fd937c6ad0f",
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2025-09-11T09:00:00.000Z",
+      "closed_at": "2025-09-11T14:00:00.000Z"
+    },
+    {
+      "id": "7e805c0d-b4a1-4690-b5ce-aec1dda6615a",
+      "customer_id": "aa3a4a20-63a4-49bc-99df-56735cd089ba",
+      "service_id": "2582c033-6c36-4fa9-ae00-7fd937c6ad0f",
+      "category": "technical_fault",
+      "summary": "Customer reported no connection; router restarted remotely.",
+      "opened_at": "2026-08-13T09:00:00.000Z",
+      "closed_at": "2026-08-15T03:00:00.000Z"
+    },
+    {
+      "id": "fe097409-b8ee-47bb-88be-42868d544a62",
+      "customer_id": "4fbb972e-4af7-4fc3-b62e-8185603a4d7c",
+      "service_id": "57f279c5-cfef-4a39-a9d5-25fb5b702e25",
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2025-05-31T09:00:00.000Z",
+      "closed_at": "2025-06-02T10:00:00.000Z"
+    },
+    {
+      "id": "6ed3358f-b009-4972-93b4-4eb788140060",
+      "customer_id": "4fbb972e-4af7-4fc3-b62e-8185603a4d7c",
+      "service_id": "57f279c5-cfef-4a39-a9d5-25fb5b702e25",
+      "category": "tariff_change",
+      "summary": "Tariff changed at the customer's request.",
+      "opened_at": "2020-11-28T09:00:00.000Z",
+      "closed_at": "2020-11-29T15:00:00.000Z"
+    },
+    {
+      "id": "35d1d1e8-79ee-4090-8a58-a921c1f6ad2b",
+      "customer_id": "4220808e-72fa-46d7-8932-42a40cdfc591",
+      "service_id": null,
+      "category": "technical_fault",
+      "summary": "Intermittent dropouts reported; technician visit offered.",
+      "opened_at": "2024-03-05T09:00:00.000Z",
+      "closed_at": "2024-03-07T16:00:00.000Z"
+    },
+    {
+      "id": "a70fe64e-9e12-4944-94dc-734e8b5e7cd8",
+      "customer_id": "a4f25545-327f-482c-b812-5e0e20a9a31a",
+      "service_id": "79cc4452-2e07-4d3e-b7b7-aa5636974a35",
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2020-03-16T09:00:00.000Z",
+      "closed_at": "2020-03-17T18:00:00.000Z"
+    },
+    {
+      "id": "012b1d23-e381-474a-8afd-7cf395763b28",
+      "customer_id": "5eff34b8-ae89-48a4-ba8d-6ce11a159340",
+      "service_id": "fae34d4a-776a-4218-96fd-a4972ff908b2",
+      "category": "technical_fault",
+      "summary": "Customer reported no connection; router restarted remotely.",
+      "opened_at": "2023-07-20T09:00:00.000Z",
+      "closed_at": "2023-07-20T15:00:00.000Z"
+    },
+    {
+      "id": "59a4a6c1-b846-49b0-996f-63fb9af3b820",
+      "customer_id": "d1bb0e07-35d4-4379-9175-340a313d9a00",
+      "service_id": null,
+      "category": "billing_question",
+      "summary": "Question about a payment that did not show up; payment matched.",
+      "opened_at": "2024-09-24T09:00:00.000Z",
+      "closed_at": "2024-09-26T12:00:00.000Z"
+    },
+    {
+      "id": "6914be0e-4225-4b15-b683-b353af60eda1",
+      "customer_id": "ba54cc37-0841-4b71-b58e-d02f47f51eb0",
+      "service_id": "7c7f34c1-0867-4c08-a982-e2e0ed958a1f",
+      "category": "tariff_change",
+      "summary": "Customer asked about a higher tariff; offer sent.",
+      "opened_at": "2018-09-18T09:00:00.000Z",
+      "closed_at": "2018-09-19T21:00:00.000Z"
+    },
+    {
+      "id": "73148b1d-84ad-4b9b-881a-b3633a8535e2",
+      "customer_id": "ba54cc37-0841-4b71-b58e-d02f47f51eb0",
+      "service_id": null,
+      "category": "other",
+      "summary": "Postal address updated.",
+      "opened_at": "2020-07-20T09:00:00.000Z",
+      "closed_at": "2020-07-22T17:00:00.000Z"
+    },
+    {
+      "id": "b8e9bcbb-0f56-46f7-af80-c8443a6c7fde",
+      "customer_id": "2d2b7f3e-889e-4070-a64d-0396169a97e4",
+      "service_id": "aa626ed5-5fe3-4221-a90d-d0a804c84f21",
+      "category": "tariff_change",
+      "summary": "Tariff changed at the customer's request.",
+      "opened_at": "2024-10-19T09:00:00.000Z",
+      "closed_at": "2024-10-22T03:00:00.000Z"
+    },
+    {
+      "id": "94f12385-4573-4ca9-a4aa-b5f0bedeca09",
+      "customer_id": "a4499f59-f90b-4f02-bed4-3a698e97056a",
+      "service_id": "15938835-12ca-4491-9c26-c9d8acab1fcb",
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2023-12-29T09:00:00.000Z",
+      "closed_at": "2023-12-31T00:00:00.000Z"
+    },
+    {
+      "id": "99d12ee3-86d5-4401-a29c-dfd05771b1bf",
+      "customer_id": "a4499f59-f90b-4f02-bed4-3a698e97056a",
+      "service_id": null,
+      "category": "tariff_change",
+      "summary": "Tariff changed at the customer's request.",
+      "opened_at": "2026-07-03T09:00:00.000Z",
+      "closed_at": "2026-07-04T03:00:00.000Z"
+    },
+    {
+      "id": "335702e2-8cc8-44a8-8818-f25fc4dda6d4",
+      "customer_id": "88a74c88-4df3-494b-9ee6-4626a234ce21",
+      "service_id": "027961c6-742d-4264-a4a1-4a76d1581f48",
+      "category": "complaint",
+      "summary": "Complaint about a late technician visit; apology and credit given.",
+      "opened_at": "2020-04-17T09:00:00.000Z",
+      "closed_at": "2020-04-18T00:00:00.000Z"
+    },
+    {
+      "id": "9d762233-43ca-429d-9d6c-c7278b4b601e",
+      "customer_id": "88a74c88-4df3-494b-9ee6-4626a234ce21",
+      "service_id": "027961c6-742d-4264-a4a1-4a76d1581f48",
+      "category": "other",
+      "summary": "Postal address updated.",
+      "opened_at": "2025-05-01T09:00:00.000Z",
+      "closed_at": "2025-05-03T11:00:00.000Z"
+    },
+    {
+      "id": "ff5af4d6-f1b0-46fb-9342-4c64e3fe5375",
+      "customer_id": "29f0547d-bd9f-445e-b486-9a881334d612",
+      "service_id": "99f2ce9a-8688-4d86-b3e0-8ae1d28fd68e",
+      "category": "technical_fault",
+      "summary": "Customer reported the service not working; ticket open while investigated.",
+      "opened_at": "2026-11-04T07:24:00.000Z",
+      "closed_at": null
+    },
+    {
+      "id": "c5d67b68-dc0c-4297-9119-77f37631f1c0",
+      "customer_id": "9da7008d-4d2f-42bd-883f-634b9b92daf4",
+      "service_id": "fc6e829a-a967-4eee-97ce-eebfef6de3df",
+      "category": "technical_fault",
+      "summary": "Customer reported the service not working; ticket open while investigated.",
+      "opened_at": "2026-11-04T07:41:00.000Z",
+      "closed_at": null
+    },
+    {
+      "id": "428c080f-c995-4f88-a8d5-dc57e5346346",
+      "customer_id": "783c7c9e-9bca-49ef-a03d-190e1d864804",
+      "service_id": "e9759667-f76d-46e6-8c6b-6d87c0c2e8bf",
+      "category": "technical_fault",
+      "summary": "Customer reported the service not working; ticket open while investigated.",
+      "opened_at": "2026-11-02T10:11:00.000Z",
+      "closed_at": null
+    },
+    {
+      "id": "4473a916-9075-4375-b43f-784cec5a3b2b",
+      "customer_id": "b09c01df-dadc-48d9-916d-cd38eb1b47be",
+      "service_id": "b7dc77b1-4cfc-472d-be29-16f8c10ed40b",
+      "category": "technical_fault",
+      "summary": "Customer reported the service not working; ticket open while investigated.",
+      "opened_at": "2026-11-02T13:29:00.000Z",
+      "closed_at": null
+    },
+    {
+      "id": "0ab328a1-98fd-46b2-8196-2ebf2fe3a75a",
+      "customer_id": "f900fe36-8f59-433b-ad3b-4dcf02e29217",
+      "service_id": "d5d33565-a96e-4024-8131-ff74a28df59e",
+      "category": "technical_fault",
+      "summary": "Customer reported the service not working; ticket open while investigated.",
+      "opened_at": "2026-11-04T16:47:00.000Z",
+      "closed_at": null
+    }
+  ],
+  "outages": [
+    {
+      "id": "4525f846-3a2f-4bce-ae8b-e072e8d899c0",
+      "area": "Opava",
+      "service_type": "mobile",
+      "description": "Mobile network maintenance overran; calls and data unavailable.",
+      "started_at": "2026-11-06T07:47:00.000Z",
+      "resolved_at": null
+    },
+    {
+      "id": "ac4ea01f-391e-45b8-b17f-dc27b63a02da",
+      "area": "Trnava",
+      "service_type": "internet",
+      "description": "Faulty aggregation switch; fixed internet down or very slow.",
+      "started_at": "2026-11-05T04:43:00.000Z",
+      "resolved_at": "2026-11-05T12:06:00.000Z"
+    },
+    {
+      "id": "1805838e-4d11-41aa-b3b7-e76c3fcc5066",
+      "area": "Praha 10",
+      "service_type": "mobile",
+      "description": "Base station outage; no mobile signal in parts of the area.",
+      "started_at": "2026-11-05T04:25:00.000Z",
+      "resolved_at": "2026-11-05T15:01:00.000Z"
+    },
+    {
+      "id": "ab044b18-c191-4ab2-97c1-24a76aa737e3",
+      "area": "Tábor",
+      "service_type": "internet",
+      "description": "Power failure at the local access node; fixed internet unavailable.",
+      "started_at": "2026-11-05T04:02:00.000Z",
+      "resolved_at": "2026-11-05T16:51:00.000Z"
+    },
+    {
+      "id": "77302e98-5ff1-4c76-82e3-24959b7ca54b",
+      "area": "Ostrava-Poruba",
+      "service_type": "internet",
+      "description": "Fibre cable damaged during roadworks; fixed internet down in the area.",
+      "started_at": "2026-11-05T08:08:00.000Z",
+      "resolved_at": "2026-11-05T15:16:00.000Z"
+    },
+    {
+      "id": "9643dd37-208b-41a2-94f9-a7a96fee6184",
+      "area": "Žilina",
+      "service_type": "mobile",
+      "description": "Base station outage; no mobile signal in parts of the area.",
+      "started_at": "2026-11-06T08:01:00.000Z",
+      "resolved_at": "2026-11-06T16:32:00.000Z"
+    },
+    {
+      "id": "873a5670-d613-461a-852c-6bf551b20c2c",
+      "area": "Liberec",
+      "service_type": "mobile",
+      "description": "Mobile network maintenance overran; calls and data unavailable.",
+      "started_at": "2026-11-02T09:55:00.000Z",
+      "resolved_at": "2026-11-02T19:52:00.000Z"
+    },
+    {
+      "id": "796f59f0-6b14-4ca2-8afa-0bf2f0f54297",
+      "area": "Praha 4",
+      "service_type": "internet",
+      "description": "Fibre cable damaged during roadworks; fixed internet down in the area.",
+      "started_at": "2026-11-06T11:56:00.000Z",
+      "resolved_at": "2026-11-06T22:50:00.000Z"
+    },
+    {
+      "id": "47ce16a3-b306-4745-9bfd-6666379607b5",
+      "area": "Opava",
+      "service_type": "mobile",
+      "description": "Base station outage; no mobile signal in parts of the area.",
+      "started_at": "2026-11-03T11:26:00.000Z",
+      "resolved_at": "2026-11-03T21:26:00.000Z"
+    },
+    {
+      "id": "8a0fa682-cd52-4ce2-8458-d8f6343f2392",
+      "area": "Olomouc",
+      "service_type": "mobile",
+      "description": "Mobile network maintenance overran; calls and data unavailable.",
+      "started_at": "2026-11-03T14:32:00.000Z",
+      "resolved_at": "2026-11-03T19:21:00.000Z"
+    },
+    {
+      "id": "e3823182-634c-4af5-95bd-7f4fc119be5b",
+      "area": "Kladno",
+      "service_type": "internet",
+      "description": "Fibre cable damaged during roadworks; fixed internet down in the area.",
+      "started_at": "2026-11-04T00:34:00.000Z",
+      "resolved_at": "2026-11-04T07:34:00.000Z"
+    },
+    {
+      "id": "e90b2e84-9d83-4273-875f-6e11d65bbd0a",
+      "area": "Praha 4",
+      "service_type": "mobile",
+      "description": "Transmission link failure; mobile calls, SMS and data down.",
+      "started_at": "2026-11-05T04:27:00.000Z",
+      "resolved_at": "2026-11-05T09:38:00.000Z"
+    },
+    {
+      "id": "b3c5de86-ffea-439c-a57a-b157a84a9b07",
+      "area": "Zlín",
+      "service_type": "internet",
+      "description": "Fibre cable damaged during roadworks; fixed internet down in the area.",
+      "started_at": "2026-11-03T07:00:00.000Z",
+      "resolved_at": "2026-11-03T14:00:00.000Z"
+    },
+    {
+      "id": "ec0e22a7-de31-40ba-9111-e5719196cd6e",
+      "area": "Jihlava",
+      "service_type": "tv",
+      "description": "Headend fault; TV channels unavailable or freezing.",
+      "started_at": "2026-11-02T01:00:00.000Z",
+      "resolved_at": "2026-11-02T09:00:00.000Z"
+    },
+    {
+      "id": "e38fda89-d0b7-49a7-8e98-aa899ae3864d",
+      "area": "Prešov",
+      "service_type": "mobile",
+      "description": "Mobile network maintenance overran; calls and data unavailable.",
+      "started_at": "2026-11-05T23:00:00.000Z",
+      "resolved_at": "2026-11-06T09:00:00.000Z"
+    }
+  ],
+  "messages": [
+    {
+      "message_id": "msg-001",
+      "received_at": "2026-11-02T12:49:00.000Z",
+      "design": "not_found: the message's keys are left out of the CRM",
+      "expected": {
+        "outcome": "not_found",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-002",
+      "received_at": "2026-11-03T11:44:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "89ee7ed0-e07e-4b00-93e2-e973c3e885a0",
+        "area": "Košice",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-003",
+      "received_at": "2026-11-03T14:34:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-004",
+      "received_at": "2026-11-03T13:03:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-005",
+      "received_at": "2026-11-03T11:45:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "6595d859-eade-4fdb-b9f3-50006c9320dc",
+        "area": "Brno-Žabovřesky",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-006",
+      "received_at": "2026-11-02T11:47:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-007",
+      "received_at": "2026-11-02T08:14:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-008",
+      "received_at": "2026-11-03T11:12:00.000Z",
+      "design": "found, with the e-mail address unknown to the CRM",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "23dc1a61-6832-476b-bea5-8a71a1af68ad",
+        "area": "Brno-Žabovřesky",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-009",
+      "received_at": "2026-11-04T07:20:00.000Z",
+      "design": "not_found: the message's keys are left out of the CRM",
+      "expected": {
+        "outcome": "not_found",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-010",
+      "received_at": "2026-11-02T17:35:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "26994cd6-5b76-4093-a2a1-2fbbad8ff9ea",
+        "area": "České Budějovice",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-011",
+      "received_at": "2026-11-06T12:16:00.000Z",
+      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "2ab81aef-4a47-4686-9755-eca31d4de553",
+        "area": "Opava",
+        "area_source": "message",
+        "outage_ids": [
+          "4525f846-3a2f-4bce-ae8b-e072e8d899c0"
+        ]
+      }
+    },
+    {
+      "message_id": "msg-012",
+      "received_at": "2026-11-05T07:24:00.000Z",
+      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "29f0547d-bd9f-445e-b486-9a881334d612",
+        "area": "Trnava",
+        "area_source": "message",
+        "outage_ids": [
+          "ac4ea01f-391e-45b8-b17f-dc27b63a02da"
+        ]
+      }
+    },
+    {
+      "message_id": "msg-013",
+      "received_at": "2026-11-04T17:10:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "4253de87-fc24-41f3-8c77-d14f60589d38",
+        "area": "Ostrava-Poruba",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-014",
+      "received_at": "2026-11-02T13:11:00.000Z",
+      "design": "ambiguous: the phone number belongs to a different customer than the other key",
+      "expected": {
+        "outcome": "ambiguous",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-015",
+      "received_at": "2026-11-03T11:41:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-016",
+      "received_at": "2026-11-02T15:48:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-017",
+      "received_at": "2026-11-06T11:23:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Košice",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-018",
+      "received_at": "2026-11-05T07:41:00.000Z",
+      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "9da7008d-4d2f-42bd-883f-634b9b92daf4",
+        "area": "Praha 10",
+        "area_source": "message",
+        "outage_ids": [
+          "1805838e-4d11-41aa-b3b7-e76c3fcc5066"
+        ]
+      }
+    },
+    {
+      "message_id": "msg-019",
+      "received_at": "2026-11-04T08:42:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "0f4b5a00-2686-4af5-a2fb-f4fecf8400c7",
+        "area": "Nitra",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-020",
+      "received_at": "2026-11-04T09:33:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-021",
+      "received_at": "2026-11-04T16:31:00.000Z",
+      "design": "no_identifiers: no account key in the message; an outage of its service type in its area was resolved before it arrived",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Opava",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-022",
+      "received_at": "2026-11-03T07:39:00.000Z",
+      "design": "ambiguous: the e-mail address is shared with another customer",
+      "expected": {
+        "outcome": "ambiguous",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-023",
+      "received_at": "2026-11-02T08:12:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-024",
+      "received_at": "2026-11-02T15:55:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Tábor",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-025",
+      "received_at": "2026-11-04T07:23:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "877e0b71-4d42-4609-89a4-434ab7d47c90",
+        "area": "Brno-Žabovřesky",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-026",
+      "received_at": "2026-11-03T07:33:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-027",
+      "received_at": "2026-11-04T14:25:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "84567818-8e08-4821-b61f-06f0e811be3e",
+        "area": "České Budějovice",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-028",
+      "received_at": "2026-11-03T09:37:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "45f7f145-22fd-492f-bb3d-5e0bad160973",
+        "area": "Hradec Králové",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-029",
+      "received_at": "2026-11-05T09:08:00.000Z",
+      "design": "no_identifiers: no account key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Tábor",
+        "area_source": "message",
+        "outage_ids": [
+          "ab044b18-c191-4ab2-97c1-24a76aa737e3"
+        ]
+      }
+    },
+    {
+      "message_id": "msg-030",
+      "received_at": "2026-11-05T07:12:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-031",
+      "received_at": "2026-11-04T16:55:00.000Z",
+      "design": "not_found: the message's keys are left out of the CRM",
+      "expected": {
+        "outcome": "not_found",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-032",
+      "received_at": "2026-11-02T11:49:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "0a0710e1-92cc-4ca8-8a65-397b8fb9a6fb",
+        "area": "Opava",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-033",
+      "received_at": "2026-11-02T10:54:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-034",
+      "received_at": "2026-11-03T09:57:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "7f867363-548f-491b-af61-a58a8b16a53d",
+        "area": "Hradec Králové",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-035",
+      "received_at": "2026-11-02T15:39:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "1deb7533-0d4c-47b0-bd57-e9098f6ef814",
+        "area": "Brno-Žabovřesky",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-036",
+      "received_at": "2026-11-03T17:12:00.000Z",
+      "design": "no_identifiers: no account key in the message; an outage of another service type covers its area",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Olomouc",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-037",
+      "received_at": "2026-11-05T10:11:00.000Z",
+      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "783c7c9e-9bca-49ef-a03d-190e1d864804",
+        "area": "Ostrava-Poruba",
+        "area_source": "message",
+        "outage_ids": [
+          "77302e98-5ff1-4c76-82e3-24959b7ca54b"
+        ]
+      }
+    },
+    {
+      "message_id": "msg-038",
+      "received_at": "2026-11-05T12:32:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "fee7c1ae-4b5d-4468-beb0-08f89e1f44b2",
+        "area": "Praha 4",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-039",
+      "received_at": "2026-11-06T14:35:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-040",
+      "received_at": "2026-11-03T11:36:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Ostrava-Poruba",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-041",
+      "received_at": "2026-11-06T10:43:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Olomouc",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-042",
+      "received_at": "2026-11-03T16:28:00.000Z",
+      "design": "ambiguous: the e-mail address is shared with another customer",
+      "expected": {
+        "outcome": "ambiguous",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-043",
+      "received_at": "2026-11-05T11:18:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "686902d7-6a61-4c47-a0b0-8414fef645eb",
+        "area": "Hradec Králové",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-044",
+      "received_at": "2026-11-03T08:41:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Tábor",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-045",
+      "received_at": "2026-11-06T12:50:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-046",
+      "received_at": "2026-11-02T07:27:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-047",
+      "received_at": "2026-11-06T12:08:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "edf57132-1781-4964-8ffc-342d28248d9e",
+        "area": "Košice",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-048",
+      "received_at": "2026-11-06T15:11:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "a2601a89-70c3-4d1e-b721-5aa0c548b787",
+        "area": "Hradec Králové",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-049",
+      "received_at": "2026-11-03T10:26:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "ca31c240-4080-4f28-8f8e-22e8d528616d",
+        "area": "Nitra",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-050",
+      "received_at": "2026-11-02T09:14:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "0e706b57-59f0-492a-bd23-84b2c58a0632",
+        "area": "Hradec Králové",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-051",
+      "received_at": "2026-11-06T10:57:00.000Z",
+      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "e2ec7294-bfa9-4622-816d-dcd18d6e2702",
+        "area": "Žilina",
+        "area_source": "message",
+        "outage_ids": [
+          "9643dd37-208b-41a2-94f9-a7a96fee6184"
+        ]
+      }
+    },
+    {
+      "message_id": "msg-052",
+      "received_at": "2026-11-02T15:08:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-053",
+      "received_at": "2026-11-05T07:38:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-054",
+      "received_at": "2026-11-04T15:35:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "50493faa-f7ce-400d-a50b-e30479f191d3",
+        "area": "Kolín",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-055",
+      "received_at": "2026-11-04T15:13:00.000Z",
+      "design": "found, with the phone number unknown to the CRM",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "f921d20b-0abd-4c0c-87fd-06556a88348d",
+        "area": "Plzeň",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-056",
+      "received_at": "2026-11-02T12:56:00.000Z",
+      "design": "no_identifiers: no account key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Liberec",
+        "area_source": "message",
+        "outage_ids": [
+          "873a5670-d613-461a-852c-6bf551b20c2c"
+        ]
+      }
+    },
+    {
+      "message_id": "msg-057",
+      "received_at": "2026-11-03T17:53:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "7689587c-6d97-4bd6-920f-76c26bdd3619",
+        "area": "Kladno",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-058",
+      "received_at": "2026-11-02T07:01:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-059",
+      "received_at": "2026-11-05T13:52:00.000Z",
+      "design": "ambiguous: the e-mail address belongs to a different customer than the other key",
+      "expected": {
+        "outcome": "ambiguous",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-060",
+      "received_at": "2026-11-02T10:21:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "03754aed-244d-4525-b9a5-a910d035a336",
+        "area": "Hradec Králové",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-061",
+      "received_at": "2026-11-04T18:40:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-062",
+      "received_at": "2026-11-04T08:23:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "15f6c598-6c14-4184-b2b5-b8593e79bf3f",
+        "area": "Olomouc",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-063",
+      "received_at": "2026-11-04T16:50:00.000Z",
+      "design": "no_identifiers: no account key in the message; an outage of its service type in its area was resolved before it arrived",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Kladno",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-064",
+      "received_at": "2026-11-03T11:55:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "1c2ab0cc-7eb2-4c12-b639-7dffc430ac4f",
+        "area": "Banská Bystrica",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-065",
+      "received_at": "2026-11-06T09:58:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "82178ee0-3865-4c99-912d-2071be9a3b2c",
+        "area": "České Budějovice",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-066",
+      "received_at": "2026-11-06T11:58:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "d948b07e-ad46-4709-997b-bc2ebaecad3e",
+        "area": "Kolín",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-067",
+      "received_at": "2026-11-03T15:10:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "c4a1a15f-fea7-49da-9a25-4bf013e53111",
+        "area": "Hradec Králové",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-068",
+      "received_at": "2026-11-03T16:21:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "a888974c-8c8f-4e00-bfce-09a8b32b9ceb",
+        "area": "Kolín",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-069",
+      "received_at": "2026-11-05T13:29:00.000Z",
+      "design": "ambiguous: the phone number moved to another customer; the old service is terminated",
+      "expected": {
+        "outcome": "ambiguous",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-070",
+      "received_at": "2026-11-05T11:45:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-071",
+      "received_at": "2026-11-05T17:41:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "b40a0d36-f9a6-49e0-9456-792a54b30cb2",
+        "area": "Žilina",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-072",
+      "received_at": "2026-11-06T17:33:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "d6d9f64b-7700-48cc-9cda-91536f5e51d9",
+        "area": "Košice",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-073",
+      "received_at": "2026-11-04T18:48:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "253a1a5c-aa5f-4725-a5c2-db364fbb711f",
+        "area": "Plzeň",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-074",
+      "received_at": "2026-11-02T17:30:00.000Z",
+      "design": "found, with the e-mail address unknown to the CRM",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "a7685718-ebbf-4fac-b5b1-9b8a2d40717a",
+        "area": "Nitra",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-075",
+      "received_at": "2026-11-03T07:56:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Žilina",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-076",
+      "received_at": "2026-11-05T08:08:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-077",
+      "received_at": "2026-11-02T16:25:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "b6b26c79-526f-4386-aa8d-4c6d722bb49d",
+        "area": "Hradec Králové",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-078",
+      "received_at": "2026-11-05T12:01:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Opava",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-079",
+      "received_at": "2026-11-05T07:48:00.000Z",
+      "design": "no_identifiers: no account key in the message; an outage of another service type covers its area",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Praha 4",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-080",
+      "received_at": "2026-11-02T11:00:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "58b5067b-0d07-4259-a2b7-9e7cca029c38",
+        "area": "Nitra",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-081",
+      "received_at": "2026-11-02T09:03:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Olomouc",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-082",
+      "received_at": "2026-11-03T10:44:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "79264483-8dc0-485c-81dc-a6c75ddb9945",
+        "area": "Nitra",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-083",
+      "received_at": "2026-11-02T11:40:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-084",
+      "received_at": "2026-11-06T16:47:00.000Z",
+      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "f900fe36-8f59-433b-ad3b-4dcf02e29217",
+        "area": "Praha 4",
+        "area_source": "message",
+        "outage_ids": [
+          "796f59f0-6b14-4ca2-8afa-0bf2f0f54297"
+        ]
+      }
+    },
+    {
+      "message_id": "msg-085",
+      "received_at": "2026-11-02T12:46:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "d4cf678e-0f48-4c60-b043-ceaa46ac6848",
+        "area": "Bratislava-Petržalka",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-086",
+      "received_at": "2026-11-04T16:35:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-087",
+      "received_at": "2026-11-06T12:01:00.000Z",
+      "design": "not_found: the message's keys are left out of the CRM",
+      "expected": {
+        "outcome": "not_found",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-088",
+      "received_at": "2026-11-06T10:58:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Ostrava-Poruba",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-089",
+      "received_at": "2026-11-02T13:03:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-090",
+      "received_at": "2026-11-05T08:00:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-091",
+      "received_at": "2026-11-04T17:56:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": "Pardubice",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-092",
+      "received_at": "2026-11-02T07:44:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "535fff7a-fafa-430f-9345-e62263c80eed",
+        "area": "Liberec",
+        "area_source": "message",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-093",
+      "received_at": "2026-11-06T11:51:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-094",
+      "received_at": "2026-11-04T16:54:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "5d13c652-3e0d-487b-8a8a-43ae4b37dec9",
+        "area": "České Budějovice",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-095",
+      "received_at": "2026-11-04T18:40:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-096",
+      "received_at": "2026-11-06T11:23:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "15fa0575-491e-4b02-9145-c6430020ded2",
+        "area": "Brno-Žabovřesky",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-097",
+      "received_at": "2026-11-04T13:44:00.000Z",
+      "design": "not_found: the message's keys are left out of the CRM",
+      "expected": {
+        "outcome": "not_found",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-098",
+      "received_at": "2026-11-04T08:30:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "2c9082d0-cded-4d39-a9ea-eb369eafd867",
+        "area": "Kolín",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-099",
+      "received_at": "2026-11-02T18:02:00.000Z",
+      "design": "found: one customer holds every key in the message",
+      "expected": {
+        "outcome": "found",
+        "customer_id": "d158f331-2176-43ac-8b5d-b2b39401dd4a",
+        "area": "Plzeň",
+        "area_source": "customer",
+        "outage_ids": []
+      }
+    },
+    {
+      "message_id": "msg-100",
+      "received_at": "2026-11-02T09:08:00.000Z",
+      "design": "no_identifiers: no account key in the message",
+      "expected": {
+        "outcome": "no_identifiers",
+        "customer_id": null,
+        "area": null,
+        "area_source": null,
+        "outage_ids": []
+      }
+    }
+  ]
+}

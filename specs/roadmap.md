@@ -68,7 +68,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** before/after examples; the evaluation shows the effect on accuracy.
 **Done when:** masking unit tests cover all data types; eval re-run.
 
-## P06: Mock CRM and enrichment
+## ✅ P06: Mock CRM and enrichment
 
 - Mock CRM (customers, services, tickets) and outage data, seeded to match the dataset.
 - Customer lookup from the masked placeholders' mapping; outage check by area.

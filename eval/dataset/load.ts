@@ -1,6 +1,7 @@
 // Loads dataset messages into the system through the intake API (P02), the way any client would.
-// Only external_id, channel, language and text are sent: labels stay in eval/data/, so the
-// pipeline can never read the answers it is evaluated on.
+// Only external_id, channel, language and text are sent, plus (from P06) the message's fixed
+// received_at from the mock CRM seed, so outage windows give the same answer on every reload.
+// Labels stay in eval/data/, so the pipeline can never read the answers it is evaluated on.
 //
 // Usage: npm run dataset:load [-- --file eval/data/injection.jsonl]
 // Needs the API running (docker compose up -d --wait, or npm run dev) and, in .env,
@@ -9,6 +10,7 @@
 import { existsSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
+import { readCrmSeed } from "../../src/db/crm-seed.js";
 import type { Channel, Language } from "../../src/taxonomy.js";
 import { readJsonl } from "../lib/jsonl.js";
 import { PATHS } from "../lib/paths.js";
@@ -27,6 +29,8 @@ export interface LoadOptions {
   apiKey: string;
   fetch?: typeof fetch;
   log?: (line: string) => void;
+  /** received_at per external_id; defaults to the CRM seed's. Records not in it get the arrival time. */
+  receivedAt?: ReadonlyMap<string, string>;
 }
 
 export interface LoadReport {
@@ -35,9 +39,15 @@ export interface LoadReport {
   failed: { id: string; reason: string }[];
 }
 
-/** The request body for one record: exactly these four fields. */
-export function toRequest(record: SourceRecord) {
-  return { external_id: record.id, channel: record.channel, language: record.language, text: record.text };
+/** The seed's fixed received_at per dataset message (P06). */
+export function seedReceivedAt(): Map<string, string> {
+  return new Map(readCrmSeed().messages.map((m) => [m.message_id, m.received_at]));
+}
+
+/** The request body for one record: these four fields, and received_at when one is fixed for it. */
+export function toRequest(record: SourceRecord, receivedAt?: string) {
+  const body = { external_id: record.id, channel: record.channel, language: record.language, text: record.text };
+  return receivedAt ? { ...body, received_at: receivedAt } : body;
 }
 
 /** One request at a time: 100 messages take about a second, and the order stays readable in logs. */
@@ -47,6 +57,7 @@ export async function loadFile({
   apiKey,
   fetch: doFetch = fetch,
   log = console.log,
+  receivedAt = seedReceivedAt(),
 }: LoadOptions): Promise<LoadReport> {
   if (!existsSync(file)) throw new Error(`File not found: ${file}`);
   const records = readJsonl<SourceRecord>(file);
@@ -59,7 +70,7 @@ export async function loadFile({
       response = await doFetch(url, {
         method: "POST",
         headers: { "content-type": "application/json", "x-api-key": apiKey },
-        body: JSON.stringify(toRequest(record)),
+        body: JSON.stringify(toRequest(record, receivedAt.get(record.id))),
       });
     } catch (error) {
       // Unreachable API: every further request would fail the same way.

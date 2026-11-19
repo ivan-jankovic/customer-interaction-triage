@@ -17,7 +17,11 @@ export interface StoredMasking {
 
 export class InteractionNotFound extends Error {}
 
-async function readMasking(db: Kysely<Database>, interactionId: string): Promise<Omit<StoredMasking, "stored"> | null> {
+/** The stored masking, or null when the interaction isn't masked yet. Reads only. */
+export async function readMasking(
+  db: Kysely<Database>,
+  interactionId: string,
+): Promise<Omit<StoredMasking, "stored"> | null> {
   const row = await db
     .selectFrom("interactions")
     .select(["masked_text", "masker_version", "masked_at"])
