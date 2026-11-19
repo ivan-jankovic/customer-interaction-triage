@@ -26,7 +26,16 @@ const promptFiles = PROMPT_DIRS.flatMap((dir) =>
     .map((f) => `${dir}/${f}`),
 );
 
+/** Hashes as published in earlier phases; an entry here can never change. */
+const PUBLISHED = {
+  "classify.v1": "5cbe9e96e1f574927aad9a5f66d095be6ff6aab97367ee56a1f2b20e5ccbe4b6", // P03
+};
+
 describe("prompt version registry", () => {
+  it.each(Object.entries(PUBLISHED))("keeps %s's published hash", (version, hash) => {
+    expect(registry.prompts[version]?.sha256).toBe(hash);
+  });
+
   it("lists every prompt file under its version name", () => {
     for (const file of promptFiles) {
       const version = basename(file, ".md");
