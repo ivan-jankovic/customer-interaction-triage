@@ -4,7 +4,7 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { loadFile } from "../../eval/dataset/load.js";
+import { loadFile, seedReceivedAt } from "../../eval/dataset/load.js";
 import { readJsonl } from "../../eval/lib/jsonl.js";
 import { PATHS } from "../../eval/lib/paths.js";
 
@@ -29,7 +29,7 @@ function fakeFetch(statuses: number[]) {
 }
 
 describe("loadFile", () => {
-  it("sends only external_id, channel, language and text of a real dataset record, never labels", async () => {
+  it("sends only external_id, channel, language, text and the seed's received_at of a real record, never labels", async () => {
     const [record] = readJsonl<Record<string, unknown>>(PATHS.dataset);
     const { calls, fetch } = fakeFetch([201]);
     await loadFile({ file: tempFile([record!]), apiUrl: "http://api.test", apiKey: KEY, fetch, log: () => {} });
@@ -39,16 +39,26 @@ describe("loadFile", () => {
     const headers = calls[0]?.init.headers as Record<string, string>;
     expect(headers["x-api-key"]).toBe(KEY);
     const body = JSON.parse(calls[0]?.init.body as string) as Record<string, unknown>;
-    expect(Object.keys(body).sort()).toEqual(["channel", "external_id", "language", "text"]);
+    expect(Object.keys(body).sort()).toEqual(["channel", "external_id", "language", "received_at", "text"]);
     expect(body).toEqual({
       external_id: record!.id,
       channel: record!.channel,
       language: record!.language,
       text: record!.text,
+      received_at: seedReceivedAt().get(record!.id as string),
     });
+    expect(body.received_at).toMatch(/^2026-11-0[2-6]T/);
     for (const label of ["intent", "final", "chosen", "must_review", "complaint"]) {
       expect(calls[0]?.init.body).not.toContain(`"${label}"`);
     }
+  });
+
+  it("sends no received_at for a record the seed doesn't know (e.g. an injection message)", async () => {
+    const { calls, fetch } = fakeFetch([201]);
+    const record = { id: "inj-001", channel: "chat", language: "cs", text: "x" };
+    await loadFile({ file: tempFile([record]), apiUrl: "http://api.test", apiKey: KEY, fetch, log: () => {} });
+    const body = JSON.parse(calls[0]?.init.body as string) as Record<string, unknown>;
+    expect(Object.keys(body).sort()).toEqual(["channel", "external_id", "language", "text"]);
   });
 
   it("counts created, existing and failed records and reports each failure", async () => {

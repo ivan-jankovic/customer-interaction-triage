@@ -6,7 +6,7 @@ import { join } from "node:path";
 import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { loadFile } from "../../eval/dataset/load.js";
+import { loadFile, seedReceivedAt } from "../../eval/dataset/load.js";
 import { readJsonl } from "../../eval/lib/jsonl.js";
 import { PATHS } from "../../eval/lib/paths.js";
 import { buildApp } from "../../src/api/app.js";
@@ -48,6 +48,13 @@ describe("dataset loader", () => {
       select external_id, channel from interactions order by channel`.execute(testDb.db);
     expect(rows.rows.map((r) => r.channel)).toEqual(["call", "chat", "email"]);
     expect(rows.rows.every((r) => /^msg-\d{3}$/.test(r.external_id))).toBe(true);
+  });
+
+  it("stores each message's fixed received_at from the CRM seed", async () => {
+    const seed = seedReceivedAt();
+    const rows = await testDb.db.selectFrom("interactions").select(["external_id", "received_at"]).execute();
+    expect(rows).toHaveLength(3);
+    for (const r of rows) expect(r.received_at.toISOString()).toBe(seed.get(r.external_id!));
   });
 
   it("reports a wrong key as a failure", async () => {

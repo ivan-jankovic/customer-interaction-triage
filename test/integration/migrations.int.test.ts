@@ -8,6 +8,8 @@ import type { Database } from "../../src/db/database.js";
 import { createMigrator } from "../../src/db/migrate.js";
 import { createTestDatabase, type TestDatabase } from "./support/test-database.js";
 
+const P06_TABLES = ["crm_customers", "crm_services", "crm_tickets", "outages", "enrichments"];
+
 let testDb: TestDatabase;
 let db: Kysely<Database>;
 
@@ -39,12 +41,16 @@ describe("migrations", () => {
       ["0001_interactions", "Success"],
       ["0002_classifications", "Success"],
       ["0003_masking", "Success"],
+      ["0004_crm", "Success"],
+      ["0005_enrichments", "Success"],
     ]);
     expect(await appliedMigrations()).toEqual([
       "0000_baseline",
       "0001_interactions",
       "0002_classifications",
       "0003_masking",
+      "0004_crm",
+      "0005_enrichments",
     ]);
   });
 
@@ -143,6 +149,7 @@ describe("migrations", () => {
     expect(await tableExists("interactions")).toBe(false);
     expect(await tableExists("classifications")).toBe(false);
     expect(await tableExists("masked_identifiers")).toBe(false);
+    for (const table of P06_TABLES) expect(await tableExists(table), table).toBe(false);
   });
 
   it("migrates to latest again", async () => {
@@ -152,5 +159,6 @@ describe("migrations", () => {
     expect(await tableExists("interactions")).toBe(true);
     expect(await tableExists("classifications")).toBe(true);
     expect(await tableExists("masked_identifiers")).toBe(true);
+    for (const table of P06_TABLES) expect(await tableExists(table), table).toBe(true);
   });
 });
