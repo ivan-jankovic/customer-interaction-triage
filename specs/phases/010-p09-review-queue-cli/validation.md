@@ -46,7 +46,7 @@ How each check is marked:
 - [x] A correction without a note, or one that changes nothing, is not stored and the loop asks again. **(test)**
 - [x] A case reviewed by someone else while on screen prints "already reviewed by …" and moves on. **(test)**
 - [x] No reviewer gives exit code 2 with a usage message; an empty queue says so; end of input ends the session with its summary. **(test)**
-- [ ] The loop works in a real terminal (`npm run review -- --reviewer <handle>`). **(manual)**
+- [x] The loop works in a real terminal (`npm run review -- --reviewer <handle>`). **(manual)** Checked by the user.
 
 ## Demo
 
