@@ -58,6 +58,11 @@ export type LlmResult =
       usage: LlmUsage;
       fellBack?: boolean;
       failure?: LlmFailure;
+      /**
+       * For api_error only: the HTTP status, or null when there was none (a connection error or
+       * timeout). The pipeline uses it to tell transient errors from permanent ones (P08).
+       */
+      status?: number | null;
       /** The model's text when there is some, e.g. a truncated answer at max_tokens. */
       text?: string;
     };
@@ -177,6 +182,7 @@ export function createAnthropicClient(sdk: MessagesApi = new Anthropic({ maxRetr
             ok: false,
             error: `API error ${error.status ?? "?"}: ${error.message}`,
             failure: "api_error",
+            status: typeof error.status === "number" ? error.status : null,
             model: request.model,
             usage: ZERO_USAGE,
           };

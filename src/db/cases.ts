@@ -15,7 +15,7 @@ import type { ReasonCode, Team } from "../taxonomy.js";
 import { KyselyClassificationStore, type StoredClassification } from "./classifications.js";
 import { KyselyCrm } from "./crm.js";
 import type { CaseRow, Database, DecisionLogRow, DecisionStep } from "./database.js";
-import { listEnrichments, toStoredEnrichment, type StoredEnrichment } from "./enrichments.js";
+import { latestEnrichmentFor, listEnrichments, type StoredEnrichment } from "./enrichments.js";
 import { InteractionNotFound, readMasking } from "./masking.js";
 
 /** Routing needs what earlier steps stored; this says which one is missing. */
@@ -96,20 +96,13 @@ async function pickEnrichment(
   interactionId: string,
   classificationId: string,
 ): Promise<StoredEnrichment> {
-  const row = await db
-    .selectFrom("enrichments")
-    .selectAll()
-    .where("interaction_id", "=", interactionId)
-    .where("classification_id", "=", classificationId)
-    .orderBy("id", "desc")
-    .limit(1)
-    .executeTakeFirst();
-  if (!row) {
+  const enrichment = await latestEnrichmentFor(db, interactionId, classificationId);
+  if (!enrichment) {
     throw new NotReadyForRouting(
       `Interaction ${interactionId} has no enrichment of its current classification; enrich first.`,
     );
   }
-  return toStoredEnrichment(row);
+  return enrichment;
 }
 
 const countBy = <T>(items: readonly T[], key: (t: T) => string) => {

@@ -43,6 +43,11 @@ export interface ClassificationAttempt {
   /** null when the served model has no known price (e.g. after a fallback). */
   costUsd: number | null;
   latencyMs: number;
+  /**
+   * For an `error` outcome only: the API's HTTP status, or null for a connection error or
+   * timeout. Used by the pipeline runner to decide whether to retry (P08); not stored.
+   */
+  apiStatus?: number | null;
 }
 
 export interface UnderstandInput {
@@ -150,6 +155,7 @@ export async function understand(input: UnderstandInput, deps: UnderstandDeps): 
       classification: null,
       rawOutput: result.text ?? null,
       errors: [result.error],
+      ...(result.failure === "api_error" ? { apiStatus: result.status ?? null } : {}),
     };
   }
 

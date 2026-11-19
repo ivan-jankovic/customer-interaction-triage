@@ -88,6 +88,23 @@ export async function enrichInteraction(db: Kysely<Database>, interactionId: str
   return toStoredEnrichment(row);
 }
 
+/** The latest enrichment made from this classification, or null; an older classification's doesn't count. */
+export async function latestEnrichmentFor(
+  db: Kysely<Database>,
+  interactionId: string,
+  classificationId: string,
+): Promise<StoredEnrichment | null> {
+  const row = await db
+    .selectFrom("enrichments")
+    .selectAll()
+    .where("interaction_id", "=", interactionId)
+    .where("classification_id", "=", classificationId)
+    .orderBy("id", "desc")
+    .limit(1)
+    .executeTakeFirst();
+  return row ? toStoredEnrichment(row) : null;
+}
+
 /** Every enrichment of an interaction, newest first. */
 export async function listEnrichments(db: Kysely<Database>, interactionId: string): Promise<StoredEnrichment[]> {
   const rows = await db
