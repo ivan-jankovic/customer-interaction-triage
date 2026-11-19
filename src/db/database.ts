@@ -1,7 +1,7 @@
 import { Kysely, PostgresDialect, type ColumnType, type Generated, type Selectable } from "kysely";
 import pg from "pg";
 import type { Classification } from "../llm/schemas/classification.schema.js";
-import type { Channel, Intent, Language, Urgency } from "../taxonomy.js";
+import type { Channel, IdentifierType, Intent, Language, Urgency } from "../taxonomy.js";
 
 /** Lifecycle of an interaction. Only `received` until the queue arrives in P08. */
 export const INTERACTION_STATUSES = ["received"] as const;
@@ -20,6 +20,10 @@ export interface InteractionsTable {
   received_at: Timestamp;
   status: ColumnType<InteractionStatus, InteractionStatus | undefined, InteractionStatus>;
   created_at: Timestamp;
+  /** Set together by the masking step (P05), then never changed. */
+  masked_text: ColumnType<string | null, never, string>;
+  masker_version: ColumnType<string | null, never, string>;
+  masked_at: ColumnType<Date | null, never, Date | string>;
 }
 
 export type InteractionRow = Selectable<InteractionsTable>;
@@ -62,10 +66,24 @@ export interface ClassificationsTable {
 
 export type ClassificationRow = Selectable<ClassificationsTable>;
 
+/** Table `masked_identifiers` (migration 0003, P05): one row per placeholder. */
+export interface MaskedIdentifiersTable {
+  id: Generated<string>;
+  interaction_id: Immutable<string>;
+  placeholder: Immutable<string>;
+  type: Immutable<IdentifierType>;
+  value: Immutable<string>;
+  normalized_value: Immutable<string>;
+  start_offset: Immutable<number>;
+  end_offset: Immutable<number>;
+  created_at: ColumnType<Date, never, never>;
+}
+
 /** Table types for Kysely; each phase adds the tables it owns together with their migration. */
 export interface Database {
   interactions: InteractionsTable;
   classifications: ClassificationsTable;
+  masked_identifiers: MaskedIdentifiersTable;
 }
 
 export function createDb(databaseUrl: string): Kysely<Database> {
