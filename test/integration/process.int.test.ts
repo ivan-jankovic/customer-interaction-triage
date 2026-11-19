@@ -141,7 +141,7 @@ describe("processInteraction", () => {
     expect(await rows("decision_log", id)).toBe(3);
   });
 
-  it.each([
+  it.each<[string, Answer, string]>([
     ["a 400 error", { status: 400 }, "classification_error"],
     ["invalid output", "invalid", "invalid_output"],
   ])("never retries %s: it goes to review on the first attempt", async (_name, answer, code) => {
