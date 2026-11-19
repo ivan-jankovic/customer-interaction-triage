@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { loadApiConfig, loadClassifierConfig, loadDatabaseUrl, loadServiceConfig } from "../src/config.js";
+import {
+  loadApiConfig,
+  loadClassifierConfig,
+  loadDatabaseUrl,
+  loadServiceConfig,
+  loadWorkerConfig,
+} from "../src/config.js";
 
 const DB = "postgres://triage:triage@localhost:5432/triage";
 const REDIS = "redis://localhost:6379";
@@ -98,5 +104,33 @@ describe("loadClassifierConfig", () => {
     expect(() => loadClassifierConfig({ TRIAGE_EFFORT: "extreme" })).toThrow(
       /TRIAGE_EFFORT must be one of low, medium/,
     );
+  });
+});
+
+describe("loadWorkerConfig", () => {
+  const ENV = { DATABASE_URL: DB, REDIS_URL: REDIS, ANTHROPIC_API_KEY: "sk-test" };
+
+  it("reads the URLs, the classifier settings and a default concurrency of 4", () => {
+    expect(loadWorkerConfig(ENV)).toEqual({
+      databaseUrl: DB,
+      redisUrl: REDIS,
+      concurrency: 4,
+      model: "claude-opus-5-5",
+      effort: "low",
+    });
+    expect(loadWorkerConfig({ ...ENV, WORKER_CONCURRENCY: "2" }).concurrency).toBe(2);
+  });
+
+  it("refuses to start without the API key or a service URL, naming what is missing", () => {
+    expect(() => loadWorkerConfig({ DATABASE_URL: DB, REDIS_URL: REDIS })).toThrow(
+      "Missing environment variable ANTHROPIC_API_KEY.",
+    );
+    expect(() => loadWorkerConfig({ ANTHROPIC_API_KEY: "sk-test" })).toThrow(
+      "Missing environment variables DATABASE_URL, REDIS_URL.",
+    );
+  });
+
+  it.each(["0", "33", "two", "1.5"])("rejects WORKER_CONCURRENCY=%s", (value) => {
+    expect(() => loadWorkerConfig({ ...ENV, WORKER_CONCURRENCY: value })).toThrow(/WORKER_CONCURRENCY/);
   });
 });

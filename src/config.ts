@@ -83,3 +83,24 @@ export function loadClassifierConfig(env: NodeJS.ProcessEnv = process.env): Clas
   }
   return { model, effort: effort as Effort };
 }
+
+export interface WorkerConfig extends ServiceConfig, ClassifierConfig {
+  concurrency: number;
+}
+
+/**
+ * Configuration of the queue worker (src/worker.ts, P08). It calls a paid model for every
+ * message it processes, so it refuses to start without ANTHROPIC_API_KEY.
+ */
+export function loadWorkerConfig(env: NodeJS.ProcessEnv = process.env): WorkerConfig {
+  const [databaseUrl, redisUrl] = requireVars(env, ["DATABASE_URL", "REDIS_URL", "ANTHROPIC_API_KEY"]) as [
+    string,
+    string,
+  ];
+  const text = env.WORKER_CONCURRENCY?.trim() || "4";
+  const concurrency = Number(text);
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 32) {
+    throw new Error(`WORKER_CONCURRENCY must be a whole number from 1 to 32, got "${text}".`);
+  }
+  return { databaseUrl, redisUrl, concurrency, ...loadClassifierConfig(env) };
+}

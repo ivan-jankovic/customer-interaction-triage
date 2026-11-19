@@ -45,7 +45,11 @@ export type ProcessQueue = Queue<ProcessJobData>;
  */
 export function createQueue(
   redisUrl: string,
-  { name = QUEUE_NAME, forIntake = false }: { name?: string; forIntake?: boolean } = {},
+  {
+    name = QUEUE_NAME,
+    forIntake = false,
+    jobOptions = JOB_OPTIONS,
+  }: { name?: string; forIntake?: boolean; /** Tests pass a short backoff. */ jobOptions?: JobsOptions } = {},
 ): { queue: ProcessQueue; close: () => Promise<void> } {
   const connection = forIntake
     ? new Redis(redisUrl, {
@@ -55,7 +59,7 @@ export function createQueue(
         connectTimeout: 2_000,
       })
     : new Redis(redisUrl, { maxRetriesPerRequest: null });
-  const queue = new Queue<ProcessJobData>(name, { connection, defaultJobOptions: JOB_OPTIONS });
+  const queue = new Queue<ProcessJobData>(name, { connection, defaultJobOptions: jobOptions });
   // Without a listener an 'error' event would crash the process; the outage is reported where
   // a call fails instead.
   queue.on("error", () => {});
