@@ -26,7 +26,7 @@ export interface MessageScore {
   routing: RoutingScore;
 }
 
-/** The routing decision (route.v1, computed by eval/lib/route-message.ts) against the labels. */
+/** The routing decision (ROUTER_VERSION, computed by eval/lib/route-message.ts) against the labels. */
 export interface RoutingScore {
   labelTeam: Team;
   predictedTeam: Team;

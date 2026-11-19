@@ -12,7 +12,11 @@ import { INTENT_TO_TEAM, REASON_CODES, type Intent, type ReasonCode, type Team }
 import type { CrmLookup, CrmServiceType, EnrichmentResult } from "./enrich.js";
 import type { Outcome } from "./understand.js";
 
-export const ROUTER_VERSION = "route.v1";
+/**
+ * route.v2 (P08) adds the reason code processing_failed, written only by the pipeline runner's
+ * failure path. For every input route() accepts, its result is the same as route.v1's.
+ */
+export const ROUTER_VERSION = "route.v2";
 
 /**
  * Below this self-reported confidence a case goes to review. 0.7 catches every message labelled

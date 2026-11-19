@@ -52,6 +52,7 @@ describe("migrations", () => {
       ["0004_crm", "Success"],
       ["0005_enrichments", "Success"],
       ["0006_cases", "Success"],
+      ["0007_processing", "Success"],
     ]);
     expect(await appliedMigrations()).toEqual([
       "0000_baseline",
@@ -61,6 +62,7 @@ describe("migrations", () => {
       "0004_crm",
       "0005_enrichments",
       "0006_cases",
+      "0007_processing",
     ]);
   });
 
@@ -148,6 +150,65 @@ describe("migrations", () => {
               input_tokens, output_tokens, cache_creation_input_tokens, cache_read_input_tokens, latency_ms)
             values (uuidv7(), 'error', 'v', 'm', 'm', 'low', 0, 0, 0, 0, 0)`.execute(db),
       ).rejects.toThrow(/foreign key/);
+    });
+  });
+
+  describe("0007_processing", () => {
+    it("allows the status processed and nothing else new", async () => {
+      const { id } = await db
+        .insertInto("interactions")
+        .values({ channel: "chat", language: null, raw_text: "x" })
+        .returning("id")
+        .executeTakeFirstOrThrow();
+      await db.updateTable("interactions").set({ status: "processed" }).where("id", "=", id).execute();
+      await expect(sql`update interactions set status = 'queued' where id = ${id}`.execute(db)).rejects.toThrow(
+        /interactions_status_check/,
+      );
+    });
+
+    it("marks interactions that already have a case processed, and rolls back cleanly", async () => {
+      await createMigrator(db).migrateTo("0006_cases");
+      const ids: string[] = [];
+      for (const text of ["with case", "without case"]) {
+        const r = await sql<{ id: string }>`insert into interactions (channel, raw_text) values ('chat', ${text})
+                                             returning id`.execute(db);
+        ids.push(r.rows[0]!.id);
+      }
+      const cl = await sql<{ id: string }>`
+        insert into classifications (interaction_id, outcome, prompt_version, requested_model, served_model, effort,
+          input_tokens, output_tokens, cache_creation_input_tokens, cache_read_input_tokens, latency_ms)
+        values (${ids[0]}, 'error', 'v', 'm', 'm', 'low', 0, 0, 0, 0, 0) returning id`.execute(db);
+      await sql`insert into cases (interaction_id, classification_id, target_team, needs_review, reason_codes, router_version)
+                values (${ids[0]}, ${cl.rows[0]!.id}, 'general', true, '["classification_error"]', 'route.v1')`.execute(
+        db,
+      );
+
+      expect((await createMigrator(db).migrateToLatest()).error).toBeUndefined();
+      const statuses = await sql<{ raw_text: string; status: string }>`
+        select raw_text, status from interactions where id in (${ids[0]}, ${ids[1]}) order by raw_text`.execute(db);
+      expect(statuses.rows).toEqual([
+        { raw_text: "with case", status: "processed" },
+        { raw_text: "without case", status: "received" },
+      ]);
+    });
+
+    it("allows a null classification_id only on a processing_failed case", async () => {
+      const insertCase = async (codes: string) => {
+        const r = await sql<{ id: string }>`insert into interactions (channel, raw_text) values ('chat', 'x')
+                                             returning id`.execute(db);
+        return sql`insert into cases (interaction_id, classification_id, target_team, needs_review, reason_codes, router_version)
+                   values (${r.rows[0]!.id}, null, 'general', true, ${codes}::jsonb, 'route.v2')`.execute(db);
+      };
+      await expect(insertCase('["processing_failed"]')).resolves.toBeDefined();
+      await expect(insertCase('["classification_error"]')).rejects.toThrow(/cases_classification_id_check/);
+    });
+
+    it("refuses to roll back while a failure case without a classification exists", async () => {
+      const result = await createMigrator(db).migrateTo("0006_cases");
+      expect(result.error).toBeDefined();
+      await sql`delete from cases where classification_id is null`.execute(db);
+      expect((await createMigrator(db).migrateTo("0006_cases")).error).toBeUndefined();
+      expect((await createMigrator(db).migrateToLatest()).error).toBeUndefined();
     });
   });
 

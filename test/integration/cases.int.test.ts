@@ -106,6 +106,23 @@ describe("routeInteraction", () => {
     expect(c.log[3]!.output).toEqual({ target_team: c.targetTeam, needs_review: false, fired_rules: [] });
     const { created: _created, ...stored } = c;
     expect(await readCase(testDb.db, id)).toEqual(stored);
+    const { status } = await testDb.db
+      .selectFrom("interactions")
+      .select("status")
+      .where("id", "=", id)
+      .executeTakeFirstOrThrow();
+    expect(status).toBe("processed");
+  });
+
+  it("leaves the status received when routing fails", async () => {
+    const id = await store("msg-011", { enrich: false });
+    await expect(routeInteraction(testDb.db, id)).rejects.toThrow(NotReadyForRouting);
+    const { status } = await testDb.db
+      .selectFrom("interactions")
+      .select("status")
+      .where("id", "=", id)
+      .executeTakeFirstOrThrow();
+    expect(status).toBe("received");
   });
 
   it("keeps every reason of a review case, in order, with details", async () => {
@@ -235,7 +252,7 @@ describe("npm run route", () => {
     expect(out).toContain("Review: no");
     expect(out).toMatch(/1\. mask +\(mask\.v1\) placeholders: \[/);
     expect(out).toMatch(/3\. enrich +\(enrich\.v1\) found;/);
-    expect(out).toMatch(/4\. route +\(route\.v1\) team /);
+    expect(out).toMatch(/4\. route +\(route\.v2\) team /);
     expect(out).not.toContain("existing case");
   });
 
