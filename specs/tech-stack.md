@@ -9,7 +9,7 @@
 | HTTP API | **Fastify** | Intake API; later also serves the review web page. |
 | Database | **PostgreSQL** + **Kysely** | Messages, cases, decision log, review corrections, mock CRM and outage data. Kysely (typed query builder on `pg`) with its built-in migrator; migrations in `src/db/migrations/`, one per change, each table added by the phase that uses it. |
 | Queue | **Redis** + **BullMQ** | Asynchronous processing with retries (from P08): one `process` queue, one job per interaction (job ID = interaction ID, data = the ID only, so Redis holds no message text). A worker (`src/worker.ts`) runs the pipeline. Redis runs as a container in Docker Compose with append-only persistence and a volume. Client: ioredis (BullMQ's own). See "Queue consistency" below. |
-| LLM | **Claude** via the **Anthropic SDK** | Structured output through `output_config.format` with a JSON Schema (forced tool use is rejected by the current models; decided in P03). Model and effort configurable (`TRIAGE_MODEL`, default `claude-opus-5-5`; `TRIAGE_EFFORT`, default `low`). The classifier uses server-side refusal fallbacks and records the model that answered. One client in `src/llm/`, shared with the dataset scripts. |
+| LLM | **Claude** via the **Anthropic SDK** | Structured output through `output_config.format` with a JSON Schema (forced tool use is rejected by the current models; decided in P03). Model and effort configurable (`TRIAGE_MODEL`, default `claude-opus-5-5`; `TRIAGE_EFFORT`, default `low`). The classifier uses server-side refusal fallbacks and records the model that answered. The investigating agent (P10) uses the same client's multi-turn method with strict tools, no fallbacks, and `INVESTIGATE_MODEL` / `INVESTIGATE_EFFORT` (default: the classifier's). One client in `src/llm/`, shared with the dataset scripts. |
 | Validation | **Ajv** + **ajv-formats**, types via **json-schema-to-ts** | Every model output is validated before use; invalid output goes to review. |
 | Tests | **Vitest** | Unit tests (`npm test`) never call a model (the LLM client is mocked) and need no Docker. Integration tests (`npm run test:integration`) run against the Compose services. |
 | Lint & format | **ESLint**, **Prettier**, `tsc --noEmit` | typescript-eslint `recommendedTypeChecked`; Prettier with print width 120 (Markdown excluded). |
@@ -25,7 +25,7 @@ intake (API) → store → queue → mask → understand (LLM) → enrich (CRM, 
    → review queue (if required)
 ```
 
-Each step is a separate module with its own tests. From P08, the steps after "queue" run in the worker through one runner (`src/pipeline/process.ts`, `process.v1`), which resumes from what earlier attempts stored. Nothing after "mask" sees raw personal data: every model call (the classifier, and the evaluation's judge) gets masked text only (from P05).
+Each step is a separate module with its own tests. From P08, the steps after "queue" run in the worker through one runner (`src/pipeline/process.ts`; `process.v2` from P10 adds the investigate step), which resumes from what earlier attempts stored. Nothing after "mask" sees raw personal data: every model call (the classifier, the investigating agent and the evaluation's judge) gets masked text only (from P05).
 
 ## Queue consistency
 
@@ -42,10 +42,10 @@ Saving a message (PostgreSQL) and enqueueing its job (Redis) are two separate wr
 - `interactions`: id (uuidv7), external id (the caller's own id, unique when set), channel (`email` | `chat` | `call`), language (`cs` | `sk` | `en`, nullable when unknown), raw text, received at, status (`received` | `processed`, set to `processed` with the case from P08), created at (from P02); masked text, masker version, masked at (P05, set together once)
 - `masked_identifiers` (from P05): id, interaction id, placeholder, type, value, normalised value, start and end offset, created at; unique per interaction and placeholder, indexed by type and normalised value
 - `classifications` (from P03): one row per attempt, never updated: id, interaction id, outcome (`valid` | `invalid` | `error`), intent, urgency, language, fields (jsonb), summary, confidence (0–1), raw output, errors, prompt version, requested and served model, fell back, effort, tokens (input, output, cache write, cache read), cost, latency, created at. The current classification is the latest valid row.
-- `investigations`: interaction id, steps taken, tools called, likely cause, evidence, confidence
+- `investigations` (from P10): one row per agent attempt, never updated: id, interaction id, classification id and enrichment id (the inputs used), investigator version, prompt version, outcome (`valid` | `step_limit` | `invalid` | `error`), likely cause, confidence and summary (set exactly when valid), evidence (jsonb: tool and finding), steps (model turns, 1–6), tool calls (jsonb: turn, tool, input, the result as sent to the model, error flag, latency), raw output, errors, requested and served model, effort, tokens (summed over turns), cost, latency, created at. The investigation of an enrichment is its latest row; a case names the one it used in its decision log.
 - `enrichments` (from P06): one row per attempt, never updated: id, interaction id, classification id (whose area and service type were used), enricher version, outcome (`found` | `not_found` | `ambiguous` | `no_identifiers`), customer id (set exactly when found), candidates (jsonb: customer id and the placeholders that matched it), unmatched placeholders, area, area source (`message` | `customer`), outage ids, created at. The current enrichment is the latest row.
 - `cases` (from P07): one per interaction (unique), written once: id, interaction id, classification id (the attempt used; null only on a `processing_failed` case that failed before classifying, from P08), enrichment id (null exactly when the classification isn't valid), customer id (nullable), target team, needs review (true exactly when there are reason codes), reason codes (jsonb), router version, created at
-- `decision_log` (from P07): one entry per pipeline step of a case, written in the same transaction: id, case id, seq (1–4), step (`mask` | `classify` | `enrich` | `route`), input summary (jsonb), output (jsonb), rule applied (the version that decided), created at. IDs, versions, outcomes and placeholders only: no message text, summary or identifier value.
+- `decision_log` (from P07): one entry per pipeline step of a case, written in the same transaction: id, case id, seq (1–5), step (`mask` | `classify` | `enrich` | `investigate` (from P10) | `route`), input summary (jsonb), output (jsonb), rule applied (the version that decided), created at. IDs, versions, outcomes and placeholders only: no message text, summary, tool result or identifier value. From P10 an `investigate` entry is written whenever an `enrich` one is: the investigation used (its ID, outcome, cause, confidence, turns and tool names), or `skipped` and why.
 - `reviews` (from P09): at most one per case (unique), written once: id, case id, reviewer (a handle such as `reviewer-1`, checked), decision (`confirmed` | `corrected`), corrected intent and corrected team (both set exactly when corrected: the final values), note (required when corrected), spot check (the case didn't need review), reviewed at. A case is never changed: the decision that counts is the case's own, or the correction's.
 - `unmask_log` (from P09): one row each time a reviewer views a message's raw text, append-only: id, case id, reviewer, reason (required), unmasked at.
 - Mock data (from P06), loaded from `eval/data/crm/seed.json` by `npm run crm:seed`:
@@ -53,6 +53,7 @@ Saving a message (PostgreSQL) and enqueueing its job (Redis) are two separate wr
   - `crm_services`: id, customer id, service type (`internet` | `mobile` | `tv`), tariff, contract number (unique), phone (mobile only, `+420…`/`+421…`) and its generated last-9-digit key, area, status (`active` | `terminated`), started at.
   - `crm_tickets`: id, customer id, service id (nullable), category (an intent), summary, opened at, closed at (nullable).
   - `outages`: id, area and its key (no case or diacritics), service type, description, started at, resolved at (nullable).
+  - `crm_line_status` (from P10): service id, state (`up` | `degraded` | `down`), state since, diagnostic. One row per service.
 
 Final fields are fixed in the phase specs.
 
@@ -77,7 +78,7 @@ Defined in code in `src/taxonomy.ts`, with definitions, examples and borderline 
 
 ## Routing rules
 
-Deterministic code (no model), in `src/pipeline/route.ts`, versioned (`route.v1` from P07; `route.v2` from P08 adds `processing_failed`, with the same result for every other input). The full rules are in the P07 spec.
+Deterministic code (no model), in `src/pipeline/route.ts`, versioned (`route.v1` from P07; `route.v2` from P08 adds `processing_failed`, with the same result for every other input; `route.v3` from P10 adds `investigation_inconclusive`). The full rules are in the P07 spec.
 
 - **Team** by intent, as in the table above; `general` when the classification is invalid or failed.
 - **Review** when at least one reason code applies; every rule is checked and all codes are kept:
@@ -89,8 +90,8 @@ Deterministic code (no model), in `src/pipeline/route.ts`, versioned (`route.v1`
   - `customer_unidentified`: a `technical_fault` with no account identifiers (other intents without identifiers are not reviewed for this);
   - `crm_mismatch_unmatched_key`: a customer was found but another key matched no one;
   - `crm_mismatch_service_type`: the classified service type is not among the customer's services;
-  - `investigation_inconclusive`: from P10.
-- **Runs** in the queue worker (from P08), or with `npm run process -- <id>` (the whole pipeline) or `npm run route -- <id>` after `classify` and `enrich`; one case per interaction, so a second run writes nothing.
+  - `investigation_inconclusive` (from P10, `route.v3`): a valid `technical_fault` whose investigation didn't end with a valid answer, found no cause (`inconclusive`) or has confidence below 0.7. It never changes the team. `route()` takes the investigation or none; with none it gives `route.v2`'s result, which the evaluation's classify-only routing metrics use. In the pipeline, a valid technical fault can't be routed without one.
+- **Runs** in the queue worker (from P08), or with `npm run process -- <id>` (the whole pipeline) or `npm run route -- <id>` after `classify`, `enrich` and, for a technical fault, `investigate`; one case per interaction, so a second run writes nothing.
 - Rules are covered by unit tests, and a dataset-wide test routes the kept `classify.v2` outputs and requires 100% recall on must-review. Every case's decision log records the rules that fired.
 
 ## Masking
@@ -120,11 +121,15 @@ Deterministic code (no model), in `src/pipeline/enrich.ts`, versioned (`enrich.v
 
 ## The investigating agent
 
-- Runs only for `technical_fault`.
-- Hand-written loop against the Anthropic API (no agent framework); ends on the model's stop reason or a **step limit**.
-- Read-only tools: `check_outages(area)`, `get_line_status(customerId)`, `get_recent_tickets(customerId)`.
-- Tool errors are returned to the model as results.
-- Output validated against a schema (likely cause, evidence, confidence); inconclusive or invalid → review.
+In `src/pipeline/investigate.ts`, versioned (`investigate.v1` from P10, prompt `investigate.v1`). The full rules are in the P10 spec.
+
+- **Runs** for every case whose classification is valid with intent `technical_fault`, whatever the enrichment found, between enrich and route (in the worker, `npm run process`, or `npm run investigate -- <id>`).
+- **A hand-written loop** against the Anthropic API (no agent framework), through the client's second method (`converse`: strict tools, the answer schema as `output_config.format`, assistant turns passed back unchanged, no fallbacks). **At most 6 model turns and 12 tool calls**; a model still asking for tools at the last turn ends as `step_limit`.
+- **Read-only tools** (`src/pipeline/investigate-tools.ts`): `check_outages(area, service_type?)` (ongoing at the message's time or resolved in the 7 days before), `get_line_status(customer_id)`, `get_recent_tickets(customer_id)` (90 days, at most 10). They read the CRM through `InvestigationCrm` (PostgreSQL in a `READ ONLY` transaction, or the in-memory seed). The customer tools accept only the case's found customer or ambiguous candidates. Results hold no identifier values. Errors (bad input, unknown tool, the guard, a database error) go back to the model as error results.
+- **Likely causes** (`LIKELY_CAUSES` in `src/taxonomy.ts`): `area_outage`, `line_fault`, `customer_equipment`, `service_inactive`, `inconclusive`.
+- **The answer** (likely cause, confidence, summary, 0–5 evidence items) is validated with Ajv, and then in code: a cause needs evidence, and every evidence item must name a tool that answered in this loop.
+- **Review:** `investigation_inconclusive` (see Routing rules). The agent never routes, writes or changes a team.
+- **Retries** as for classification: every attempt is stored; a transient API error retries the job, and on the final attempt the `error` attempt sends the case to review. A retry reuses a stored attempt unless its outcome is `error`.
 
 ## Evaluation
 
@@ -139,6 +144,7 @@ Deterministic code (no model), in `src/pipeline/enrich.ts`, versioned (`enrich.v
 - **Routing metrics (from P07)** are scored from the stored outputs, without a model: each message is masked, enriched against the in-memory CRM seed and routed. The report also counts each reason code, checks each labelled reason against its code, lists missed must-review messages, and records `enrich.v1`, `route.v1` and the seed hash.
 - **Injection set:** messages containing instructions aimed at the model; pass = no action triggered and review rules still apply.
 - **Runs (from P04):** `npm run eval` classifies the full dataset (or `--subset small`, 18 fixed messages in `eval/data/subsets/small.json`) with the pipeline's understanding step, directly from the dataset file (no database), under the paid-run guard (dry run, confirmation, cost cap). Each run writes `eval/results/<run-id>/`: `run.json` (models, effort, prompt versions and hashes, dataset hash, git commit), `outputs.jsonl`, `metrics.json`, `report.md` and a self-contained `report.html`. `npm run eval:report` recomputes the reports from the stored outputs byte for byte; `npm run eval:keep` moves a run to `eval/results/kept/`, the only runs committed. The small subset runs in CI from P12.
+- **Investigation (from P10):** `npm run eval:investigate` runs the agent over the dataset's labelled technical faults, from a classify run's stored classifications (by default the kept `classify.v2` run), masked and enriched against the in-memory seed, with the tools reading the seed too. Labels are the causes designed into the seed (`expected_cause`, `crm-generate.v2`). Metrics: cause accuracy, per-cause precision and recall, confusion matrix, review rate, outcomes, turns and tool calls, cost and latency, overall and per language. Same run folder, paid-run guard (cap $2), `eval:report` and `eval:keep` as `npm run eval`.
 - **Summary judge:** prompt `summary-judge.v1` on `claude-haiku-5-5` (a different model from the classifier) grades each summary for faithfulness and completeness (1–5) and flags personal data; it never sees the labels.
 - **Comparisons:** prompt versions or models compared on the same set.
 
