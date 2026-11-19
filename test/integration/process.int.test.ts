@@ -14,6 +14,7 @@ import { attempt, VALID_CLASSIFICATION } from "../support/attempts.js";
 import {
   byMaskedText,
   labelsOf,
+  outputFor,
   processDeps,
   scriptedAgent,
   scriptedLlm,
@@ -177,6 +178,35 @@ describe("processInteraction", () => {
     const r = await run(id, llm, false);
     expect(llm.calls).toHaveLength(0);
     expect(r.case.reasonCodes).toEqual(["invalid_output"]);
+  });
+});
+
+describe("the output check (P11)", () => {
+  it("sends a case to review with suspicious_output when the summary holds a phone number", async () => {
+    const id = await storeMessage(db, MSG);
+    const output = {
+      ...(JSON.parse(outputFor(MSG)) as Record<string, unknown>),
+      summary: "Customer on 601 123 456 reports no signal.",
+    };
+    const llm = {
+      complete: (req: { model: string }) =>
+        Promise.resolve({
+          ok: true as const,
+          text: JSON.stringify(output),
+          model: req.model,
+          usage: { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
+        }),
+    };
+    const r = await processInteraction(db, processDeps(llm, scriptedAgent()), id, { finalAttempt: true });
+    expect(r.case).toMatchObject({
+      targetTeam: labelsOf(MSG).expected_team,
+      needsReview: true,
+      reasonCodes: ["suspicious_output"],
+      routerVersion: "route.v4",
+    });
+    const routeLog = r.case.log.find((l) => l.step === "route")!;
+    expect(JSON.stringify(routeLog)).toContain("phone in the classification summary");
+    expect(JSON.stringify(r.case.log)).not.toContain("601 123 456");
   });
 });
 

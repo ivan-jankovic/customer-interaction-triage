@@ -329,7 +329,7 @@
   "worstErrors": [],
   "routing": {
     "enricherVersion": "enrich.v1",
-    "routerVersion": "route.v3",
+    "routerVersion": "route.v4",
     "seedSha256": "f5c8731da8939a8ff793693a48b992678a47d534c0c90f74328353fa7d5aaf09",
     "reasonCodes": [
       {
@@ -378,6 +378,10 @@
       },
       {
         "code": "investigation_inconclusive",
+        "n": 0
+      },
+      {
+        "code": "suspicious_output",
         "n": 0
       }
     ],
