@@ -180,6 +180,34 @@ export interface DecisionLogTable {
 
 export type DecisionLogRow = Selectable<DecisionLogTable>;
 
+/** Table `reviews` (migration 0008, P09): at most one per case, written once. */
+export interface ReviewsTable {
+  id: Generated<string>;
+  case_id: Immutable<string>;
+  reviewer: Immutable<string>;
+  decision: Immutable<"confirmed" | "corrected">;
+  /** Both set exactly when the decision is `corrected` (the final values, even if one is unchanged). */
+  corrected_intent: Immutable<Intent | null>;
+  corrected_team: Immutable<Team | null>;
+  note: Immutable<string | null>;
+  /** True when the case didn't need review (a spot check of an auto-routed case). */
+  spot_check: Immutable<boolean>;
+  reviewed_at: ColumnType<Date, never, never>;
+}
+
+export type ReviewRow = Selectable<ReviewsTable>;
+
+/** Table `unmask_log` (migration 0008, P09): one row per raw-text view, append-only. */
+export interface UnmaskLogTable {
+  id: Generated<string>;
+  case_id: Immutable<string>;
+  reviewer: Immutable<string>;
+  reason: Immutable<string>;
+  unmasked_at: ColumnType<Date, never, never>;
+}
+
+export type UnmaskLogRow = Selectable<UnmaskLogTable>;
+
 /** Table types for Kysely; each phase adds the tables it owns together with their migration. */
 export interface Database {
   interactions: InteractionsTable;
@@ -192,6 +220,8 @@ export interface Database {
   enrichments: EnrichmentsTable;
   cases: CasesTable;
   decision_log: DecisionLogTable;
+  reviews: ReviewsTable;
+  unmask_log: UnmaskLogTable;
 }
 
 export function createDb(databaseUrl: string): Kysely<Database> {
