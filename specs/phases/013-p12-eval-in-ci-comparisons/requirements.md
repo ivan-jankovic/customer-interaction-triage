@@ -127,3 +127,7 @@ Decided during spec review: **`claude-opus-5-5` vs `claude-sonnet-5-5`, on the f
   | Latency p50 / p95 | 2.1 s / 2.9 s | 2.0 s / 2.4 s |
 
   No must-review message is missed by either model. Every intent is right with both, so this dataset can't show where they differ on intent; the comparison says Sonnet is good enough for the routine path here, not that it is as good in general. The default stays Opus (out of scope).
+- **CI runs on PR #14:**
+  - [Run 44638499736](https://github.com/ivan-jankovic/customer-interaction-triage/actions/runs/44638499736) (pull request): **green**. 18/18 intents right, 6/6 must-review messages sent to review, $0.17. That is more than the ~$0.12 estimate because a fresh runner starts with an empty prompt cache.
+  - [Run 44638854433](https://github.com/ivan-jankovic/customer-interaction-triage/actions/runs/44638854433) (`workflow_dispatch`, `min_intent_correct=19`): **red** at `eval:check` ("18 of 18 intents right; at least 19 required", exit 1), $0.11. The run folder was still uploaded as an artifact.
+- **Paid runs in this phase:** $0.33 (Sonnet comparison) + $0.28 (the two CI runs) = **$0.61**.
