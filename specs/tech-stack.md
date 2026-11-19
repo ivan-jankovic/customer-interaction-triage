@@ -14,7 +14,7 @@
 | Tests | **Vitest** | Unit tests (`npm test`) never call a model (the LLM client is mocked) and need no Docker. Integration tests (`npm run test:integration`) run against the Compose services. |
 | Lint & format | **ESLint**, **Prettier**, `tsc --noEmit` | typescript-eslint `recommendedTypeChecked`; Prettier with print width 120 (Markdown excluded). |
 | Local setup | **Docker Compose** | PostgreSQL, Redis and (from P02) the app, one command. Images pinned to exact versions. Local only; no hosted deployment. |
-| CI | **GitHub Actions** | On every pull request and push to `main`: a `checks` job (lint, format, type check, unit tests, dependency audit) and an `integration` job against the Compose services (started with `docker compose up --wait`, so CI uses the same configuration as local). Actions pinned to commit SHAs; Dependabot for npm, Actions and Compose images. From P04: an evaluation subset with a model (API key as a secret). |
+| CI | **GitHub Actions** | On every pull request and push to `main`: a `checks` job (lint, format, type check, unit tests, dependency audit) and an `integration` job against the Compose services (started with `docker compose up --wait`, so CI uses the same configuration as local). Actions pinned to commit SHAs; Dependabot for npm, Actions and Compose images. From P12: the small evaluation subset with a model (API key as a secret) and a pass threshold. |
 | Package manager | **npm** | |
 
 ## Pipeline
@@ -98,7 +98,8 @@ Deterministic, rule-based (no model): phone numbers, e-mail addresses, Czech bir
 - The generator and graders are separate from the triage prompts being evaluated, so the pipeline is not tested on labels it produced itself.
 - **Metrics** (overall and per language): intent accuracy, per-intent precision and recall, confusion matrix, field extraction accuracy, routing accuracy, recall on must-review, summary quality (LLM-graded rubric), cost and latency per message.
 - **Injection set:** messages containing instructions aimed at the model; pass = no action triggered and review rules still apply.
-- **Runs:** full set manually (`npm run eval`), results written to `eval/results/` with model and prompt version; a small subset in CI.
+- **Runs (from P04):** `npm run eval` classifies the full dataset (or `--subset small`, 18 fixed messages in `eval/data/subsets/small.json`) with the pipeline's understanding step, directly from the dataset file (no database), under the paid-run guard (dry run, confirmation, cost cap). Each run writes `eval/results/<run-id>/`: `run.json` (models, effort, prompt versions and hashes, dataset hash, git commit), `outputs.jsonl`, `metrics.json`, `report.md` and a self-contained `report.html`. `npm run eval:report` recomputes the reports from the stored outputs byte for byte; `npm run eval:keep` moves a run to `eval/results/kept/`, the only runs committed. The small subset runs in CI from P12.
+- **Summary judge:** prompt `summary-judge.v1` on `claude-haiku-5-5` (a different model from the classifier) grades each summary for faithfulness and completeness (1–5) and flags personal data; it never sees the labels.
 - **Comparisons:** prompt versions or models compared on the same set.
 
 ## Review queue

@@ -52,6 +52,20 @@ Every attempt is stored in `classifications`, also when the output is invalid, w
 
 Prompts are versioned: [versions.json](src/llm/prompts/versions.json) holds a hash of every prompt file, and a test fails if a published prompt changes. To change a prompt, add a new version.
 
+## Evaluating
+
+`npm run eval` classifies the labelled dataset with the same understanding step, grades each summary with a separate judge model, and writes a report. It calls paid models: it prints an estimate and asks before any call, and stops at `--max-cost` (default $3).
+
+```sh
+npm run eval -- --subset small --dry-run   # plan and cost estimate for the 18-message subset, no calls
+npm run eval -- --subset small             # ~$0.20, for development
+npm run eval                               # the full 100 messages, ~$0.90
+npm run eval:report -- <run-id>            # recompute a run's reports from its stored outputs (free)
+npm run eval:keep -- <run-id>              # move a run to eval/results/kept/ so it can be committed
+```
+
+Each run lands in `eval/results/<run-id>/` with `report.md` and `report.html` (intent accuracy, per-intent precision and recall, confusion matrix, field accuracy, summary scores, confidence, cost and latency, overall and per language). The format is described in [eval/results/README.md](eval/results/README.md); kept runs, including the baseline, are in [eval/results/kept/](eval/results/kept/).
+
 ## Checks
 
 | Command | What it does |
