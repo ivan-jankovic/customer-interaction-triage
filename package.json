@@ -45,7 +45,9 @@
     "enrich": "tsx --env-file-if-exists=.env src/cli/enrich.ts",
     "route": "tsx --env-file-if-exists=.env src/cli/route.ts",
     "worker": "tsx --env-file-if-exists=.env src/worker.ts",
-    "worker:dist": "node dist/worker.js"
+    "worker:dist": "node dist/worker.js",
+    "process": "tsx --env-file-if-exists=.env src/cli/process.ts",
+    "queue:status": "tsx --env-file-if-exists=.env src/cli/queue-status.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",

@@ -156,3 +156,16 @@ export async function sweep(
   }
   return result;
 }
+
+/** How many interactions have no case, and the oldest one's created_at (for `npm run queue:status`). */
+export async function backlogSummary(
+  db: Kysely<Database>,
+  { before = new Date() }: { before?: Date } = {},
+): Promise<{ count: number; oldest: Date | null }> {
+  const r = await sql<{ n: string; oldest: Date | null }>`
+    select count(*) as n, min(i.created_at) as oldest
+    from interactions i
+    where i.created_at < ${before}
+      and not exists (select 1 from cases c where c.interaction_id = i.id)`.execute(db);
+  return { count: Number(r.rows[0]!.n), oldest: r.rows[0]!.oldest };
+}
