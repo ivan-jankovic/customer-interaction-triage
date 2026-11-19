@@ -5,6 +5,7 @@
 | Set | full (8 messages) |
 | Classifier | claude-opus-5-5, effort low, prompt classify.v1 |
 | Summary judge | claude-haiku-5-5, effort low, prompt summary-judge.v1 |
+| Masking | none (raw text sent to the model) |
 | Dataset | eval/data/dataset.jsonl (sha256 f4e50c3762ff) |
 | Code | 0123456789ab |
 | Started | 2026-11-19T12:00:00.000Z |

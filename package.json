@@ -37,7 +37,8 @@
     "dataset:subset": "tsx eval/subsets.ts",
     "eval": "tsx --env-file-if-exists=.env eval/run.ts",
     "eval:report": "tsx eval/report/cli.ts",
-    "eval:keep": "tsx eval/report/keep.ts"
+    "eval:keep": "tsx eval/report/keep.ts",
+    "mask": "tsx --env-file-if-exists=.env src/cli/mask.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",

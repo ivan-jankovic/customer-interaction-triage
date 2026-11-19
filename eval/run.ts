@@ -13,6 +13,7 @@ import { pathToFileURL } from "node:url";
 import { loadClassifierConfig } from "../src/config.js";
 import { createAnthropicClient, type LlmClient, type LlmRequest } from "../src/llm/client.js";
 import { loadPrompt } from "../src/llm/prompts.js";
+import { mask, MASKER_VERSION } from "../src/pipeline/mask.js";
 import { buildRequest, CLASSIFY_MAX_TOKENS, CLASSIFY_PROMPT_VERSION, understand } from "../src/pipeline/understand.js";
 import { JUDGE_MAX_TOKENS, JUDGE_PROMPT_VERSION, judgeSummary, loadJudgeConfig } from "./judge.js";
 import { BudgetExceeded, estimateTokens, type Budget, type PlannedCall } from "./lib/cost.js";
@@ -48,6 +49,8 @@ export interface RunInfo {
   complete: boolean;
   classifier: { model: string; effort: string; promptVersion: string; promptSha256: string };
   judge: { model: string; effort: string; promptVersion: string; promptSha256: string };
+  /** The masker the messages went through before any model call (P05); null in earlier runs. */
+  masker?: { version: string } | null;
   dataset: { file: string; sha256: string };
   subset: { file: string; sha256: string } | null;
   git: { commit: string; dirty: boolean };
@@ -162,6 +165,7 @@ export async function runEval(argv: string[], deps: EvalDeps = {}): Promise<stri
       promptSha256: registryHash(judgePrompt.version),
     },
     dataset: { file: relative(REPO_ROOT, datasetPath), sha256: sha256File(datasetPath) },
+    masker: { version: MASKER_VERSION },
     subset:
       set === "small" ? { file: relative(REPO_ROOT, SMALL_SUBSET_PATH), sha256: sha256File(SMALL_SUBSET_PATH) } : null,
     git: (deps.git ?? gitInfo)(),
@@ -170,7 +174,10 @@ export async function runEval(argv: string[], deps: EvalDeps = {}): Promise<stri
   };
 
   const jobs = records.map((record) => {
-    const input = { text: record.text, channel: record.channel };
+    // Masked in memory with the pipeline's masker: neither the classifier nor the judge sees
+    // the raw text (P05). Message text and mapping are not written to the run folder.
+    const masked = mask(record.text);
+    const input = { maskedText: masked.maskedText, identifiers: masked.identifiers, channel: record.channel };
     const request = buildRequest(input, { ...classifier, prompt: classifyPrompt });
     const plannedClassify: PlannedCall = {
       model: classifier.model,
@@ -179,7 +186,7 @@ export async function runEval(argv: string[], deps: EvalDeps = {}): Promise<stri
     };
     const plannedJudge: PlannedCall = {
       model: judgeConfig.model,
-      inputTokens: estimateTokens(judgePrompt.system + record.text) + SUMMARY_TOKENS_ESTIMATE,
+      inputTokens: estimateTokens(judgePrompt.system + masked.maskedText) + SUMMARY_TOKENS_ESTIMATE,
       outputTokens: Math.min(JUDGE_OUTPUT_ESTIMATE, JUDGE_MAX_TOKENS),
     };
     return {
@@ -197,7 +204,7 @@ export async function runEval(argv: string[], deps: EvalDeps = {}): Promise<stri
         if (attempt.outcome === "valid") {
           try {
             judge = await judgeSummary(
-              { channel: record.channel, text: record.text, summary: attempt.classification!.summary },
+              { channel: record.channel, text: masked.maskedText, summary: attempt.classification!.summary },
               { llm: budgeted(getLlm(), budget, plannedJudge), ...judgeConfig, prompt: judgePrompt },
             );
           } catch (error) {

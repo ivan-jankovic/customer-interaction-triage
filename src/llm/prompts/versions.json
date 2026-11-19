@@ -16,6 +16,10 @@
     "summary-judge.v1": {
       "file": "eval/prompts/summary-judge.v1.md",
       "sha256": "84168ebd849a278d0d7f5d0f96ca5edfb52c0a4e6e66a662066a9a38e9d9d6ca"
+    },
+    "classify.v2": {
+      "file": "src/llm/prompts/classify.v2.md",
+      "sha256": "1be65fa847d0c24e8d3640dd49ad996711e43ab3130334b8b071c8f3b85865ff"
     }
   }
 }

@@ -30,6 +30,7 @@ export function renderMarkdown(run: RunInfo, m: Metrics): string {
           `${run.classifier.model}, effort ${run.classifier.effort}, prompt ${run.classifier.promptVersion}`,
         ],
         ["Summary judge", `${run.judge.model}, effort ${run.judge.effort}, prompt ${run.judge.promptVersion}`],
+        ["Masking", run.masker ? run.masker.version : "none (raw text sent to the model)"],
         ["Dataset", `${run.dataset.file} (sha256 ${run.dataset.sha256.slice(0, 12)})`],
         ["Code", `${run.git.commit.slice(0, 12)}${run.git.dirty ? " (with uncommitted changes)" : ""}`],
         ["Started", run.startedAt],
