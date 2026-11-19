@@ -1,5 +1,5 @@
 // npm run crm:seed [-- --file <seed.json>]: loads the mock CRM and outage list (P06) from
-// eval/data/crm/seed.json into PostgreSQL, replacing whatever the four mock tables held.
+// eval/data/crm/seed.json into PostgreSQL, replacing whatever the mock tables held.
 // Running it twice leaves the same rows. Free: no model is called.
 
 import { fileURLToPath } from "node:url";
@@ -22,7 +22,7 @@ export async function runCrmSeed(
     const counts = await seedCrm(deps.db, seed);
     out(
       `Loaded ${values.file} (${seed.generator}): ${counts.customers} customers, ${counts.services} services, ` +
-        `${counts.tickets} tickets, ${counts.outages} outages.`,
+        `${counts.tickets} tickets, ${counts.outages} outages, ${counts.lineStatus} line states.`,
     );
     return 0;
   } catch (error) {

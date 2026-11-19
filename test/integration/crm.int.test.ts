@@ -36,6 +36,7 @@ describe("crm:seed", () => {
       services: seed.services.length,
       tickets: seed.tickets.length,
       outages: seed.outages.length,
+      lineStatus: seed.line_status.length,
     });
     expect(lines.join("\n")).toContain(`${seed.customers.length} customers`);
   });
@@ -46,6 +47,7 @@ describe("crm:seed", () => {
       services: await testDb.db.selectFrom("crm_services").selectAll().orderBy("id").execute(),
       tickets: await testDb.db.selectFrom("crm_tickets").selectAll().orderBy("id").execute(),
       outages: await testDb.db.selectFrom("outages").selectAll().orderBy("id").execute(),
+      lineStatus: await testDb.db.selectFrom("crm_line_status").selectAll().orderBy("service_id").execute(),
     });
     const before = await snapshot();
     await seedCrm(testDb.db, seed);
@@ -102,6 +104,38 @@ describe("KyselyCrm agrees with the in-memory CRM", () => {
       for (const type of types) {
         for (const at of times) {
           expect((await crm.outagesAt(area, type, at)).sort()).toEqual((await memory.outagesAt(area, type, at)).sort());
+        }
+      }
+    }
+  });
+
+  it("for every customer's line status (P10)", async () => {
+    for (const c of seed.customers) {
+      expect(await crm.lineStatusOfCustomer(c.id), c.id).toEqual(await memory.lineStatusOfCustomer(c.id));
+    }
+  });
+
+  it("for every customer's recent tickets at every technical fault's time (P10)", async () => {
+    const times = seed.messages.filter((m) => m.expected_cause !== null).map((m) => new Date(m.received_at));
+    for (const c of seed.customers) {
+      for (const at of times) {
+        expect(await crm.recentTickets(c.id, at, 90, 10)).toEqual(await memory.recentTickets(c.id, at, 90, 10));
+      }
+    }
+    // Wide enough to reach the old tickets too, and to check the limit.
+    const any = seed.customers[0]!.id;
+    const now = new Date("2026-11-06T12:00:00Z");
+    expect(await crm.recentTickets(any, now, 3650, 1)).toEqual(await memory.recentTickets(any, now, 3650, 1));
+  });
+
+  it("for outages in an area, ongoing or resolved within 7 days, at every message's time (P10)", async () => {
+    const areas = [...new Set(seed.outages.map((o) => o.area)), "zilina", "Brno"];
+    const types: (CrmServiceType | null)[] = ["internet", "mobile", "tv", null];
+    const times = seed.messages.map((m) => new Date(m.received_at));
+    for (const area of areas) {
+      for (const type of types) {
+        for (const at of times) {
+          expect(await crm.outagesInArea(area, type, at, 7)).toEqual(await memory.outagesInArea(area, type, at, 7));
         }
       }
     }

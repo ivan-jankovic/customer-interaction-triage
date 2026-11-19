@@ -2,7 +2,18 @@ import { Kysely, PostgresDialect, type ColumnType, type Generated, type Selectab
 import pg from "pg";
 import type { Classification } from "../llm/schemas/classification.schema.js";
 import type { AreaSource, CrmServiceType, EnrichmentOutcome, ServiceStatus } from "../pipeline/enrich.js";
-import type { Channel, IdentifierType, Intent, Language, ReasonCode, Team, Urgency } from "../taxonomy.js";
+import type {
+  Channel,
+  IdentifierType,
+  Intent,
+  InvestigationOutcome,
+  Language,
+  LikelyCause,
+  LineState,
+  ReasonCode,
+  Team,
+  Urgency,
+} from "../taxonomy.js";
 
 /**
  * Lifecycle of an interaction: `received` at intake, `processed` once its case is written (P08,
@@ -127,6 +138,14 @@ export interface OutagesTable {
   resolved_at: ColumnType<Date | null, Date | string | null, Date | string | null>;
 }
 
+/** Table `crm_line_status` (migration 0009, P10): one row per service, written only by the seed loader. */
+export interface CrmLineStatusTable {
+  service_id: string;
+  state: LineState;
+  state_since: ColumnType<Date, Date | string, Date | string>;
+  diagnostic: string;
+}
+
 /** Table `enrichments` (migration 0005, P06): one row per attempt, never updated. */
 export interface EnrichmentsTable {
   id: Generated<string>;
@@ -163,7 +182,8 @@ export interface CasesTable {
 
 export type CaseRow = Selectable<CasesTable>;
 
-export const DECISION_STEPS = ["mask", "classify", "enrich", "route"] as const;
+/** In pipeline order; `investigate` from P10 (migration 0009). Cases written before have no entry for it. */
+export const DECISION_STEPS = ["mask", "classify", "enrich", "investigate", "route"] as const;
 export type DecisionStep = (typeof DECISION_STEPS)[number];
 
 /** Table `decision_log` (migration 0006, P07): one entry per pipeline step of a case. */
@@ -208,6 +228,51 @@ export interface UnmaskLogTable {
 
 export type UnmaskLogRow = Selectable<UnmaskLogTable>;
 
+/** One tool call of an investigation, as stored (P10). */
+export interface StoredToolCall {
+  /** The model turn (1-based) that asked for it. */
+  turn: number;
+  tool: string;
+  input: unknown;
+  /** The result as sent to the model (JSON text, or the error message). */
+  result: string;
+  is_error: boolean;
+  latency_ms: number;
+}
+
+/** Table `investigations` (migration 0009, P10): one row per agent attempt, never updated. */
+export interface InvestigationsTable {
+  id: Generated<string>;
+  interaction_id: Immutable<string>;
+  classification_id: Immutable<string>;
+  enrichment_id: Immutable<string>;
+  investigator_version: Immutable<string>;
+  prompt_version: Immutable<string>;
+  outcome: Immutable<InvestigationOutcome>;
+  /** likely_cause, confidence and summary are set exactly when the outcome is `valid`. */
+  likely_cause: Immutable<LikelyCause | null>;
+  /** pg returns numeric as a string. */
+  confidence: ColumnType<string | null, number | null, never>;
+  summary: Immutable<string | null>;
+  evidence: Json<{ tool: string; finding: string }[]>;
+  steps: Immutable<number>;
+  tool_calls: Json<StoredToolCall[]>;
+  raw_output: Immutable<string | null>;
+  errors: Json<string[]>;
+  requested_model: Immutable<string>;
+  served_model: Immutable<string>;
+  effort: Immutable<string>;
+  input_tokens: Immutable<number>;
+  output_tokens: Immutable<number>;
+  cache_creation_input_tokens: Immutable<number>;
+  cache_read_input_tokens: Immutable<number>;
+  cost_usd: ColumnType<string | null, number | null, never>;
+  latency_ms: Immutable<number>;
+  created_at: ColumnType<Date, never, never>;
+}
+
+export type InvestigationRow = Selectable<InvestigationsTable>;
+
 /** Table types for Kysely; each phase adds the tables it owns together with their migration. */
 export interface Database {
   interactions: InteractionsTable;
@@ -217,11 +282,13 @@ export interface Database {
   crm_services: CrmServicesTable;
   crm_tickets: CrmTicketsTable;
   outages: OutagesTable;
+  crm_line_status: CrmLineStatusTable;
   enrichments: EnrichmentsTable;
   cases: CasesTable;
   decision_log: DecisionLogTable;
   reviews: ReviewsTable;
   unmask_log: UnmaskLogTable;
+  investigations: InvestigationsTable;
 }
 
 export function createDb(databaseUrl: string): Kysely<Database> {

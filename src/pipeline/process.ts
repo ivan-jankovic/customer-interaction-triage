@@ -87,7 +87,13 @@ export async function processInteraction(
   const existing = await readCase(db, interactionId);
   if (existing) return { case: { ...existing, created: false }, steps: null, failure: null };
 
-  const steps: StepResults = { mask: "skipped", classify: "skipped", enrich: "skipped", route: "skipped" };
+  const steps: StepResults = {
+    mask: "skipped",
+    classify: "skipped",
+    enrich: "skipped",
+    investigate: "skipped",
+    route: "skipped",
+  };
   let step: DecisionStep = "mask";
   let classificationId: string | null = null;
   let enrichmentId: string | null = null;

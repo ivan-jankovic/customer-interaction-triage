@@ -1,5 +1,5 @@
 {
-  "generator": "crm-generate.v1",
+  "generator": "crm-generate.v2",
   "dataset_hash": "94ee3b2f479d1187005ce434d2e09fbd890447e7ba02ff25641d88261f6c77a9",
   "customers": [
     {
@@ -2613,6 +2613,15 @@
       "summary": "Customer reported the service not working; ticket open while investigated.",
       "opened_at": "2026-11-04T16:47:00.000Z",
       "closed_at": null
+    },
+    {
+      "id": "2b8d305f-9a3f-484b-b78d-07b6b0764b1b",
+      "customer_id": "b40a0d36-f9a6-49e0-9456-792a54b30cb2",
+      "service_id": "c4852181-8a84-4194-8b6b-d9458cc95365",
+      "category": "technical_fault",
+      "summary": "Customer reported the service not working; ticket open while investigated.",
+      "opened_at": "2026-11-05T08:41:00.000Z",
+      "closed_at": null
     }
   ],
   "outages": [
@@ -2737,6 +2746,734 @@
       "resolved_at": "2026-11-06T09:00:00.000Z"
     }
   ],
+  "line_status": [
+    {
+      "service_id": "c6c4c2cd-92da-446d-ad39-f5c28effbd41",
+      "state": "up",
+      "state_since": "2021-08-22T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "2955c550-507f-4a7e-8eed-e7ac4995075a",
+      "state": "down",
+      "state_since": "2026-10-02T23:00:00.000Z",
+      "diagnostic": "Service terminated; line deprovisioned."
+    },
+    {
+      "service_id": "dee2d908-b4ca-4ccd-b307-730d7fac1f6e",
+      "state": "up",
+      "state_since": "2020-03-23T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "e9c45826-a33b-4bea-b6bd-56abb626b517",
+      "state": "up",
+      "state_since": "2025-11-18T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "ff071e82-b49a-4527-8585-2c1581cc7083",
+      "state": "up",
+      "state_since": "2023-01-01T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "271baa07-354f-4e68-9240-d8705ceb4538",
+      "state": "up",
+      "state_since": "2019-02-20T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "47cde2a6-6f07-46cf-bf6c-b9289d0ba17e",
+      "state": "up",
+      "state_since": "2021-07-20T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "757f347e-e351-445c-a08b-8d49c8ec0424",
+      "state": "down",
+      "state_since": "2026-11-06T07:53:00.000Z",
+      "diagnostic": "SIM not registered; the serving cell is unreachable."
+    },
+    {
+      "service_id": "99f2ce9a-8688-4d86-b3e0-8ae1d28fd68e",
+      "state": "down",
+      "state_since": "2026-11-05T04:57:00.000Z",
+      "diagnostic": "No sync on the access port; the access node is unreachable."
+    },
+    {
+      "service_id": "044a7fc8-882c-45af-bb15-01ef5bee01bc",
+      "state": "up",
+      "state_since": "2018-04-01T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "87e861ce-84a9-4719-94b9-db3e8ead93d6",
+      "state": "up",
+      "state_since": "2022-05-15T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "ea340ce4-2903-472f-ab8c-c5e10b1ea835",
+      "state": "up",
+      "state_since": "2021-07-26T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "0ee8e0e6-6916-43db-b86a-67aaa3001cc7",
+      "state": "down",
+      "state_since": "2026-03-20T09:00:00.000Z",
+      "diagnostic": "Service terminated; line deprovisioned."
+    },
+    {
+      "service_id": "920014a6-eb7b-4dab-ad47-b477e601de83",
+      "state": "up",
+      "state_since": "2018-07-08T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "cebdabc5-8085-4e6e-9325-c5cc604b0fff",
+      "state": "down",
+      "state_since": "2025-01-30T09:00:00.000Z",
+      "diagnostic": "Service terminated; line deprovisioned."
+    },
+    {
+      "service_id": "93dac627-5759-4e7d-b12c-07199934fecf",
+      "state": "up",
+      "state_since": "2018-03-13T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "fc6e829a-a967-4eee-97ce-eebfef6de3df",
+      "state": "down",
+      "state_since": "2026-11-05T04:40:00.000Z",
+      "diagnostic": "SIM not registered; the serving cell is unreachable."
+    },
+    {
+      "service_id": "b064ace3-d413-4183-84dc-a2656d3a8399",
+      "state": "up",
+      "state_since": "2025-01-03T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "92e6027c-689c-42fc-a86a-dd7e0f234646",
+      "state": "down",
+      "state_since": "2023-07-03T09:00:00.000Z",
+      "diagnostic": "Service terminated; line deprovisioned."
+    },
+    {
+      "service_id": "ad18ade3-69b2-45d7-b134-aaeb3fda65d8",
+      "state": "up",
+      "state_since": "2024-08-06T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "ec31d3c1-de1f-4a73-9de9-973ed6de13a0",
+      "state": "down",
+      "state_since": "2019-07-10T09:00:00.000Z",
+      "diagnostic": "Service terminated; line deprovisioned."
+    },
+    {
+      "service_id": "c70b3938-224a-43bd-818d-9c74da9dff8d",
+      "state": "up",
+      "state_since": "2018-08-02T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "2c1f182a-22cd-4119-9661-2c87f3b01a74",
+      "state": "up",
+      "state_since": "2026-09-23T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "3ff7716a-45dd-40dd-9d24-0859ac66ea6a",
+      "state": "down",
+      "state_since": "2026-10-02T23:00:00.000Z",
+      "diagnostic": "Service terminated; line deprovisioned."
+    },
+    {
+      "service_id": "270c20e4-0ea4-46a9-97c1-e185e2401d22",
+      "state": "up",
+      "state_since": "2025-08-09T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "6b12245c-2835-4945-a7f9-23cd62c28409",
+      "state": "up",
+      "state_since": "2021-06-12T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "554d6ad0-c0a5-4837-a4e3-fe1296975607",
+      "state": "up",
+      "state_since": "2023-07-02T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "828efb51-7097-4fb3-9069-851e58bdd698",
+      "state": "up",
+      "state_since": "2024-01-05T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "b93540ed-f239-4326-a4a1-a06a627aee3e",
+      "state": "up",
+      "state_since": "2020-04-20T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "4441044e-449c-48c5-909c-bd92cedf54c3",
+      "state": "up",
+      "state_since": "2024-09-25T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "ccee0466-c1b4-4334-9222-1bb98fdb3e64",
+      "state": "down",
+      "state_since": "2026-10-02T23:00:00.000Z",
+      "diagnostic": "Service terminated; line deprovisioned."
+    },
+    {
+      "service_id": "d0fecc32-f54e-462b-a18a-77c9a22b4c6a",
+      "state": "up",
+      "state_since": "2022-03-01T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "c8b4fcb9-4d01-45e4-a475-f2050383013f",
+      "state": "up",
+      "state_since": "2021-09-16T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "e9759667-f76d-46e6-8c6b-6d87c0c2e8bf",
+      "state": "down",
+      "state_since": "2026-11-05T08:11:00.000Z",
+      "diagnostic": "No sync on the access port; the access node is unreachable."
+    },
+    {
+      "service_id": "cf69b74d-eb08-42d8-9e9d-2adcc9171fe7",
+      "state": "down",
+      "state_since": "2019-11-26T09:00:00.000Z",
+      "diagnostic": "Service terminated; line deprovisioned."
+    },
+    {
+      "service_id": "528642aa-7d32-4a27-9e51-5e12c8b7f627",
+      "state": "up",
+      "state_since": "2023-12-08T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "e27df2de-0483-45fb-a44f-80acfdfa4ce5",
+      "state": "up",
+      "state_since": "2021-11-17T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "db2b6048-ab52-4d29-8e3c-60236a951bd5",
+      "state": "up",
+      "state_since": "2023-01-02T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "82fccf3a-c4e9-4b1f-9bc3-846f88536bde",
+      "state": "up",
+      "state_since": "2020-07-28T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "62bb04e2-f95b-4425-8061-6268d3d5e2b7",
+      "state": "up",
+      "state_since": "2025-10-28T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "8f40477b-4ffe-468b-b366-8b29b3a7c682",
+      "state": "up",
+      "state_since": "2025-04-18T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "a9e0cda5-f7cd-4772-931d-15f044f8c56d",
+      "state": "up",
+      "state_since": "2026-05-20T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "7434e140-98b2-4930-95e3-39ed3f0d58da",
+      "state": "up",
+      "state_since": "2023-04-18T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "71e245de-f48a-49c7-a837-22ebce4d148e",
+      "state": "up",
+      "state_since": "2025-09-12T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "660e28b9-9f45-4a20-afb6-94b1024b52d9",
+      "state": "up",
+      "state_since": "2022-12-10T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "ab7548cb-1f08-4408-850c-b686a19cf929",
+      "state": "up",
+      "state_since": "2022-06-22T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "87f9d463-0a09-4391-98fd-5505becfd4d3",
+      "state": "down",
+      "state_since": "2026-11-06T08:14:00.000Z",
+      "diagnostic": "SIM not registered; the serving cell is unreachable."
+    },
+    {
+      "service_id": "bac4aa24-4dd8-4575-85d3-5a06e2ef9a89",
+      "state": "up",
+      "state_since": "2024-11-18T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "ada0c6b8-2508-4f88-afeb-c18cc4bdd4ee",
+      "state": "up",
+      "state_since": "2026-03-20T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "8e1e3204-6702-4cb7-a941-6daaecc9dcba",
+      "state": "up",
+      "state_since": "2024-04-13T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "4803ec2e-94b7-4fce-b9d0-a2fa0b6e11ae",
+      "state": "up",
+      "state_since": "2023-02-24T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "b0c44bb9-a212-4b71-9348-20a89366fe65",
+      "state": "up",
+      "state_since": "2018-04-10T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "3c2e1dfa-0ee8-474d-b825-1b0825d2c4f2",
+      "state": "up",
+      "state_since": "2025-08-08T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "8cf71b61-8a09-4e6c-9495-0267bd701ca2",
+      "state": "down",
+      "state_since": "2026-10-02T23:00:00.000Z",
+      "diagnostic": "Service terminated; line deprovisioned."
+    },
+    {
+      "service_id": "88387e97-b899-4a90-b119-0d14801fb216",
+      "state": "up",
+      "state_since": "2022-01-13T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "d0bb7fdd-56b9-4b60-be82-cdf23eeef80d",
+      "state": "up",
+      "state_since": "2025-05-04T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "9389680c-58ee-4277-a956-dd04174d2d56",
+      "state": "up",
+      "state_since": "2024-01-18T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "71735949-b98a-46c1-9d9f-73348d2526e8",
+      "state": "up",
+      "state_since": "2025-02-21T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "d9dd87b2-0da6-4af3-9382-31c1039647a8",
+      "state": "up",
+      "state_since": "2024-02-04T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "df5a909a-5fea-4178-9923-33dcd90ee15a",
+      "state": "down",
+      "state_since": "2024-06-18T09:00:00.000Z",
+      "diagnostic": "Service terminated; line deprovisioned."
+    },
+    {
+      "service_id": "86bccac5-1103-4123-923f-3ee4cb05d06d",
+      "state": "up",
+      "state_since": "2018-09-21T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "7359a011-2281-4adf-a817-c70c7e130746",
+      "state": "up",
+      "state_since": "2019-12-24T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "a4978a8d-81ca-4fc1-bdf5-f7c5e2605cad",
+      "state": "up",
+      "state_since": "2026-04-18T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "6a9abab4-63fa-4f7d-a24f-4703b4cc2425",
+      "state": "up",
+      "state_since": "2022-05-18T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "a5136fcd-7e59-4996-9f59-e247d6ab343b",
+      "state": "up",
+      "state_since": "2025-04-22T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "27fd771d-2613-4728-a11b-5528b56b3438",
+      "state": "up",
+      "state_since": "2023-11-03T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "b7dc77b1-4cfc-472d-be29-16f8c10ed40b",
+      "state": "down",
+      "state_since": "2025-05-04T09:00:00.000Z",
+      "diagnostic": "Service terminated; line deprovisioned."
+    },
+    {
+      "service_id": "1f9e4014-24e2-42b2-9a50-bf9a1531b677",
+      "state": "up",
+      "state_since": "2023-11-19T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "f78c978a-b091-46d1-bb98-89f4c9178847",
+      "state": "up",
+      "state_since": "2023-04-11T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "c4852181-8a84-4194-8b6b-d9458cc95365",
+      "state": "down",
+      "state_since": "2026-11-05T03:26:00.000Z",
+      "diagnostic": "SIM not registered on the network; the serving cell is up and other subscribers are connected."
+    },
+    {
+      "service_id": "b92c1cbf-49e4-405a-9b96-c11a04a0fd36",
+      "state": "up",
+      "state_since": "2019-09-14T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "b1024047-a98e-4525-90c1-881c98fa7173",
+      "state": "down",
+      "state_since": "2022-09-05T09:00:00.000Z",
+      "diagnostic": "Service terminated; line deprovisioned."
+    },
+    {
+      "service_id": "13862aa6-931c-4707-b1af-6e4ab0eec1ac",
+      "state": "up",
+      "state_since": "2020-12-21T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "a5d02569-2e38-41c3-b0c8-8b31d1be6702",
+      "state": "up",
+      "state_since": "2018-03-25T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "a53db3f6-85a0-49e3-95f0-b537e2772c29",
+      "state": "up",
+      "state_since": "2022-02-16T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "58341ddb-fb4b-4a69-8174-026d6a1740fe",
+      "state": "up",
+      "state_since": "2022-08-05T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "5eb626ee-d012-44cd-b766-32fa1cd67d99",
+      "state": "up",
+      "state_since": "2025-10-01T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "fa11f734-7fde-47c8-a7db-f634d91eb42c",
+      "state": "up",
+      "state_since": "2025-03-19T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "05aae58e-d0d5-4c42-9b6b-e1d06dea2ede",
+      "state": "up",
+      "state_since": "2025-09-13T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "d8e029f2-4567-48f9-aee5-2b6c6a713e57",
+      "state": "up",
+      "state_since": "2026-08-25T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "12aa010b-da94-4e41-b82e-4793857fe626",
+      "state": "up",
+      "state_since": "2022-10-02T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "d5d33565-a96e-4024-8131-ff74a28df59e",
+      "state": "down",
+      "state_since": "2026-11-06T11:58:00.000Z",
+      "diagnostic": "No sync on the access port; the access node is unreachable."
+    },
+    {
+      "service_id": "8f20cbea-126f-4e2d-b768-2f38316e0377",
+      "state": "up",
+      "state_since": "2018-04-27T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "1b7334b5-f95d-4c78-b9c8-dfaf5b42d767",
+      "state": "up",
+      "state_since": "2026-10-02T23:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "f98945f0-399b-40a8-8122-114ce1e02069",
+      "state": "up",
+      "state_since": "2018-03-21T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "9b9faaa6-5ddc-4508-8377-8983a3939e07",
+      "state": "up",
+      "state_since": "2025-08-26T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "ae018a77-b42e-43f4-b292-c67a68c219da",
+      "state": "up",
+      "state_since": "2019-05-25T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "0943d877-03b5-4310-b0d2-a84488cab91b",
+      "state": "up",
+      "state_since": "2019-09-03T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "053d20a4-c698-48a2-9d7e-c859ed071141",
+      "state": "down",
+      "state_since": "2026-02-21T09:00:00.000Z",
+      "diagnostic": "Service terminated; line deprovisioned."
+    },
+    {
+      "service_id": "6b5de217-9a35-4129-a650-6a006dfa81b8",
+      "state": "up",
+      "state_since": "2026-10-02T23:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "32280099-82e5-4ca1-8bcd-3e4310bb5edb",
+      "state": "up",
+      "state_since": "2022-12-05T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "a81ae322-e594-40ba-b948-eefcb7719fc1",
+      "state": "up",
+      "state_since": "2022-09-05T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "d3d17275-a78f-430d-b86f-f58b21594779",
+      "state": "up",
+      "state_since": "2024-05-05T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "61dbb2cf-423c-4616-8d1b-3133f687bf1d",
+      "state": "up",
+      "state_since": "2023-03-07T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "c6365124-b248-4fa7-832d-8f385c2b5a68",
+      "state": "up",
+      "state_since": "2025-07-11T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "cf98f889-ee21-4be1-b6c5-0aa40c7477fa",
+      "state": "up",
+      "state_since": "2023-03-16T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "6c55b197-5f55-4a43-922d-fff73210ef46",
+      "state": "up",
+      "state_since": "2021-02-10T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "15008ec5-2ad4-4323-a339-f4d896165ef5",
+      "state": "up",
+      "state_since": "2024-10-21T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "dfa270f6-430c-4d98-948b-3955b6fafe4f",
+      "state": "up",
+      "state_since": "2018-03-16T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "3c025507-4a40-412b-9917-594d6d3e1047",
+      "state": "up",
+      "state_since": "2020-08-17T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "f513a2d1-f61d-42ea-9db3-3f39cdb18063",
+      "state": "up",
+      "state_since": "2024-12-15T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "2582c033-6c36-4fa9-ae00-7fd937c6ad0f",
+      "state": "up",
+      "state_since": "2025-01-17T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "6bd36ac7-d52d-4cce-9e82-68021623ebce",
+      "state": "up",
+      "state_since": "2022-06-17T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "57f279c5-cfef-4a39-a9d5-25fb5b702e25",
+      "state": "up",
+      "state_since": "2018-06-06T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "ea3a30ec-bc51-48b3-a6e6-d10d25d5b254",
+      "state": "up",
+      "state_since": "2021-02-11T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "a458f488-fb8a-4414-bbde-338385fc8fce",
+      "state": "up",
+      "state_since": "2025-01-22T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "79cc4452-2e07-4d3e-b7b7-aa5636974a35",
+      "state": "up",
+      "state_since": "2021-07-18T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "2a3513c1-0505-45d4-8311-dbb9cb659aa6",
+      "state": "up",
+      "state_since": "2019-07-01T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "cdb21224-db14-4769-bbf7-44c828e3f69b",
+      "state": "up",
+      "state_since": "2020-12-09T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "f51a7ed9-a836-4c0e-9681-354ae4e65a73",
+      "state": "up",
+      "state_since": "2023-10-18T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "fae34d4a-776a-4218-96fd-a4972ff908b2",
+      "state": "up",
+      "state_since": "2022-10-08T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "4cfb16ef-ecbb-408f-acef-2255ded705d5",
+      "state": "up",
+      "state_since": "2020-04-15T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "9f00a872-c41b-4f96-8a20-73e1cbfc9d73",
+      "state": "up",
+      "state_since": "2019-11-09T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "2f7b0d78-b7f1-4e06-9b80-14da416eab3e",
+      "state": "up",
+      "state_since": "2022-12-11T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "5cf4f2e8-4e0b-4e17-a236-c5fb51be886f",
+      "state": "up",
+      "state_since": "2019-10-18T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "73d6f8f7-3dd0-422d-8912-7d8ffde03146",
+      "state": "up",
+      "state_since": "2026-10-02T23:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "7c7f34c1-0867-4c08-a982-e2e0ed958a1f",
+      "state": "up",
+      "state_since": "2018-08-19T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "8a3cb9ec-a99f-4c7a-9a97-3974b8dca0d1",
+      "state": "up",
+      "state_since": "2021-04-10T09:00:00.000Z",
+      "diagnostic": "Set-top box online; streams delivered."
+    },
+    {
+      "service_id": "aa626ed5-5fe3-4221-a90d-d0a804c84f21",
+      "state": "up",
+      "state_since": "2024-06-12T09:00:00.000Z",
+      "diagnostic": "Registered on the network; no errors."
+    },
+    {
+      "service_id": "15938835-12ca-4491-9c26-c9d8acab1fcb",
+      "state": "up",
+      "state_since": "2022-12-07T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    },
+    {
+      "service_id": "027961c6-742d-4264-a4a1-4a76d1581f48",
+      "state": "up",
+      "state_since": "2018-03-11T09:00:00.000Z",
+      "diagnostic": "In sync; no errors on the access port."
+    }
+  ],
   "messages": [
     {
       "message_id": "msg-001",
@@ -2748,7 +3485,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-002",
@@ -2760,7 +3498,8 @@
         "area": "Košice",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-003",
@@ -2772,7 +3511,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-004",
@@ -2784,7 +3524,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-005",
@@ -2796,7 +3537,8 @@
         "area": "Brno-Žabovřesky",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-006",
@@ -2808,19 +3550,21 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-007",
       "received_at": "2026-11-02T08:14:00.000Z",
-      "design": "no_identifiers: no account key in the message",
+      "design": "no_identifiers: no account key in the message; designed cause inconclusive",
       "expected": {
         "outcome": "no_identifiers",
         "customer_id": null,
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": "inconclusive"
     },
     {
       "message_id": "msg-008",
@@ -2832,7 +3576,8 @@
         "area": "Brno-Žabovřesky",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-009",
@@ -2844,7 +3589,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-010",
@@ -2856,12 +3602,13 @@
         "area": "České Budějovice",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-011",
       "received_at": "2026-11-06T12:16:00.000Z",
-      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived; designed cause area_outage: its line went down when the outage started",
       "expected": {
         "outcome": "found",
         "customer_id": "2ab81aef-4a47-4686-9755-eca31d4de553",
@@ -2870,12 +3617,13 @@
         "outage_ids": [
           "4525f846-3a2f-4bce-ae8b-e072e8d899c0"
         ]
-      }
+      },
+      "expected_cause": "area_outage"
     },
     {
       "message_id": "msg-012",
       "received_at": "2026-11-05T07:24:00.000Z",
-      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived; designed cause area_outage: its line went down when the outage started",
       "expected": {
         "outcome": "found",
         "customer_id": "29f0547d-bd9f-445e-b486-9a881334d612",
@@ -2884,7 +3632,8 @@
         "outage_ids": [
           "ac4ea01f-391e-45b8-b17f-dc27b63a02da"
         ]
-      }
+      },
+      "expected_cause": "area_outage"
     },
     {
       "message_id": "msg-013",
@@ -2896,7 +3645,8 @@
         "area": "Ostrava-Poruba",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-014",
@@ -2908,7 +3658,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-015",
@@ -2920,7 +3671,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-016",
@@ -2932,24 +3684,26 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-017",
       "received_at": "2026-11-06T11:23:00.000Z",
-      "design": "no_identifiers: no account key in the message",
+      "design": "no_identifiers: no account key in the message; designed cause inconclusive",
       "expected": {
         "outcome": "no_identifiers",
         "customer_id": null,
         "area": "Košice",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": "inconclusive"
     },
     {
       "message_id": "msg-018",
       "received_at": "2026-11-05T07:41:00.000Z",
-      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived; designed cause area_outage: its line went down when the outage started",
       "expected": {
         "outcome": "found",
         "customer_id": "9da7008d-4d2f-42bd-883f-634b9b92daf4",
@@ -2958,7 +3712,8 @@
         "outage_ids": [
           "1805838e-4d11-41aa-b3b7-e76c3fcc5066"
         ]
-      }
+      },
+      "expected_cause": "area_outage"
     },
     {
       "message_id": "msg-019",
@@ -2970,7 +3725,8 @@
         "area": "Nitra",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-020",
@@ -2982,19 +3738,21 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-021",
       "received_at": "2026-11-04T16:31:00.000Z",
-      "design": "no_identifiers: no account key in the message; an outage of its service type in its area was resolved before it arrived",
+      "design": "no_identifiers: no account key in the message; an outage of its service type in its area was resolved before it arrived; designed cause inconclusive",
       "expected": {
         "outcome": "no_identifiers",
         "customer_id": null,
         "area": "Opava",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": "inconclusive"
     },
     {
       "message_id": "msg-022",
@@ -3006,7 +3764,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-023",
@@ -3018,7 +3777,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-024",
@@ -3030,7 +3790,8 @@
         "area": "Tábor",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-025",
@@ -3042,7 +3803,8 @@
         "area": "Brno-Žabovřesky",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-026",
@@ -3054,7 +3816,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-027",
@@ -3066,7 +3829,8 @@
         "area": "České Budějovice",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-028",
@@ -3078,12 +3842,13 @@
         "area": "Hradec Králové",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-029",
       "received_at": "2026-11-05T09:08:00.000Z",
-      "design": "no_identifiers: no account key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "design": "no_identifiers: no account key in the message; an outage of its service type in its area was ongoing when it arrived; designed cause area_outage",
       "expected": {
         "outcome": "no_identifiers",
         "customer_id": null,
@@ -3092,7 +3857,8 @@
         "outage_ids": [
           "ab044b18-c191-4ab2-97c1-24a76aa737e3"
         ]
-      }
+      },
+      "expected_cause": "area_outage"
     },
     {
       "message_id": "msg-030",
@@ -3104,7 +3870,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-031",
@@ -3116,7 +3883,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-032",
@@ -3128,7 +3896,8 @@
         "area": "Opava",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-033",
@@ -3140,7 +3909,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-034",
@@ -3152,7 +3922,8 @@
         "area": "Hradec Králové",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-035",
@@ -3164,24 +3935,26 @@
         "area": "Brno-Žabovřesky",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-036",
       "received_at": "2026-11-03T17:12:00.000Z",
-      "design": "no_identifiers: no account key in the message; an outage of another service type covers its area",
+      "design": "no_identifiers: no account key in the message; an outage of another service type covers its area; designed cause inconclusive",
       "expected": {
         "outcome": "no_identifiers",
         "customer_id": null,
         "area": "Olomouc",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": "inconclusive"
     },
     {
       "message_id": "msg-037",
       "received_at": "2026-11-05T10:11:00.000Z",
-      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived; designed cause area_outage: its line went down when the outage started",
       "expected": {
         "outcome": "found",
         "customer_id": "783c7c9e-9bca-49ef-a03d-190e1d864804",
@@ -3190,7 +3963,8 @@
         "outage_ids": [
           "77302e98-5ff1-4c76-82e3-24959b7ca54b"
         ]
-      }
+      },
+      "expected_cause": "area_outage"
     },
     {
       "message_id": "msg-038",
@@ -3202,7 +3976,8 @@
         "area": "Praha 4",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-039",
@@ -3214,7 +3989,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-040",
@@ -3226,7 +4002,8 @@
         "area": "Ostrava-Poruba",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-041",
@@ -3238,7 +4015,8 @@
         "area": "Olomouc",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-042",
@@ -3250,7 +4028,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-043",
@@ -3262,7 +4041,8 @@
         "area": "Hradec Králové",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-044",
@@ -3274,7 +4054,8 @@
         "area": "Tábor",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-045",
@@ -3286,7 +4067,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-046",
@@ -3298,7 +4080,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-047",
@@ -3310,7 +4093,8 @@
         "area": "Košice",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-048",
@@ -3322,7 +4106,8 @@
         "area": "Hradec Králové",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-049",
@@ -3334,7 +4119,8 @@
         "area": "Nitra",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-050",
@@ -3346,12 +4132,13 @@
         "area": "Hradec Králové",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-051",
       "received_at": "2026-11-06T10:57:00.000Z",
-      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived; designed cause area_outage: its line went down when the outage started",
       "expected": {
         "outcome": "found",
         "customer_id": "e2ec7294-bfa9-4622-816d-dcd18d6e2702",
@@ -3360,7 +4147,8 @@
         "outage_ids": [
           "9643dd37-208b-41a2-94f9-a7a96fee6184"
         ]
-      }
+      },
+      "expected_cause": "area_outage"
     },
     {
       "message_id": "msg-052",
@@ -3372,7 +4160,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-053",
@@ -3384,7 +4173,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-054",
@@ -3396,7 +4186,8 @@
         "area": "Kolín",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-055",
@@ -3408,12 +4199,13 @@
         "area": "Plzeň",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-056",
       "received_at": "2026-11-02T12:56:00.000Z",
-      "design": "no_identifiers: no account key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "design": "no_identifiers: no account key in the message; an outage of its service type in its area was ongoing when it arrived; designed cause area_outage",
       "expected": {
         "outcome": "no_identifiers",
         "customer_id": null,
@@ -3422,7 +4214,8 @@
         "outage_ids": [
           "873a5670-d613-461a-852c-6bf551b20c2c"
         ]
-      }
+      },
+      "expected_cause": "area_outage"
     },
     {
       "message_id": "msg-057",
@@ -3434,7 +4227,8 @@
         "area": "Kladno",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-058",
@@ -3446,7 +4240,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-059",
@@ -3458,7 +4253,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-060",
@@ -3470,7 +4266,8 @@
         "area": "Hradec Králové",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-061",
@@ -3482,7 +4279,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-062",
@@ -3494,19 +4292,21 @@
         "area": "Olomouc",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-063",
       "received_at": "2026-11-04T16:50:00.000Z",
-      "design": "no_identifiers: no account key in the message; an outage of its service type in its area was resolved before it arrived",
+      "design": "no_identifiers: no account key in the message; an outage of its service type in its area was resolved before it arrived; designed cause inconclusive",
       "expected": {
         "outcome": "no_identifiers",
         "customer_id": null,
         "area": "Kladno",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": "inconclusive"
     },
     {
       "message_id": "msg-064",
@@ -3518,7 +4318,8 @@
         "area": "Banská Bystrica",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-065",
@@ -3530,7 +4331,8 @@
         "area": "České Budějovice",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-066",
@@ -3542,7 +4344,8 @@
         "area": "Kolín",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-067",
@@ -3554,7 +4357,8 @@
         "area": "Hradec Králové",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-068",
@@ -3566,19 +4370,21 @@
         "area": "Kolín",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-069",
       "received_at": "2026-11-05T13:29:00.000Z",
-      "design": "ambiguous: the phone number moved to another customer; the old service is terminated",
+      "design": "ambiguous: the phone number moved to another customer; the old service is terminated; designed cause service_inactive",
       "expected": {
         "outcome": "ambiguous",
         "customer_id": null,
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": "service_inactive"
     },
     {
       "message_id": "msg-070",
@@ -3590,19 +4396,21 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-071",
       "received_at": "2026-11-05T17:41:00.000Z",
-      "design": "found: one customer holds every key in the message",
+      "design": "found: one customer holds every key in the message; designed cause line_fault: its line is down with no outage, and a fault ticket is open",
       "expected": {
         "outcome": "found",
         "customer_id": "b40a0d36-f9a6-49e0-9456-792a54b30cb2",
         "area": "Žilina",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": "line_fault"
     },
     {
       "message_id": "msg-072",
@@ -3614,7 +4422,8 @@
         "area": "Košice",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-073",
@@ -3626,7 +4435,8 @@
         "area": "Plzeň",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-074",
@@ -3638,7 +4448,8 @@
         "area": "Nitra",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-075",
@@ -3650,7 +4461,8 @@
         "area": "Žilina",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-076",
@@ -3662,7 +4474,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-077",
@@ -3674,31 +4487,34 @@
         "area": "Hradec Králové",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-078",
       "received_at": "2026-11-05T12:01:00.000Z",
-      "design": "no_identifiers: no account key in the message",
+      "design": "no_identifiers: no account key in the message; designed cause inconclusive",
       "expected": {
         "outcome": "no_identifiers",
         "customer_id": null,
         "area": "Opava",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": "inconclusive"
     },
     {
       "message_id": "msg-079",
       "received_at": "2026-11-05T07:48:00.000Z",
-      "design": "no_identifiers: no account key in the message; an outage of another service type covers its area",
+      "design": "no_identifiers: no account key in the message; an outage of another service type covers its area; designed cause inconclusive",
       "expected": {
         "outcome": "no_identifiers",
         "customer_id": null,
         "area": "Praha 4",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": "inconclusive"
     },
     {
       "message_id": "msg-080",
@@ -3710,7 +4526,8 @@
         "area": "Nitra",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-081",
@@ -3722,7 +4539,8 @@
         "area": "Olomouc",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-082",
@@ -3734,7 +4552,8 @@
         "area": "Nitra",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-083",
@@ -3746,12 +4565,13 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-084",
       "received_at": "2026-11-06T16:47:00.000Z",
-      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived",
+      "design": "found: one customer holds every key in the message; an outage of its service type in its area was ongoing when it arrived; designed cause area_outage: its line went down when the outage started",
       "expected": {
         "outcome": "found",
         "customer_id": "f900fe36-8f59-433b-ad3b-4dcf02e29217",
@@ -3760,7 +4580,8 @@
         "outage_ids": [
           "796f59f0-6b14-4ca2-8afa-0bf2f0f54297"
         ]
-      }
+      },
+      "expected_cause": "area_outage"
     },
     {
       "message_id": "msg-085",
@@ -3772,7 +4593,8 @@
         "area": "Bratislava-Petržalka",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-086",
@@ -3784,7 +4606,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-087",
@@ -3796,7 +4619,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-088",
@@ -3808,7 +4632,8 @@
         "area": "Ostrava-Poruba",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-089",
@@ -3820,7 +4645,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-090",
@@ -3832,7 +4658,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-091",
@@ -3844,7 +4671,8 @@
         "area": "Pardubice",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-092",
@@ -3856,7 +4684,8 @@
         "area": "Liberec",
         "area_source": "message",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-093",
@@ -3868,7 +4697,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-094",
@@ -3880,7 +4710,8 @@
         "area": "České Budějovice",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-095",
@@ -3892,7 +4723,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-096",
@@ -3904,7 +4736,8 @@
         "area": "Brno-Žabovřesky",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-097",
@@ -3916,7 +4749,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-098",
@@ -3928,7 +4762,8 @@
         "area": "Kolín",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-099",
@@ -3940,7 +4775,8 @@
         "area": "Plzeň",
         "area_source": "customer",
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     },
     {
       "message_id": "msg-100",
@@ -3952,7 +4788,8 @@
         "area": null,
         "area_source": null,
         "outage_ids": []
-      }
+      },
+      "expected_cause": null
     }
   ]
 }

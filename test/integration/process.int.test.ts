@@ -68,7 +68,7 @@ describe("processInteraction", () => {
     const id = await storeMessage(db, MSG);
     const llm = llmFor(["valid"]);
     const r = await run(id, llm, false);
-    expect(r.steps).toEqual({ mask: "ran", classify: "ran", enrich: "ran", route: "ran" });
+    expect(r.steps).toEqual({ mask: "ran", classify: "ran", enrich: "ran", investigate: "skipped", route: "ran" });
     expect(r.failure).toBeNull();
     expect(r.case).toMatchObject({
       created: true,
@@ -112,7 +112,7 @@ describe("processInteraction", () => {
     const llm = llmFor(["valid"]);
     const r = await run(id, llm);
     expect(llm.calls).toHaveLength(0);
-    expect(r.steps).toEqual({ mask: "ran", classify: "reused", enrich: "ran", route: "ran" });
+    expect(r.steps).toEqual({ mask: "ran", classify: "reused", enrich: "ran", investigate: "skipped", route: "ran" });
   });
 
   it("stores a transient error and throws for a retry; the next run succeeds with one case", async () => {

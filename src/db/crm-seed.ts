@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { Ajv } from "ajv";
 import addFormatsModule from "ajv-formats";
 import type { FromSchema } from "json-schema-to-ts";
-import { INTENTS } from "../taxonomy.js";
+import { INTENTS, LIKELY_CAUSES, LINE_STATES } from "../taxonomy.js";
 import { AREA_SOURCES, CRM_SERVICE_TYPES, ENRICHMENT_OUTCOMES, SERVICE_STATUSES } from "../pipeline/enrich.js";
 
 export const CRM_SEED_PATH = join(
@@ -110,6 +110,21 @@ export const crmSeedSchema = {
         additionalProperties: false,
       },
     },
+    /** P10 (crm-generate.v2): one row per service. */
+    line_status: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          service_id: uuid,
+          state: { type: "string", enum: LINE_STATES },
+          state_since: timestamp,
+          diagnostic: { type: "string", minLength: 1 },
+        },
+        required: ["service_id", "state", "state_since", "diagnostic"],
+        additionalProperties: false,
+      },
+    },
     messages: {
       type: "array",
       items: {
@@ -131,13 +146,15 @@ export const crmSeedSchema = {
             required: ["outcome", "customer_id", "area", "area_source", "outage_ids"],
             additionalProperties: false,
           },
+          /** P10: the likely cause a technical fault is designed to have; null for other intents. */
+          expected_cause: { anyOf: [{ type: "string", enum: LIKELY_CAUSES }, { type: "null" }] },
         },
-        required: ["message_id", "received_at", "design", "expected"],
+        required: ["message_id", "received_at", "design", "expected", "expected_cause"],
         additionalProperties: false,
       },
     },
   },
-  required: ["generator", "dataset_hash", "customers", "services", "tickets", "outages", "messages"],
+  required: ["generator", "dataset_hash", "customers", "services", "tickets", "outages", "line_status", "messages"],
   additionalProperties: false,
 } as const;
 
@@ -146,6 +163,7 @@ export type SeedCustomer = CrmSeed["customers"][number];
 export type SeedService = CrmSeed["services"][number];
 export type SeedTicket = CrmSeed["tickets"][number];
 export type SeedOutage = CrmSeed["outages"][number];
+export type SeedLineStatus = CrmSeed["line_status"][number];
 export type SeedMessage = CrmSeed["messages"][number];
 
 // ajv-formats is CommonJS; under NodeNext its default import is the module object.

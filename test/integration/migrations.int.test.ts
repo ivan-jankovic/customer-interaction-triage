@@ -8,7 +8,7 @@ import type { Database } from "../../src/db/database.js";
 import { createMigrator } from "../../src/db/migrate.js";
 import { createTestDatabase, type TestDatabase } from "./support/test-database.js";
 
-const P06_TO_P09_TABLES = [
+const P06_TO_P10_TABLES = [
   "crm_customers",
   "crm_services",
   "crm_tickets",
@@ -18,6 +18,8 @@ const P06_TO_P09_TABLES = [
   "decision_log",
   "reviews",
   "unmask_log",
+  "crm_line_status",
+  "investigations",
 ];
 
 let testDb: TestDatabase;
@@ -56,6 +58,7 @@ describe("migrations", () => {
       ["0006_cases", "Success"],
       ["0007_processing", "Success"],
       ["0008_reviews", "Success"],
+      ["0009_investigations", "Success"],
     ]);
     expect(await appliedMigrations()).toEqual([
       "0000_baseline",
@@ -67,6 +70,7 @@ describe("migrations", () => {
       "0006_cases",
       "0007_processing",
       "0008_reviews",
+      "0009_investigations",
     ]);
   });
 
@@ -216,6 +220,115 @@ describe("migrations", () => {
     });
   });
 
+  describe("0009_investigations", () => {
+    /** An interaction with an error classification, an enrichment and a case: what an investigation and a log entry need. */
+    async function fixture() {
+      const i = await sql<{ id: string }>`insert into interactions (channel, raw_text) values ('chat', 'x')
+                                           returning id`.execute(db);
+      const interactionId = i.rows[0]!.id;
+      const cl = await sql<{ id: string }>`
+        insert into classifications (interaction_id, outcome, prompt_version, requested_model, served_model, effort,
+          input_tokens, output_tokens, cache_creation_input_tokens, cache_read_input_tokens, latency_ms)
+        values (${interactionId}, 'error', 'v', 'm', 'm', 'low', 0, 0, 0, 0, 0) returning id`.execute(db);
+      const en = await sql<{ id: string }>`
+        insert into enrichments (interaction_id, classification_id, enricher_version, outcome, candidates,
+          unmatched_placeholders, outage_ids)
+        values (${interactionId}, ${cl.rows[0]!.id}, 'enrich.v1', 'no_identifiers', '[]', '[]', '[]')
+        returning id`.execute(db);
+      const cs = await sql<{ id: string }>`
+        insert into cases (interaction_id, classification_id, target_team, needs_review, reason_codes, router_version)
+        values (${interactionId}, ${cl.rows[0]!.id}, 'general', true, '["classification_error"]', 'route.v3')
+        returning id`.execute(db);
+      return { interactionId, classificationId: cl.rows[0]!.id, enrichmentId: en.rows[0]!.id, caseId: cs.rows[0]!.id };
+    }
+
+    const insertInvestigation = (
+      f: Awaited<ReturnType<typeof fixture>>,
+      row: {
+        outcome: string;
+        cause?: string | null;
+        confidence?: number | null;
+        summary?: string | null;
+        steps?: number;
+      },
+    ) =>
+      sql`
+      insert into investigations (interaction_id, classification_id, enrichment_id, investigator_version,
+        prompt_version, outcome, likely_cause, confidence, summary, evidence, steps, tool_calls, errors,
+        requested_model, served_model, effort, input_tokens, output_tokens, cache_creation_input_tokens,
+        cache_read_input_tokens, latency_ms)
+      values (${f.interactionId}, ${f.classificationId}, ${f.enrichmentId}, 'investigate.v1', 'investigate.v1',
+        ${row.outcome}, ${row.cause ?? null}, ${row.confidence ?? null}, ${row.summary ?? null}, '[]',
+        ${row.steps ?? 2}, '[]', '[]', 'm', 'm', 'low', 0, 0, 0, 0, 0)`.execute(db);
+
+    it("accepts a valid investigation and one that hit the step limit", async () => {
+      const f = await fixture();
+      await insertInvestigation(f, { outcome: "valid", cause: "area_outage", confidence: 0.9, summary: "s" });
+      await insertInvestigation(f, { outcome: "step_limit", steps: 6 });
+    });
+
+    it.each([
+      [
+        "a valid one without a cause",
+        { outcome: "valid", confidence: 0.9, summary: "s" },
+        /investigations_valid_check/,
+      ],
+      [
+        "an invalid one with a cause",
+        { outcome: "invalid", cause: "line_fault" },
+        /investigations_(valid|unset)_check/,
+      ],
+      ["an unknown outcome", { outcome: "timeout" }, /investigations_outcome_check/],
+      [
+        "an unknown cause",
+        { outcome: "valid", cause: "gremlins", confidence: 0.5, summary: "s" },
+        /investigations_cause_check/,
+      ],
+      [
+        "a confidence above 1",
+        { outcome: "valid", cause: "line_fault", confidence: 1.5, summary: "s" },
+        /investigations_confidence_check/,
+      ],
+      ["seven steps", { outcome: "step_limit", steps: 7 }, /investigations_steps_check/],
+    ])("rejects %s", async (_, row, error) => {
+      await expect(insertInvestigation(await fixture(), row)).rejects.toThrow(error);
+    });
+
+    it("lets the decision log hold an investigate step at seq 5, but not a sixth entry", async () => {
+      const f = await fixture();
+      const entry = (seq: number, step: string) =>
+        sql`insert into decision_log (case_id, seq, step, input_summary, output, rule_applied)
+            values (${f.caseId}, ${seq}, ${step}, '{}', '{}', 'x')`.execute(db);
+      await entry(4, "investigate");
+      await entry(5, "route");
+      await expect(entry(6, "mask")).rejects.toThrow(/decision_log_seq_check/);
+      await expect(entry(3, "review")).rejects.toThrow(/decision_log_step_check/);
+    });
+
+    it("rejects a line status with an unknown state", async () => {
+      const c = await sql<{ id: string }>`insert into crm_customers (customer_number, segment, created_at)
+                                           values ('MR90000001', 'residential', now()) returning id`.execute(db);
+      const s = await sql<{ id: string }>`insert into crm_services (customer_id, service_type, tariff, contract_number,
+                                             area, status, started_at)
+                                           values (${c.rows[0]!.id}, 'internet', 't', 'SML-2020-90001', 'Brno',
+                                             'active', now()) returning id`.execute(db);
+      const line = (state: string) =>
+        sql`insert into crm_line_status (service_id, state, state_since, diagnostic)
+            values (${s.rows[0]!.id}, ${state}, now(), 'd')`.execute(db);
+      await expect(line("flapping")).rejects.toThrow(/crm_line_status_state_check/);
+      await line("up");
+    });
+
+    it("refuses to roll back while an investigate entry exists, then rolls back cleanly without one", async () => {
+      expect((await createMigrator(db).migrateTo("0008_reviews")).error).toBeDefined();
+      await sql`delete from decision_log`.execute(db);
+      expect((await createMigrator(db).migrateTo("0008_reviews")).error).toBeUndefined();
+      expect(await tableExists("investigations")).toBe(false);
+      expect(await tableExists("crm_line_status")).toBe(false);
+      expect((await createMigrator(db).migrateToLatest()).error).toBeUndefined();
+    });
+  });
+
   it("rolls back to no migrations and drops the table", async () => {
     const result = await createMigrator(db).migrateTo(NO_MIGRATIONS);
     expect(result.error).toBeUndefined();
@@ -224,7 +337,7 @@ describe("migrations", () => {
     expect(await tableExists("interactions")).toBe(false);
     expect(await tableExists("classifications")).toBe(false);
     expect(await tableExists("masked_identifiers")).toBe(false);
-    for (const table of P06_TO_P09_TABLES) expect(await tableExists(table), table).toBe(false);
+    for (const table of P06_TO_P10_TABLES) expect(await tableExists(table), table).toBe(false);
   });
 
   it("migrates to latest again", async () => {
@@ -234,6 +347,6 @@ describe("migrations", () => {
     expect(await tableExists("interactions")).toBe(true);
     expect(await tableExists("classifications")).toBe(true);
     expect(await tableExists("masked_identifiers")).toBe(true);
-    for (const table of P06_TO_P09_TABLES) expect(await tableExists(table), table).toBe(true);
+    for (const table of P06_TO_P10_TABLES) expect(await tableExists(table), table).toBe(true);
   });
 });
