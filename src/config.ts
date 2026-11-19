@@ -14,6 +14,8 @@ export interface ApiConfig {
   /** Intake enqueues each stored interaction (P08). */
   redisUrl: string;
   intakeApiKey: string;
+  /** P13: the shared key of the review page; null leaves the /review routes off. */
+  reviewApiKey: string | null;
   host: string;
   port: number;
 }
@@ -54,12 +56,19 @@ export function loadApiConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
       `INTAKE_API_KEY must be at least ${MIN_API_KEY_LENGTH} characters. Generate one with: openssl rand -hex 32`,
     );
   }
+  // Optional (P13): without it the review page is off and intake works as before.
+  const reviewApiKey = env.REVIEW_API_KEY?.trim() || null;
+  if (reviewApiKey !== null && reviewApiKey.length < MIN_API_KEY_LENGTH) {
+    throw new Error(
+      `REVIEW_API_KEY must be at least ${MIN_API_KEY_LENGTH} characters. Generate one with: openssl rand -hex 32`,
+    );
+  }
   const portText = env.PORT?.trim() || "3000";
   const port = Number(portText);
   if (!Number.isInteger(port) || port < 1 || port > 65_535) {
     throw new Error(`PORT must be a whole number from 1 to 65535, got "${portText}".`);
   }
-  return { databaseUrl, redisUrl, intakeApiKey, host: env.HOST?.trim() || "127.0.0.1", port };
+  return { databaseUrl, redisUrl, intakeApiKey, reviewApiKey, host: env.HOST?.trim() || "127.0.0.1", port };
 }
 
 export interface ClassifierConfig {

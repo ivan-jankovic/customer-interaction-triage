@@ -59,6 +59,8 @@ services:
       # Intake enqueues each stored interaction (P08); it tolerates Redis going away later.
       REDIS_URL: redis://redis:6379
       INTAKE_API_KEY: ${INTAKE_API_KEY:-}
+      # The review page (P13) is served only when this is set.
+      REVIEW_API_KEY: ${REVIEW_API_KEY:-}
       # Inside the container the API must listen on all interfaces; the port mapping below
       # still publishes it on 127.0.0.1 only.
       HOST: 0.0.0.0
