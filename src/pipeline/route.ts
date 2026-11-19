@@ -18,6 +18,7 @@ import {
   type Team,
 } from "../taxonomy.js";
 import type { CrmLookup, CrmServiceType, EnrichmentResult } from "./enrich.js";
+import { findIdentifiersInOutput, type ModelOutputText } from "./output-check.js";
 import type { Outcome } from "./understand.js";
 
 /**
@@ -25,8 +26,11 @@ import type { Outcome } from "./understand.js";
  * failure path. For every input route() accepts, its result is the same as route.v1's.
  * route.v3 (P10) adds investigation_inconclusive, from the investigating agent's attempt. With
  * no investigation (null), its result is the same as route.v2's.
+ * route.v4 (P11) adds suspicious_output: an identifier in a model's output text (the
+ * classification summary, the investigation summary or an evidence finding). With outputs that
+ * hold none, its result is the same as route.v3's.
  */
-export const ROUTER_VERSION = "route.v3";
+export const ROUTER_VERSION = "route.v4";
 
 /**
  * Below this self-reported confidence a case goes to review. 0.7 catches every message labelled
@@ -86,6 +90,25 @@ export interface InvestigationSummary {
   outcome: InvestigationOutcome;
   likelyCause: LikelyCause | null;
   confidence: number | null;
+  /** The agent's own texts, read only by the output check (route.v4); absent counts as none. */
+  summary?: string | null;
+  evidence?: readonly { finding: string }[];
+}
+
+/** The model-written texts of a case, for the output check (P11). */
+export function modelOutputTexts(
+  c: Classification | null,
+  inv: InvestigationSummary | null | undefined,
+): ModelOutputText[] {
+  return [
+    ...(c ? [{ output: "classification summary", text: c.summary }] : []),
+    ...(inv
+      ? [
+          { output: "investigation summary", text: inv.summary ?? null },
+          ...(inv.evidence ?? []).map((e, i) => ({ output: `evidence ${i + 1}`, text: e.finding })),
+        ]
+      : []),
+  ];
 }
 
 export interface FiredRule {
@@ -146,6 +169,11 @@ export function route(input: RouteInput): RouteResult {
     const inv = input.investigation;
     if (c.intent === "technical_fault" && inv && isInconclusive(inv)) {
       add("investigation_inconclusive", describeInconclusive(inv));
+    }
+
+    const suspicious = findIdentifiersInOutput(modelOutputTexts(c, inv));
+    if (suspicious.length > 0) {
+      add("suspicious_output", suspicious.map((f) => `${f.types.join(", ")} in the ${f.output}`).join("; "));
     }
   }
 

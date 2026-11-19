@@ -68,19 +68,59 @@ describe("enriching the dataset", () => {
     );
   });
 
+  // P11 (crm-generate.v3): the injection messages with an account key find their own customer,
+  // with no unmatched key and their labelled service type, so no CRM reason code fires and
+  // their review comes from the intent rules only.
+  it("has a seed injection entry for every injection message", () => {
+    expect(seed.injection.map((m) => m.message_id).sort()).toEqual(injection.map((r) => r.id).sort());
+    const outcomes = seed.injection.map((m) => m.expected.outcome);
+    expect(outcomes.filter((o) => o === "found")).toHaveLength(9);
+    expect(outcomes.filter((o) => o === "no_identifiers")).toHaveLength(6);
+  });
+
   it.each(injection.map((r) => [r.id, r] as const))(
-    "%s: an injection message enriches without error, finding nobody",
-    async (_id, r) => {
+    "%s: an injection message enriches as designed, with no CRM mismatch",
+    async (id, r) => {
+      const labels = labelsOf(r);
+      const m = seed.injection.find((x) => x.message_id === id)!;
       const result = await enrich(
         {
           identifiers: mask(r.text).identifiers,
-          area: labelsOf(r).fields.area,
-          serviceType: labelsOf(r).fields.service_type,
-          receivedAt: new Date("2026-11-04T10:00:00Z"),
+          area: labels.fields.area,
+          serviceType: labels.fields.service_type,
+          receivedAt: new Date(m.received_at),
         },
         crm,
       );
-      expect(["not_found", "no_identifiers"]).toContain(result.outcome);
+      expect(
+        {
+          outcome: result.outcome,
+          customer_id: result.customerId,
+          area: result.area,
+          area_source: result.areaSource,
+          outage_ids: result.outageIds,
+        },
+        m.design,
+      ).toEqual(m.expected);
+      expect(result.unmatchedPlaceholders).toEqual([]);
+      if (result.customerId !== null && labels.fields.service_type !== "unknown") {
+        const types = (await crm.servicesOfCustomer(result.customerId)).map((s) => s.serviceType);
+        expect(types).toContain(labels.fields.service_type);
+      }
     },
   );
+
+  it("gives the injection customers no key a dataset customer holds", () => {
+    const injectionIds = new Set(seed.injection.map((m) => m.expected.customer_id).filter((x) => x !== null));
+    const datasetIds = new Set(seed.messages.map((m) => m.expected.customer_id).filter((x) => x !== null));
+    for (const id of injectionIds) expect(datasetIds.has(id)).toBe(false);
+    const keysOf = (ids: Set<string>) =>
+      seed.services
+        .filter((s) => ids.has(s.customer_id))
+        .flatMap((s) => [s.contract_number, s.phone])
+        .concat(seed.customers.filter((c) => ids.has(c.id)).flatMap((c) => [c.customer_number, c.email]))
+        .filter((k): k is string => k !== null);
+    const datasetKeys = new Set(keysOf(datasetIds));
+    for (const k of keysOf(injectionIds)) expect(datasetKeys.has(k), k).toBe(false);
+  });
 });

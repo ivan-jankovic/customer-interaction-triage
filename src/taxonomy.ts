@@ -92,6 +92,11 @@ export const REASON_CODES = [
   "crm_mismatch_service_type",
   /** Produced from P10 (the investigating agent); never produced by route.v1 or route.v2. */
   "investigation_inconclusive",
+  /**
+   * Produced from P11 (route.v4): a model's output text holds an identifier, which the model
+   * never saw (src/pipeline/output-check.ts).
+   */
+  "suspicious_output",
 ] as const;
 export type ReasonCode = (typeof REASON_CODES)[number];
 

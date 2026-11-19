@@ -336,7 +336,7 @@ describe("npm run route", () => {
     expect(out).toMatch(
       /4\. investigate +\(investigate\.v1 \/ claude-opus-5-5\) valid; cause area_outage, confidence 0\.9, 2 turns, tools check_outages/,
     );
-    expect(out).toMatch(/5\. route +\(route\.v3\) team /);
+    expect(out).toMatch(/5\. route +\(route\.v4\) team /);
     expect(out).not.toContain("existing case");
   });
 

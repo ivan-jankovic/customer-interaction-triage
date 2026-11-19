@@ -11,6 +11,7 @@ import type { DatasetRecord } from "../../eval/schema/dataset-record.schema.js";
 import type { InvestigationSummary } from "../../src/pipeline/route.js";
 
 const KEPT_RUN = join(PATHS.results, "kept", "20261119-010458-full-claude-opus-5-5-classify.v2");
+const KEPT_V1_RUN = join(PATHS.results, "kept", "20261119-002345-full-claude-opus-5-5-classify.v1");
 
 const dataset = new Map(readJsonl<DatasetRecord>(PATHS.dataset).map((r) => [r.id, r]));
 const outputs = readJsonl<OutputLine>(join(KEPT_RUN, "outputs.jsonl"));
@@ -89,5 +90,20 @@ describe("routing the kept classify.v2 outputs", () => {
       const added = r.reasonCodes.filter((c) => !without.get(id)!.reasonCodes.includes(c));
       expect(added, id).toEqual(fault && inv.likelyCause !== "area_outage" ? ["investigation_inconclusive"] : []);
     }
+  });
+
+  // P11: the output check must not fire on ordinary summaries. classify.v1 saw raw text, so its
+  // summaries are the harder case: they could have copied an identifier, and none did.
+  it.each([
+    ["classify.v2", KEPT_RUN],
+    ["classify.v1", KEPT_V1_RUN],
+  ])("fires suspicious_output on no kept %s output", async (_name, run) => {
+    const router = makeMessageRouter();
+    const fired: string[] = [];
+    for (const line of readJsonl<OutputLine>(join(run, "outputs.jsonl"))) {
+      const r = await router(dataset.get(line.id)!, line.attempt);
+      if (r.reasonCodes.includes("suspicious_output")) fired.push(line.id);
+    }
+    expect(fired).toEqual([]);
   });
 });

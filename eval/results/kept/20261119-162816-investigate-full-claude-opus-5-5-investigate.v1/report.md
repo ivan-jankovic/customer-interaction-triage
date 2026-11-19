@@ -6,7 +6,7 @@
 | Agent | claude-opus-5-5, effort low, prompt investigate.v1, investigate.v1, at most 6 turns |
 | Input | classify run 20261119-010458-full-claude-opus-5-5-classify.v2 (classify.v2) |
 | Masking, enrichment and tools | mask.v1, enrich.v1, CRM seed sha256 97503b40f736 |
-| Labels | designed causes from CRM seed sha256 d08644869c58 (rescored: the run used another seed, see above) |
+| Labels | designed causes from CRM seed sha256 f5c8731da893 (rescored: the run used another seed, see above) |
 | Dataset | eval/data/dataset.jsonl (sha256 94ee3b2f479d) |
 | Code | 57a954f0aa11 |
 | Started | 2026-11-19T16:28:16.062Z |

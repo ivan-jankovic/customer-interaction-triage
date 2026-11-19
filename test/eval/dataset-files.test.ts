@@ -15,6 +15,7 @@ import {
 } from "../../eval/dataset/identifiers.js";
 import { deniedNamesIn } from "../../eval/lib/denylist.js";
 import { readJsonl } from "../../eval/lib/jsonl.js";
+import { sha256File } from "../../eval/lib/hash.js";
 import { PATHS } from "../../eval/lib/paths.js";
 
 const dataset = readJsonl<DatasetRecord>(PATHS.dataset);
@@ -151,5 +152,15 @@ describe("dataset files: synthetic data", () => {
         if (i.type === "bank_account") expect(isValidCzAccountChecksum(i.value.split("/")[0]!), where).toBe(false);
         if (i.type === "iban") expect(isValidIban(i.value), where).toBe(false);
       }
+  });
+});
+
+// P11: the labelled files are fixed; a change would need the P00 procedure and new kept runs.
+describe("pinned dataset files", () => {
+  it.each([
+    [PATHS.dataset, "94ee3b2f479d1187005ce434d2e09fbd890447e7ba02ff25641d88261f6c77a9"],
+    [PATHS.injection, "1ebe8caec43842d23c90533ddfa69cd440c463b9751bd669105e96a0038e465b"],
+  ])("%s is unchanged", (path, hash) => {
+    expect(sha256File(path)).toBe(hash);
   });
 });

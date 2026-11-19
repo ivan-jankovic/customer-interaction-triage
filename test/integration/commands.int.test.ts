@@ -64,7 +64,7 @@ describe("npm run process", () => {
     expect(r.out).toContain("Steps: mask ran, classify ran, enrich ran, investigate ran, route ran");
     expect(r.out).toContain(`Team: ${labelsOf("msg-011").expected_team}`);
     expect(r.out).toMatch(/4\. investigate +\(investigate\.v1 \/ claude-opus-5-5\) valid; cause area_outage/);
-    expect(r.out).toMatch(/5\. route +\(route\.v3\) team /);
+    expect(r.out).toMatch(/5\. route +\(route\.v4\) team /);
 
     const again = await run([id], ["valid"], {}, false);
     expect(again.code).toBe(0);
