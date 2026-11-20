@@ -96,4 +96,4 @@ export function anchors(markdown: string): Set<string> {
 export const readDoc = (path: string) => readFileSync(ROOT + path, "utf8");
 
 /** The docs the tests check. */
-export const DOCS = ["README.md", "docs/guide.md"] as const;
+export const DOCS = ["README.md", "docs/guide.md", "docs/results.md"] as const;

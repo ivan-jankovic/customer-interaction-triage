@@ -1,6 +1,6 @@
-// P14: the README's headline numbers equal the kept runs' metrics.json, so the README can't go
-// stale silently. Each check names the run it comes from and the exact text the README shows;
-// a new kept run that changes a number fails here until the README is updated.
+// P14: the numbers in the README and docs/results.md equal the kept runs' metrics.json, so the
+// docs can't go stale silently. Each check names the run it comes from and the exact text the doc
+// shows; a new kept run that changes a number fails here until the docs are updated.
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -28,7 +28,7 @@ interface Rates {
   };
 }
 interface ClassifyMetrics {
-  overall: Rates & { validRate: number };
+  overall: Rates & { validRate: number; n: number };
   byLanguage: Record<"cs" | "sk" | "en", Rates>;
   macroF1: number;
   cost: { perMessageUsd: number };
@@ -61,8 +61,43 @@ const inj = metrics<InjectionMetrics>(RUNS.injection);
 const o = c.overall;
 const mr = o.routing.mustReview;
 
-/** [what, the run it comes from, the text the README must contain] */
-const EXPECTED: [string, string, string][] = [
+/** The README's headline table and limitations: [what, the run, the text README.md must contain] */
+const IN_README: [string, string, string][] = [
+  [
+    "intent accuracy",
+    RUNS.classify,
+    `| Intent understood correctly | ${pct(o.intentAccuracy)} of ${c.overall.n} messages |`,
+  ],
+  [
+    "must-review recall",
+    RUNS.classify,
+    `| Messages that needed a person, sent to a person | ${pct(mr.recall)} (${mr.tp} of ${mr.labelled}) |`,
+  ],
+  ["review rate", RUNS.classify, `| All messages sent to review | ${pct(o.routing.reviewRate)} |`],
+  [
+    "investigation cause accuracy",
+    RUNS.investigate,
+    `| Technical faults whose cause the agent found | ${pct(inv.accuracy)} (${Math.round(inv.accuracy * inv.n)} of ${inv.n}) |`,
+  ],
+  [
+    "injection scenarios passed",
+    RUNS.injection,
+    `| Prompt-injection scenarios that failed to fool the system | ${inj.overall.passed} of ${inj.overall.scenarios}, in all ${inj.repeats / inj.n} repeats |`,
+  ],
+  [
+    "cost and median latency per message",
+    RUNS.classify,
+    `| Cost and time per message | ${usd4(c.cost.perMessageUsd)}, ${sec(c.latencyMs.p50)} (median) |`,
+  ],
+  [
+    "review rate, limitations",
+    RUNS.classify,
+    `${Math.round(o.routing.reviewRate * 100)}% of the dataset goes to review`,
+  ],
+];
+
+/** The full results page: [what, the run it comes from, the text docs/results.md must contain] */
+const IN_RESULTS: [string, string, string][] = [
   ["valid outputs", RUNS.classify, `| Valid outputs | ${pct(o.validRate)} |`],
   [
     "intent accuracy",
@@ -83,11 +118,6 @@ const EXPECTED: [string, string, string][] = [
   ],
   ["review rate", RUNS.classify, `| Sent to review | ${pct(o.routing.reviewRate)} |`],
   ["review rate, explained", RUNS.classify, `**Why ${Math.round(o.routing.reviewRate * 100)}% go to review:**`],
-  [
-    "review rate, limitations",
-    RUNS.classify,
-    `${Math.round(o.routing.reviewRate * 100)}% of the dataset goes to review`,
-  ],
   ["cost per message", RUNS.classify, `| Cost per message | ${usd4(c.cost.perMessageUsd)} |`],
   ["latency", RUNS.classify, `| Latency p50 / p95 | ${sec(c.latencyMs.p50)} / ${sec(c.latencyMs.p95)} |`],
   [
@@ -134,20 +164,26 @@ const EXPECTED: [string, string, string][] = [
   ],
 ];
 
-describe("README numbers match the kept reports", () => {
-  const readme = readDoc("README.md");
-  const lines = readme.split("\n");
+/** A table row must be a whole line: "| Urgency accuracy | 89.0% |" is also the start of the Opus vs Sonnet row. */
+function expectText(doc: string, text: string, why: string) {
+  const content = readDoc(doc);
+  if (text.startsWith("|")) expect(content.split("\n"), why).toContain(text);
+  else expect(content, why).toContain(text);
+}
 
-  it.each(EXPECTED)("%s (%s)", (_what, run, text) => {
-    const why = `README should contain: ${text}\n(from ${KEPT}/${run}/metrics.json)`;
-    // A table row must be a whole line: "| Urgency accuracy | 89.0% |" is also the start of the
-    // Opus vs Sonnet row, so a substring match could pass on the wrong table.
-    if (text.startsWith("|")) expect(lines, why).toContain(text);
-    else expect(readme, why).toContain(text);
+describe.each([
+  ["README.md", IN_README],
+  ["docs/results.md", IN_RESULTS],
+] as const)("numbers in %s match the kept reports", (doc, expected) => {
+  it.each(expected)("%s (%s)", (_what, run, text) => {
+    expectText(doc, text, `${doc} should contain: ${text}\n(from ${KEPT}/${run}/metrics.json)`);
   });
+});
 
-  it("links every run it quotes", () => {
-    for (const run of [RUNS.classify, RUNS.investigate, RUNS.injection]) expect(readme).toContain(`${KEPT}/${run}/`);
-    expect(readme).toContain(`${KEPT}/comparisons/p12-opus-vs-sonnet.md`);
+describe("the results page links every run it quotes", () => {
+  it("links the kept reports", () => {
+    const results = readDoc("docs/results.md");
+    for (const run of [RUNS.classify, RUNS.investigate, RUNS.injection]) expect(results).toContain(`${KEPT}/${run}/`);
+    expect(results).toContain(`${KEPT}/comparisons/p12-opus-vs-sonnet.md`);
   });
 });
