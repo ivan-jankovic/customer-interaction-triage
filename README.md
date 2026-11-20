@@ -37,9 +37,9 @@ On a labelled set of 100 synthetic messages (60 Czech, 20 Slovak, 20 English) wi
 | All messages sent to review | 56.0% |
 | Technical faults whose cause the agent found | 100.0% (17 of 17) |
 | Prompt-injection scenarios that failed to fool the system | 15 of 15, in all 5 repeats |
-| Cost and time per message | $0.0060, 2.1 s (median) |
+| Classification cost and time per message | $0.0060, 2.1 s (median) |
 
-These numbers show the design works as intended on clean, labelled data. They don't show how it would do on real traffic: the dataset is small, synthetic and possibly easy, as its messages were written by the same model that classifies them. The full results, with the confusion matrix, the per-language numbers, a comparison with a cheaper model and what the results do and don't show, are in [docs/results.md](docs/results.md).
+"Needed a person" means the labels say so: the 33 cancellations and complaints, and 6 messages too unclear to route (one is both). The other 18 messages sent to review were caught by rules that are cautious on purpose, such as a customer the CRM couldn't find or matched more than once, a technical fault with no account identifier, or low confidence. These numbers show the design works as intended on clean, labelled data. They don't show how it would do on real traffic: the dataset is small, synthetic and possibly easy, as its messages were written by the same model that classifies them. The full results, with the confusion matrix, the per-language numbers, a comparison with a cheaper model and what the results do and don't show, are in [docs/results.md](docs/results.md).
 
 ## How it works
 
@@ -169,7 +169,7 @@ The enrichment and the investigation read a **mock CRM** (customers, services, t
 
 ### A labelled dataset the pipeline can't grade itself on
 
-**Decision:** 100 messages with labels chosen first; a model writes a message for each label set; two other models (`claude-sonnet-5-5` and `claude-haiku-5-5`) label every message without seeing the chosen labels; a person reviews every disagreement plus a random sample of 10 where all agree.
+**Decision:** 100 messages with labels chosen first; a model (`claude-opus-5-5`, the same one the classifier uses by default) writes a message for each label set; two other models (`claude-sonnet-5-5` and `claude-haiku-5-5`) label every message without seeing the chosen labels; a person reviews every disagreement plus a random sample of 10 where all agree.
 **Alternative:** a public dataset, or labelling generated messages with the pipeline's own prompts.
 **Why:** there is no public dataset of Czech and Slovak telecom messages with these labels, and labels produced by the pipeline would only measure agreement with itself. ([P00](specs/phases/001-p00-intents-schemas-labelled-dataset/requirements.md), [dataset README](eval/data/README.md))
 
@@ -219,4 +219,4 @@ npm run dataset:load              # the 100 dataset messages, stored and queued 
 npm test                          # unit tests: no Docker, no network, no model calls
 ```
 
-Nothing is classified until a worker runs, and that costs money: about $0.006 per message, plus about $0.02 per technical fault for the investigation. An evaluation of the full set costs about $0.60, the CI subset about $0.12. The [guide](docs/guide.md) explains the worker, each step's command, the review CLI and web page, the evaluations and the checks.
+Nothing is classified until a worker runs, and that costs money: about $0.006 per message, plus about $0.02 per technical fault for the investigation. Evaluating the classifier on the full set costs about $0.60 (the agent's evaluation on the 17 faults about $0.36 more), the CI subset about $0.12. The [guide](docs/guide.md) explains the worker, each step's command, the review CLI and web page, the evaluations and the checks.

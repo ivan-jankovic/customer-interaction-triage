@@ -87,7 +87,7 @@ const IN_README: [string, string, string][] = [
   [
     "cost and median latency per message",
     RUNS.classify,
-    `| Cost and time per message | ${usd4(c.cost.perMessageUsd)}, ${sec(c.latencyMs.p50)} (median) |`,
+    `| Classification cost and time per message | ${usd4(c.cost.perMessageUsd)}, ${sec(c.latencyMs.p50)} (median) |`,
   ],
   [
     "review rate, limitations",
