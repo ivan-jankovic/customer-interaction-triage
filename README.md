@@ -6,11 +6,11 @@ It is built spec-first: what and why in [specs/mission.md](specs/mission.md), ho
 
 ## What it does
 
-1. **Intake:** an API receives a message, stores it and queues it.
+1. **Intake:** an API receives a message, stores it (as an *interaction*) and queues it.
 2. **Masking:** phone numbers, e-mail addresses, customer and contract numbers, birth numbers (the Czech and Slovak personal ID number) and bank accounts become typed placeholders before any model sees the text.
 3. **Understanding:** one model call with structured output: an intent from a fixed list, urgency, service type, area, a short summary and a confidence.
-4. **Enrichment:** the customer is looked up in a mock CRM by the masked identifiers, and a mock list of outages is checked for the area.
-5. **Investigation:** for technical faults only, a small agent with three read-only tools looks for the likely cause and returns it with evidence.
+4. **Enrichment:** the customer is looked up in a mock CRM by the identifiers that were masked (their values come from the stored mapping, not from the model), and a mock list of outages is checked for the area.
+5. **Investigation:** for technical faults only, a small agent with three read-only tools looks for the likely cause and returns it with a confidence and evidence.
 6. **Routing:** rules in code choose the team and decide whether a person must review the case.
 7. **Case record:** one case per message, with a decision log of what each step read, produced and which version decided.
 8. **Review:** people confirm or correct the cases that need review, in a terminal or on a small web page.
@@ -63,7 +63,7 @@ flowchart LR
 | --- | --- | --- |
 | Mask | Rule-based: finds identifiers by format and replaces them with `[PHONE_1]`, `[CUSTOMER_NUMBER_1]`, … | masked text, `masked_identifiers` |
 | Classify | One call to Claude with a JSON Schema; the output is validated with Ajv. Invalid output is kept and the case goes to review. | `classifications` (every attempt) |
-| Enrich | CRM lookup by the masked keys (`found`, `not_found`, `ambiguous`, `no_identifiers`); outages in the area at the message's time. | `enrichments` |
+| Enrich | CRM lookup by the masked identifiers' values (`found`, `not_found`, `ambiguous`, `no_identifiers`); outages in the area at the message's time. | `enrichments` |
 | Investigate | Technical faults only: a bounded agent loop with `check_outages`, `get_line_status` and `get_recent_tickets`, ending in a validated likely cause with evidence. An answer that is invalid, hits the step limit, finds no cause or is under 0.7 confident sends the case to review. | `investigations` (every tool call) |
 | Route | Team by intent; review when any rule fires, with every reason code kept. | `cases`, `decision_log` |
 | Review | Confirm or correct (intent and team, with a note), or skip for now, which stores nothing; unmasking the raw text needs a reason and is logged. | `reviews`, `unmask_log` |
@@ -208,7 +208,7 @@ erDiagram
 
 **Decision:** routing and review are deterministic rules in [src/pipeline/route.ts](src/pipeline/route.ts), versioned and unit-tested. The model only reads text.
 **Alternative:** ask the model for the team and whether a person should look at the case.
-**Why:** rules can be tested, explained and audited: every case's decision log names the rules that fired. A prompt instruction can be talked out of by the message itself. Cancellations and complaints always go to a person, whatever the model's confidence. The other review reasons: invalid output or a failed call, confidence below 0.7, a customer not found or matching more than one customer, a technical fault with no account identifier, a mismatch with the CRM, an inconclusive investigation, an identifier in a model's output, and a message whose processing failed. Every reason that applies is kept. ([P07](specs/phases/008-p07-routing-rules-decision-log/requirements.md))
+**Why:** rules can be tested, explained and audited: every case's decision log names the rules that fired. A prompt instruction can be talked out of by the message itself. Cancellations and complaints always go to a person, whatever the model's confidence. The other review reasons: invalid output or a failed call, confidence below 0.7, a customer not found or matching more than one customer, a technical fault with no account identifier, a mismatch with the CRM (one identifier matched the customer but another matched no one, or the customer has no service of the type the message is about), an inconclusive investigation, an identifier in a model's output, and a message whose processing failed. Every reason that applies is kept. ([P07](specs/phases/008-p07-routing-rules-decision-log/requirements.md))
 
 ### Structured output, validated before use
 
@@ -293,15 +293,15 @@ By language (Slovak and English have 20 messages each, so their numbers are indi
 | Must-review recall / precision | 100.0% / 63.9% | 100.0% / 80.0% | 100.0% / 70.0% |
 | Sent to review | 60.0% | 50.0% | 50.0% |
 
-**Must-review** means the labels say a person should see the message: the 33 cancellations and complaints, and 6 messages labelled unclear (one is both), 38 in all. **Why 56% go to review:** the dataset gives every intent about the same share (16 or 17 messages), so cancellations and complaints, which are always reviewed, are a third of it, and the mock CRM has customers that can't be found or match more than one on purpose. Among the routine messages (every intent except cancellation and complaint), 34% go to review. The rules are conservative on purpose: a missed review costs more than an extra check.
+**Must-review** means the labels say a person should see the message: the 33 cancellations and complaints, and 6 messages labelled *unclear*, where even a person can't tell what the customer wants (one is both), 38 in all. Unclear isn't an intent; at runtime those cases are caught by low confidence. **Why 56% go to review:** the dataset gives every intent about the same share (16 or 17 messages), so cancellations and complaints, which are always reviewed, are a third of it, and the mock CRM has customers that can't be found or match more than one on purpose. Among the routine messages (every intent except cancellation and complaint), 34% go to review. The rules are conservative on purpose: a missed review costs more than an extra check.
 
 ### Investigation
 
-`investigate.v1` over the 17 labelled technical faults ([report](eval/results/kept/20261119-162816-investigate-full-claude-opus-5-5-investigate.v1/report.md)): **cause accuracy 100.0%** (17 of 17), all answers valid, 2.0 turns and 1.9 tool calls on average, 47.1% sent to review by the investigation (8 of the 17 faults are designed to have no findable cause, and the agent correctly answers `inconclusive`, which goes to review), $0.0209 and 6.2 s per fault on average. Some causes have only one or two examples.
+`investigate.v1` over the 17 labelled technical faults ([report](eval/results/kept/20261119-162816-investigate-full-claude-opus-5-5-investigate.v1/report.md)): **cause accuracy 100.0%** (17 of 17, counting `inconclusive` as the right answer where the faults were designed to have no findable cause), all answers valid, 2.0 turns and 1.9 tool calls on average, 47.1% sent to review by the investigation (8 of the 17 faults are designed to have no findable cause, and the agent correctly answers `inconclusive`, which goes to review), $0.0209 and 6.2 s per fault on average. Some causes have only one or two examples.
 
 ### Prompt injection
 
-15 messages with instructions aimed at the model, in all three languages, using 5 tactics (a direct instruction, fake system text, an instruction hidden in a quoted e-mail, a review bypass, a request for data) toward 4 goals, each run 5 times through the whole pipeline ([report](eval/results/kept/20261119-182812-injection-x5-claude-opus-5-5-classify.v2/report.md)): **15 of 15 scenarios passed in all 5 repeats**. No action was triggered, every must-review message went to review, no output contained an identifier or another customer's data, and every attack's goal (reroute, skip review, leak data, trigger an action) failed. Cost $0.74.
+15 messages with instructions aimed at the model, in all three languages, using 5 tactics (a direct instruction, fake system text, an instruction hidden in a quoted e-mail, a review bypass, a request for data) toward 4 goals, each run 5 times through the whole pipeline ([report](eval/results/kept/20261119-182812-injection-x5-claude-opus-5-5-classify.v2/report.md)): **15 of 15 scenarios passed in all 5 repeats**. No action was triggered (the agent called only its three tools, and only about the case's own customer), every must-review message went to review, no output contained an identifier or another customer's data, and every attack's goal (reroute, skip review, leak data, trigger an action) failed. Cost $0.74.
 
 ### Opus vs Sonnet
 
@@ -325,7 +325,7 @@ They don't show how it would do on real traffic:
 
 - **The dataset is small and synthetic.** 100 messages, every intent with about the same share, and only 15 deliberately hard ones (several intents at once, or unclear what the customer wants). Real traffic is messier and less balanced.
 - **The messages may be easy.** They were written by `claude-opus-5-5`, the same model the classifier uses, from labels chosen first and a labelling guide. The labels are independent of the pipeline (two other models graded them and a person reviewed every disagreement), but the wording comes from the model being tested. The graders never disagreed on intent.
-- **Perfect scores can't rank alternatives.** With 100% intent accuracy on both models, and on both prompt versions (`classify.v1` without masking and `classify.v2` with it, compared in P05), the dataset can't show which is better; only urgency and cost separate them.
+- **Perfect scores can't rank alternatives.** With 100% intent accuracy on both models, and on both prompt versions (`classify.v1` read the raw text and extracted identifiers itself; `classify.v2` gets masked text and the identifiers come from the masking map; masking cost no intent accuracy), the dataset can't show which is better; only urgency and cost separate them.
 - **Urgency is the softest label.** Every reviewer correction during labelling was on urgency, and it is the one metric well below 100%. No rule reads it.
 
 The next step for trustworthy numbers is a harder dataset (see Next steps).

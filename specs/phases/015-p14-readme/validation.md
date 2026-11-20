@@ -16,9 +16,9 @@ How each check is marked:
 
 ## Structure
 
-- [ ] `README.md` has, in this order: the opening paragraph, What it does, Architecture, The pipeline, Data model, Key decisions, Results, Review page, Limitations, Next steps, Quick start. **(manual)**
-- [ ] `docs/guide.md` holds the former reference (setup, intake API, each pipeline step, background processing, reviewing, evaluating, prompt injection, checks) with the same section titles, and links back to the README. **(manual)**
-- [ ] Nothing from the former README is lost: every command and every rule it described is in the README or the guide. **(manual)**
+- [x] `README.md` has, in this order: the opening paragraph, What it does, Architecture, The pipeline, Data model, Key decisions, Results, Review page, Limitations, Next steps, Quick start. **(manual)**
+- [x] `docs/guide.md` holds the former reference (setup, intake API, each pipeline step, background processing, reviewing, evaluating, prompt injection, checks) with the same section titles, and links back to the README. **(manual)**
+- [x] Nothing from the former README is lost: every command and every rule it described is in the README or the guide. **(manual)**
 
 ## Diagrams
 
@@ -27,20 +27,20 @@ How each check is marked:
 
 ## Key decisions
 
-- [ ] Each decision in requirements.md (Key decisions) has a short section with the decision, the alternative, why, and a link to its phase spec. **(manual)**
+- [x] Each decision in requirements.md (Key decisions) has a short section with the decision, the alternative, why, and a link to its phase spec. **(manual)**
 
 ## Results
 
-- [ ] Every number in the Results section links to the kept report it comes from. **(manual)**
-- [ ] The headline numbers equal the kept reports: intent accuracy, must-review recall and precision, review rate, routing accuracy, urgency accuracy, investigation cause accuracy, injection scenarios passed, cost per message. **(test)**
-- [ ] The numbers test fails when one of those numbers in the README is changed by hand. **(manual)**
-- [ ] Results includes the confusion matrix, the per-language table with the "indicative" note, and "What the results do and don't show". **(manual)**
+- [x] Every number in the Results section links to the kept report it comes from. **(manual)**
+- [x] The headline numbers equal the kept reports: intent accuracy, must-review recall and precision, review rate, routing accuracy, urgency accuracy, investigation cause accuracy, injection scenarios passed, cost per message. **(test)**
+- [x] The numbers test fails when one of those numbers in the README is changed by hand. **(manual)**
+- [x] Results includes the confusion matrix, the per-language table with the "indicative" note, and "What the results do and don't show". **(manual)**
 
 ## Links and images
 
-- [ ] Every relative link in `README.md` and `docs/guide.md` resolves, and every `#anchor` matches a heading (GitHub slug rules). **(test)**
-- [ ] Every image the README embeds is in `docs/images/`, exists, has alt text and is under 500 KB. **(test)**
-- [ ] The screenshots show no browser chrome and no raw message text. **(manual)**
+- [x] Every relative link in `README.md` and `docs/guide.md` resolves, and every `#anchor` matches a heading (GitHub slug rules). **(test)**
+- [x] Every image the README embeds is in `docs/images/`, exists, has alt text and is under 500 KB. **(test)**
+- [x] The screenshots show no browser chrome and no raw message text. **(manual)**
 
 ## Cold read
 
@@ -57,17 +57,17 @@ A fresh subagent with no project context reads only the README and answers these
 9. How is prompt injection defended against, and what are the known limits?
 10. What would you need to run it locally, and what costs money?
 
-- [ ] A fresh subagent answers all 10 correctly from the README alone; its answers and any fixes are recorded in requirements.md (Results). **(manual)**
+- [x] A fresh subagent answers all 10 correctly from the README alone; its answers and any fixes are recorded in requirements.md (Results). **(manual)**
 - [ ] The user has read the README on GitHub and has no open questions about the design, the decisions or the results. **(manual)**
 
 ## Specs updated
 
-- [ ] [tech-stack.md](../../tech-stack.md)'s repository layout includes `docs/`. **(manual)**
+- [x] [tech-stack.md](../../tech-stack.md)'s repository layout includes `docs/`. **(manual)**
 - [ ] P14 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 
-- [ ] No model call in this phase. **(manual)**
-- [ ] No source code under `src/` changes (`git diff main --stat -- src` is empty). **(manual)**
-- [ ] The prompts and their registry hashes are unchanged. **(test)**
-- [ ] The README names no real company or person, and every example is synthetic. **(manual)**
+- [x] No model call in this phase. **(manual)**
+- [x] No source code under `src/` changes (`git diff main --stat -- src` is empty). **(manual)**
+- [x] The prompts and their registry hashes are unchanged. **(test)**
+- [x] The README names no real company or person, and every example is synthetic. **(manual)**

@@ -98,7 +98,7 @@ const EXPECTED: [string, string, string][] = [
   [
     "investigation cause accuracy",
     RUNS.investigate,
-    `**cause accuracy ${pct(inv.accuracy)}** (${Math.round(inv.accuracy * inv.n)} of ${inv.n})`,
+    `**cause accuracy ${pct(inv.accuracy)}** (${Math.round(inv.accuracy * inv.n)} of ${inv.n}`,
   ],
   ["investigation review rate", RUNS.investigate, `${pct(inv.reviewRate)} sent to review by the investigation`],
   [
