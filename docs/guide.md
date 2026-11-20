@@ -115,9 +115,7 @@ npm run investigate -- msg-011 # technical faults only; costs money
 npm run route -- msg-011    # team, review flag, reason codes and the decision log (free); a second run writes nothing
 ```
 
-On the kept `classify.v2` run, routing sends every message to its labelled team, catches **all 38** messages labelled must-review (recall 100%, precision 67.9%), and sends 56 of the 100 messages to review. The rules and their reasons are in the [P07 spec](../specs/phases/008-p07-routing-rules-decision-log/requirements.md).
-
-The review rate reflects the test set, not real traffic. The dataset gives every intent an equal share, so cancellations and complaints, which are always reviewed, make up a third of it. The mock CRM was also seeded with not-found and ambiguous customers on purpose. Among routine messages (all intents except cancellation and complaint), 34% go to review. The rules are conservative on purpose: a missed review costs more than an extra check. They are meant to be tuned later with reviewers' corrections (P09) and the confidence-gate comparison (P17). The breakdown is in the P07 spec, under Results.
+How the rules did on the dataset (routing accuracy, must-review recall, the review rate and why it is high) is in the [README, Results](../README.md#classification-and-routing). The rules and their reasons are in the [P07 spec](../specs/phases/008-p07-routing-rules-decision-log/requirements.md).
 
 ## Background processing
 
@@ -195,20 +193,7 @@ The `eval` workflow ([`.github/workflows/eval.yml`](../.github/workflows/eval.ym
 
 ### Opus vs Sonnet
 
-The same prompt (`classify.v2`) on `claude-opus-5-5` and `claude-sonnet-5-5`, over the full 100 messages ([full comparison](../eval/results/kept/comparisons/p12-opus-vs-sonnet.md)):
-
-| Metric | Opus 5.5 | Sonnet 5.5 |
-| --- | --- | --- |
-| Intent accuracy | 100.0% | 100.0% |
-| Routing accuracy (team) | 100.0% | 100.0% |
-| Must-review recall | 100.0% (38/38) | 100.0% (38/38) |
-| Urgency accuracy | 89.0% | 85.0% |
-| Service type / area | 98.0% / 99.0% | 100.0% / 100.0% |
-| Summary faithful / complete (1–5) | 4.86 / 4.49 | 4.88 / 4.45 |
-| Cost per message | $0.0060 | $0.0033 |
-| Latency p50 / p95 | 2.1 s / 2.9 s | 2.0 s / 2.4 s |
-
-On this dataset Sonnet makes the same routing and review decisions at 55% of the cost; it is 4 points weaker on urgency (Czech messages), which no rule reads. The default stays Opus for now: the dataset is small and every intent is already right with both models, so it can't show where they would differ.
+`claude-opus-5-5` and `claude-sonnet-5-5` with the same prompt, over the full 100 messages: the table and what it means are in the [README, Opus vs Sonnet](../README.md#opus-vs-sonnet), and every metric in the [full comparison](../eval/results/kept/comparisons/p12-opus-vs-sonnet.md). `npm run eval:compare` makes such a comparison from any two runs.
 
 For the investigating agent, `npm run eval:investigate` runs it over the dataset's 17 technical faults, using the classifications stored in the kept `classify.v2` run (so only the agent is paid for), and scores the cause it finds against the cause designed into the mock CRM: cause accuracy, per-cause precision and recall, the confusion matrix, turns, tool calls, cost and latency.
 
@@ -236,7 +221,7 @@ npm run eval:injection -- --dry-run            # plan and cost estimate, no call
 npm run eval:injection -- --repeat 5           # 15 scenarios x 5 repeats, ~$0.75 (cap $3)
 ```
 
-**Result** (kept run, `claude-opus-5-5`, 5 repeats): **15 of 15 scenarios pass in all 5 repeats**, for every tactic, goal and language. Every must-review repeat went to review, every team was as labelled or in review, the agent asked only about the case's own customer, and no output held an identifier. Cost $0.74.
+**Result:** 15 of 15 scenarios pass in all 5 repeats; the details are in the [README, Prompt injection](../README.md#prompt-injection).
 
 **Known limits.** Tests in [test/security/fooled-model.test.ts](../test/security/fooled-model.test.ts) use a mocked model that obeys the injection, to show what the code holds by itself. Two things it can't catch:
 
