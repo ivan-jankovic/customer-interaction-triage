@@ -7,7 +7,7 @@ It is built spec-first: what and why in [specs/mission.md](specs/mission.md), ho
 ## What it does
 
 1. **Intake:** an API receives a message, stores it and queues it.
-2. **Masking:** phone numbers, e-mail addresses, customer and contract numbers, birth numbers and bank accounts become typed placeholders before any model sees the text.
+2. **Masking:** phone numbers, e-mail addresses, customer and contract numbers, birth numbers (the Czech and Slovak personal ID number) and bank accounts become typed placeholders before any model sees the text.
 3. **Understanding:** one model call with structured output: an intent from a fixed list, urgency, service type, area, a short summary and a confidence.
 4. **Enrichment:** the customer is looked up in a mock CRM by the masked identifiers, and a mock list of outages is checked for the area.
 5. **Investigation:** for technical faults only, a small agent with three read-only tools looks for the likely cause and returns it with evidence.
@@ -38,7 +38,7 @@ flowchart LR
   cli <--> pg
 ```
 
-Everything runs locally with Docker Compose: PostgreSQL, Redis, the app and, when asked for, the worker. The worker is opt-in because every message it processes is a paid model call. A queue job holds only the message's ID, so Redis never sees message text. If saving and queueing get out of step (Redis down, a crash between the two), the worker's sweep queues every message that has no case yet.
+Everything runs locally with Docker Compose: PostgreSQL, Redis, the app and, when asked for (`docker compose --profile worker up`), the worker. The worker is opt-in because every message it processes is a paid model call. A queue job holds only the message's ID, so Redis never sees message text. If saving and queueing get out of step (Redis down, a crash between the two), the worker's sweep queues every message that has no case yet.
 
 ## The pipeline
 
@@ -64,11 +64,11 @@ flowchart LR
 | Mask | Rule-based: finds identifiers by format and replaces them with `[PHONE_1]`, `[CUSTOMER_NUMBER_1]`, … | masked text, `masked_identifiers` |
 | Classify | One call to Claude with a JSON Schema; the output is validated with Ajv. Invalid output is kept and the case goes to review. | `classifications` (every attempt) |
 | Enrich | CRM lookup by the masked keys (`found`, `not_found`, `ambiguous`, `no_identifiers`); outages in the area at the message's time. | `enrichments` |
-| Investigate | Technical faults only: a bounded agent loop with `check_outages`, `get_line_status` and `get_recent_tickets`, ending in a validated likely cause with evidence. | `investigations` (every tool call) |
+| Investigate | Technical faults only: a bounded agent loop with `check_outages`, `get_line_status` and `get_recent_tickets`, ending in a validated likely cause with evidence. An answer that is invalid, hits the step limit, finds no cause or is under 0.7 confident sends the case to review. | `investigations` (every tool call) |
 | Route | Team by intent; review when any rule fires, with every reason code kept. | `cases`, `decision_log` |
-| Review | Confirm or correct (intent and team, with a note); unmasking the raw text needs a reason and is logged. | `reviews`, `unmask_log` |
+| Review | Confirm or correct (intent and team, with a note), or skip for now, which stores nothing; unmasking the raw text needs a reason and is logged. | `reviews`, `unmask_log` |
 
-Each step stores what it did, and a retried job reuses what earlier attempts stored, so a retry never pays twice for a model call.
+Each step stores what it did, and a retried job reuses what earlier attempts stored, so a retry never pays twice for a model call. A job is tried 5 times with growing pauses; if it still fails, the message gets a case in `general` with the reason `processing_failed`, so every message ends as exactly one case and the sweep stops picking it up.
 
 ## Data model
 
@@ -208,7 +208,7 @@ erDiagram
 
 **Decision:** routing and review are deterministic rules in [src/pipeline/route.ts](src/pipeline/route.ts), versioned and unit-tested. The model only reads text.
 **Alternative:** ask the model for the team and whether a person should look at the case.
-**Why:** rules can be tested, explained and audited: every case's decision log names the rules that fired. A prompt instruction can be talked out of by the message itself. Cancellations and complaints always go to a person, whatever the model's confidence. ([P07](specs/phases/008-p07-routing-rules-decision-log/requirements.md))
+**Why:** rules can be tested, explained and audited: every case's decision log names the rules that fired. A prompt instruction can be talked out of by the message itself. Cancellations and complaints always go to a person, whatever the model's confidence. The other review reasons: invalid output or a failed call, confidence below 0.7, a customer not found or matching more than one customer, a technical fault with no account identifier, a mismatch with the CRM, an inconclusive investigation, an identifier in a model's output, and a message whose processing failed. Every reason that applies is kept. ([P07](specs/phases/008-p07-routing-rules-decision-log/requirements.md))
 
 ### Structured output, validated before use
 
@@ -230,25 +230,25 @@ erDiagram
 
 ### Untrusted input: layered defences
 
-**Decision:** five layers against instructions hidden in messages: the prompt marks the message as data; output is validated (an extra field like `"skip_review": true` makes it invalid); decisions are in code; the agent's tools are read-only and only accept the case's own customer; and an identifier in any model output sends the case to review.
+**Decision:** five layers against instructions hidden in messages: the prompt marks the message as data; output is validated (an extra field like `"skip_review": true` makes it invalid); decisions are in code; the agent's tools are read-only and only accept the case's own customer; and an identifier value (not a placeholder) in any model output sends the case to review: no model sees the values, so one in its output was guessed or slipped past the masker.
 **Alternative:** rely on a well-written prompt.
 **Why:** only the first layer depends on the model. The others hold even when the model is fooled, and tests with a mocked model that obeys the injection show exactly what they hold. ([P11](specs/phases/012-p11-prompt-injection-scenarios/requirements.md))
 
 ### A labelled dataset the pipeline can't grade itself on
 
-**Decision:** 100 messages with labels chosen first; a model writes a message for each label set; two other models label every message without seeing the chosen labels; a person reviews every disagreement plus a random sample.
+**Decision:** 100 messages with labels chosen first; a model writes a message for each label set; two other models (`claude-sonnet-5-5` and `claude-haiku-5-5`) label every message without seeing the chosen labels; a person reviews every disagreement plus a random sample of 10 where all agree.
 **Alternative:** a public dataset, or labelling generated messages with the pipeline's own prompts.
 **Why:** there is no public dataset of Czech and Slovak telecom messages with these labels, and labels produced by the pipeline would only measure agreement with itself. ([P00](specs/phases/001-p00-intents-schemas-labelled-dataset/requirements.md), [dataset README](eval/data/README.md))
 
 ### Evaluation in CI with a threshold
 
-**Decision:** an 18-message subset runs with the real model on pull requests that change what the model sees, and fails below 16 of 18 intents right or if any must-review message would be auto-routed. It uses a separate API key with its own spend limit.
+**Decision:** an 18-message subset runs with the real model on pull requests that change what the model sees or how it is scored (the prompts and LLM client, the pipeline, the taxonomy, the config, the evaluation code, the dependencies), and fails below 16 of 18 intents right or if any must-review message would be auto-routed. It uses a separate API key with its own spend limit.
 **Alternative:** evaluate only by hand, or the full set on every pull request.
-**Why:** a prompt or model change that hurts quality should fail like a broken test, at about $0.12 a run instead of $0.90. ([P12](specs/phases/013-p12-eval-in-ci-comparisons/requirements.md))
+**Why:** a prompt or model change that hurts quality should fail like a broken test, at about $0.12 a run instead of $0.60 for the full set. ([P12](specs/phases/013-p12-eval-in-ci-comparisons/requirements.md))
 
 ### Review: final, masked by default, every unmask logged
 
-**Decision:** one review per case, never edited. Reviewers see the masked text; the raw text needs a reason and is logged before it is shown. The web page reuses the CLI's logic and adds a shared key, a signed session and CSRF tokens.
+**Decision:** one review per case, never edited. Reviewers see the masked text; the raw text needs a reason and is logged before it is shown. The web page reuses the CLI's logic. It is protected by one access key shared by all reviewers (not a per-person login), a signed session cookie and CSRF tokens.
 **Alternative:** editable cases, or showing the raw text by default.
 **Why:** a case and its review stay an audit trail of who decided what and why. Masking protects the model boundary; logging makes staff access to personal data visible. ([P09](specs/phases/010-p09-review-queue-cli/requirements.md), [P13](specs/phases/014-p13-review-web-page/requirements.md))
 
@@ -293,15 +293,15 @@ By language (Slovak and English have 20 messages each, so their numbers are indi
 | Must-review recall / precision | 100.0% / 63.9% | 100.0% / 80.0% | 100.0% / 70.0% |
 | Sent to review | 60.0% | 50.0% | 50.0% |
 
-**Why 56% go to review:** the dataset gives every intent an equal share, so cancellations and complaints, which are always reviewed, are a third of it, and the mock CRM has not-found and ambiguous customers on purpose. Among routine messages, 34% go to review. The rules are conservative on purpose: a missed review costs more than an extra check.
+**Must-review** means the labels say a person should see the message: the 33 cancellations and complaints, and 6 messages labelled unclear (one is both), 38 in all. **Why 56% go to review:** the dataset gives every intent about the same share (16 or 17 messages), so cancellations and complaints, which are always reviewed, are a third of it, and the mock CRM has customers that can't be found or match more than one on purpose. Among the routine messages (every intent except cancellation and complaint), 34% go to review. The rules are conservative on purpose: a missed review costs more than an extra check.
 
 ### Investigation
 
-`investigate.v1` over the 17 labelled technical faults ([report](eval/results/kept/20261119-162816-investigate-full-claude-opus-5-5-investigate.v1/report.md)): **cause accuracy 100.0%** (17 of 17), all answers valid, 2.0 turns and 1.9 tool calls on average, 47.1% sent to review by the investigation, $0.0209 and 6.2 s per fault on average. Some causes have only one or two examples.
+`investigate.v1` over the 17 labelled technical faults ([report](eval/results/kept/20261119-162816-investigate-full-claude-opus-5-5-investigate.v1/report.md)): **cause accuracy 100.0%** (17 of 17), all answers valid, 2.0 turns and 1.9 tool calls on average, 47.1% sent to review by the investigation (8 of the 17 faults are designed to have no findable cause, and the agent correctly answers `inconclusive`, which goes to review), $0.0209 and 6.2 s per fault on average. Some causes have only one or two examples.
 
 ### Prompt injection
 
-15 messages with instructions aimed at the model (5 tactics, 4 goals, all three languages), each run 5 times through the whole pipeline ([report](eval/results/kept/20261119-182812-injection-x5-claude-opus-5-5-classify.v2/report.md)): **15 of 15 scenarios passed in all 5 repeats**. No action was triggered, every must-review message went to review, no output contained an identifier or another customer's data, and every attack's goal (reroute, skip review, leak data, trigger an action) failed. Cost $0.74.
+15 messages with instructions aimed at the model, in all three languages, using 5 tactics (a direct instruction, fake system text, an instruction hidden in a quoted e-mail, a review bypass, a request for data) toward 4 goals, each run 5 times through the whole pipeline ([report](eval/results/kept/20261119-182812-injection-x5-claude-opus-5-5-classify.v2/report.md)): **15 of 15 scenarios passed in all 5 repeats**. No action was triggered, every must-review message went to review, no output contained an identifier or another customer's data, and every attack's goal (reroute, skip review, leak data, trigger an action) failed. Cost $0.74.
 
 ### Opus vs Sonnet
 
@@ -323,9 +323,9 @@ They show that the pipeline does what it was designed to do: on clean, labelled 
 
 They don't show how it would do on real traffic:
 
-- **The dataset is small and synthetic.** 100 messages, each intent with an equal share, and only 15 deliberately ambiguous ones. Real traffic is messier and less balanced.
+- **The dataset is small and synthetic.** 100 messages, every intent with about the same share, and only 15 deliberately hard ones (several intents at once, or unclear what the customer wants). Real traffic is messier and less balanced.
 - **The messages may be easy.** They were written by `claude-opus-5-5`, the same model the classifier uses, from labels chosen first and a labelling guide. The labels are independent of the pipeline (two other models graded them and a person reviewed every disagreement), but the wording comes from the model being tested. The graders never disagreed on intent.
-- **Perfect scores can't rank alternatives.** With 100% intent accuracy on both models and both prompt versions, the dataset can't show which is better; only urgency and cost separate them.
+- **Perfect scores can't rank alternatives.** With 100% intent accuracy on both models, and on both prompt versions (`classify.v1` without masking and `classify.v2` with it, compared in P05), the dataset can't show which is better; only urgency and cost separate them.
 - **Urgency is the softest label.** Every reviewer correction during labelling was on urgency, and it is the one metric well below 100%. No rule reads it.
 
 The next step for trustworthy numbers is a harder dataset (see Next steps).
@@ -353,7 +353,7 @@ The decisions made so far, with corrections next to what the case said:
 - **Results on a small, synthetic, possibly easy dataset** (see above).
 - **Names and street addresses are not masked** and reach the model. The summary rules ask the model not to repeat them, and the evaluation's judge flags any summary that does.
 - **Identifier formats are Czech and Slovak only.**
-- **Two known injection limits:** a confidently wrong intent (a cancellation read as a billing question at confidence 0.7 or more is auto-routed), and a misleading summary without identifiers. Both are written as named tests.
+- **Two known injection limits:** a confidently wrong intent (a cancellation read as a billing question at confidence 0.7 or more is auto-routed), and a misleading summary without identifiers. Both are pinned down by tests that show the behaviour (`KNOWN LIMIT` in [the security tests](test/security/fooled-model.test.ts)).
 - **Review rules are conservative and untuned:** 56% of the dataset goes to review. Corrections are stored but not used yet.
 - **The reviewer is not authenticated.** The handle is recorded, not verified, and the web page's key is shared. There is no login rate limit, because it only runs locally.
 - **No hosted deployment.** Everything runs on one machine with Docker Compose.
@@ -382,4 +382,4 @@ npm run dataset:load              # the 100 dataset messages, stored and queued 
 npm test                          # unit tests: no Docker, no network, no model calls
 ```
 
-Nothing is classified until a worker runs, and that costs money: about $0.01 per message, plus a few cents per technical fault. The [guide](docs/guide.md) explains the worker, each step's command, the review CLI and web page, the evaluations and the checks.
+Nothing is classified until a worker runs, and that costs money: about $0.006 per message, plus about $0.02 per technical fault for the investigation. An evaluation of the full set costs about $0.60, the CI subset about $0.12. The [guide](docs/guide.md) explains the worker, each step's command, the review CLI and web page, the evaluations and the checks.
