@@ -16,7 +16,7 @@ How each check is marked:
 
 ## Structure
 
-- [x] `README.md` has, in this order: the opening paragraph, What it does, Architecture, The pipeline, Data model, Key decisions, Results, Review page, Limitations, Next steps, Quick start. **(manual)**
+- [x] `README.md` has, in this order: the opening paragraph, What a reviewer sees (with the screenshots), Results at a glance, How it works, Architecture, The pipeline, Data model, Key decisions, Limitations, Next steps, Quick start (changed during review; see requirements.md, Contents). **(manual)**
 - [x] `docs/guide.md` holds the former reference (setup, intake API, each pipeline step, background processing, reviewing, evaluating, prompt injection, checks) with the same section titles, and links back to the README. **(manual)**
 - [x] Nothing from the former README is lost: every command and every rule it described is in the README or the guide. **(manual)**
 
@@ -31,14 +31,14 @@ How each check is marked:
 
 ## Results
 
-- [x] Every number in the Results section links to the kept report it comes from. **(manual)**
-- [x] The headline numbers equal the kept reports: intent accuracy, must-review recall and precision, review rate, routing accuracy, urgency accuracy, investigation cause accuracy, injection scenarios passed, cost per message. **(test)**
+- [x] `docs/results.md` holds the full results, and every number in it links to the kept report it comes from; the README's "Results at a glance" links to it. **(manual)**
+- [x] The numbers equal the kept reports: in the README, the six headline numbers and the review rate under Limitations; in `docs/results.md`, intent accuracy, must-review recall and precision, review rate, routing accuracy, urgency accuracy, investigation cause accuracy, injection scenarios passed, cost per message and the Opus vs Sonnet rows. **(test)**
 - [x] The numbers test fails when one of those numbers in the README is changed by hand. **(manual)**
-- [x] Results includes the confusion matrix, the per-language table with the "indicative" note, and "What the results do and don't show". **(manual)**
+- [x] `docs/results.md` includes the confusion matrix, the per-language table with the "indicative" note, and "What the results do and don't show". **(manual)**
 
 ## Links and images
 
-- [x] Every relative link in `README.md` and `docs/guide.md` resolves, and every `#anchor` matches a heading (GitHub slug rules). **(test)**
+- [x] Every relative link in `README.md`, `docs/guide.md` and `docs/results.md` resolves, and every `#anchor` matches a heading (GitHub slug rules). **(test)**
 - [x] Every image the README embeds is in `docs/images/`, exists, has alt text and is under 500 KB. **(test)**
 - [x] The screenshots show no browser chrome and no raw message text. **(manual)**
 

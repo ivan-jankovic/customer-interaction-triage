@@ -29,7 +29,9 @@ Out of scope:
 
 ## Contents
 
-The README, in this order. Each section is short; detail lives behind links.
+**Changed during review of the README (decided by the user):** the first version followed the order below and put all results in the README, so a reader met tables before seeing the product. The README now leads with the product: after the opening paragraph come **What a reviewer sees** (one message's journey told plainly, with the four screenshots) and **Results at a glance** (six headline numbers and the main caveat), then **How it works** (the eight steps), Architecture, The pipeline, Data model, Key decisions, Limitations, Next steps and Quick start. The full results (items of Results below, including the confusion matrix and "What the results do and don't show") moved to `docs/results.md`, linked from the README. The audience stays a new reader of the project, not the fictional reviewer: the mission's success criterion is about understanding the design.
+
+The original order, kept for the record:
 
 1. **Title and one paragraph:** what it is, for whom (a fictional Czech internet and mobile provider; e-mails, chats and call transcripts in Czech, Slovak and English), that it uses only synthetic data, and that it is built spec-first.
 2. **What it does:** the eight steps of [mission.md](../../mission.md) in a few lines, and what it deliberately doesn't do (the non-goals: no chatbot, no autonomous actions, no real data).
