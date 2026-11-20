@@ -10,7 +10,7 @@ Each phase's spec lives in `specs/phases/NNN-pNN-<slug>/`: a three-digit sequenc
 
 How to start, implement and finish a phase (branch, spec folder with `requirements.md`, `plan.md` and `validation.md`, approval and merge) is described in `CLAUDE.md` in the repository root.
 
-Phases P00–P14 are the **MVP**. P15–P17 are optional.
+Phases P00–P14 are the **MVP**. P15 comes next; P16–P18 are optional.
 
 ## ✅ P00: Intents, schemas and labelled dataset
 
@@ -135,7 +135,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** the review flow in the browser.
 **Done when:** the page covers the same actions as the CLI.
 
-## P14: README
+## ✅ P14: README
 
 - What it does, architecture diagram, pipeline, data model.
 - Key decisions: workflow vs. agent, rules in code, masking, queue consistency between PostgreSQL and Redis, structured output.
@@ -147,12 +147,12 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 
 **— MVP complete —**
 
-## P15 (optional): Transcription
+## P15: Reviewer logins
 
-- Speech-to-text for a few synthetic call recordings at the start of the pipeline; evaluation of the effect on classification.
+- A separate login for each reviewer instead of the one shared review key, so every review and every unmask is recorded under a verified person, not a typed handle.
 
-**Demo:** an audio "call" processed end to end.
-**Done when:** results are documented.
+**Demo:** two reviewers log in with their own credentials; the unmask log names each of them.
+**Done when:** the shared key is gone, and the README's Limitations no longer list an unauthenticated reviewer.
 
 ## P16 (optional): MCP server
 
@@ -161,7 +161,14 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** the tools used from an MCP client.
 **Done when:** documented in the README.
 
-## P17 (optional): Confidence gate comparison
+## P17 (optional): Transcription
+
+- Speech-to-text for a few synthetic call recordings at the start of the pipeline; evaluation of the effect on classification.
+
+**Demo:** an audio "call" processed end to end.
+**Done when:** results are documented.
+
+## P18 (optional): Confidence gate comparison
 
 Compare ways of deciding when a case is confident enough to skip review, on the same labelled dataset:
 - **Self-reported confidence** from the structured output (the MVP approach).
