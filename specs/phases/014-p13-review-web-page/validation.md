@@ -12,9 +12,9 @@ How each check is marked:
 
 ## Checks pass
 
-- [ ] `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run build` and `npm run audit` pass, with `@fastify/cookie` and `@fastify/formbody` installed. **(ci)**
-- [ ] `npm test` passes with no `ANTHROPIC_API_KEY` and no network; no test calls a model. **(ci)**
-- [ ] `npm run test:integration` passes locally and in CI. **(ci)**
+- [x] `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run build` and `npm run audit` pass, with `@fastify/cookie` and `@fastify/formbody` installed. **(ci)**
+- [x] `npm test` passes with no `ANTHROPIC_API_KEY` and no network; no test calls a model. **(ci)**
+- [x] `npm run test:integration` passes locally and in CI. **(ci)** Green on PR #15, with `eval` (18/18 intents, 6/6 must-review).
 
 ## Configuration
 
