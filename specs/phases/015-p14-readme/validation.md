@@ -23,7 +23,7 @@ How each check is marked:
 ## Diagrams
 
 - [ ] The architecture and pipeline diagrams are Mermaid `flowchart`s and render on GitHub. **(manual)**
-- [ ] The data model is two Mermaid `erDiagram`s (pipeline tables; mock CRM) that render on GitHub, and every table and relation in them exists in the migrations. **(manual)**
+- [ ] The README's data model is a Mermaid `erDiagram` of the pipeline tables and their relations (no columns), linking to the guide's "Data model" with the two detailed `erDiagram`s (pipeline tables; mock CRM); all render on GitHub, and every table and relation in them exists in the migrations. **(manual)**
 
 ## Key decisions
 

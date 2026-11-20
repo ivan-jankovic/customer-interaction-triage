@@ -81,6 +81,7 @@ Mermaid in the Markdown, which GitHub renders (decided during spec review).
 - **Architecture:** a `flowchart` with the processes and stores.
 - **Pipeline:** a `flowchart` of the steps, marking the ones that call a model and the conditional investigate step.
 - **Data model** (decided during spec review): one `erDiagram` of the pipeline tables (`interactions`, `masked_identifiers`, `classifications`, `enrichments`, `investigations`, `cases`, `decision_log`, `reviews`, `unmask_log`) with their key columns and relations, and a smaller second one for the mock CRM (`crm_customers`, `crm_services`, `crm_tickets`, `crm_line_status`, `outages`). The full column lists stay in [tech-stack.md](../../tech-stack.md); the README links there.
+- **Changed during review of the README:** the README shows only the pipeline tables and their relations, without columns, and links to a "Data model" section in `docs/guide.md` that holds both detailed diagrams. The column diagrams were too much for the front page. Decided by the user.
 
 The diagrams are written from the migrations and `src/db/database.ts`, not from memory.
 

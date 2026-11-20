@@ -1,6 +1,6 @@
 # Guide
 
-How to run, use and check Customer Interaction Triage: setup, the intake API, each pipeline step, background processing, reviewing, evaluating and the checks. For what the system is, how it is built and how well it works, start with the [README](../README.md).
+How to run, use and check Customer Interaction Triage: setup, the intake API, each pipeline step, background processing, reviewing, evaluating, prompt injection, the data model and the checks. For what the system is, how it is built and how well it works, start with the [README](../README.md).
 
 ## Local setup
 
@@ -229,6 +229,128 @@ npm run eval:injection -- --repeat 5           # 15 scenarios x 5 repeats, ~$0.7
 - **A misleading summary without identifiers.** The judge catches it in the evaluation, but in the pipeline a reviewer only sees it on cases that go to review. Names and street addresses aren't masked, so only the judge can flag them.
 
 The design, the pass rule and the results are in the [P11 spec](../specs/phases/012-p11-prompt-injection-scenarios/requirements.md).
+
+## Data model
+
+The pipeline's tables with their key columns. Every column, with its meaning, is in [tech-stack.md, "Data model"](../specs/tech-stack.md#data-model-initial); the [README](../README.md#data-model) explains how the tables fit together.
+
+```mermaid
+erDiagram
+  interactions ||--o{ masked_identifiers : "masked into"
+  interactions ||--o{ classifications : "attempts"
+  interactions ||--o{ enrichments : "attempts"
+  interactions ||--o{ investigations : "attempts"
+  interactions ||--o| cases : "ends as one"
+  classifications ||--o{ enrichments : "used by"
+  enrichments ||--o{ investigations : "used by"
+  classifications |o--o{ cases : "used by"
+  enrichments |o--o{ cases : "used by"
+  cases ||--|{ decision_log : "one entry per step"
+  cases ||--o| reviews : "at most one"
+  cases ||--o{ unmask_log : "every raw-text view"
+
+  interactions {
+    uuid id PK
+    text external_id UK
+    text channel
+    text language
+    text raw_text
+    text masked_text
+    text status
+  }
+  masked_identifiers {
+    uuid interaction_id FK
+    text placeholder
+    text type
+    text value
+  }
+  classifications {
+    uuid interaction_id FK
+    text outcome
+    text intent
+    real confidence
+    text prompt_version
+    text served_model
+    numeric cost_usd
+  }
+  enrichments {
+    uuid classification_id FK
+    text outcome
+    uuid customer_id
+    jsonb outage_ids
+  }
+  investigations {
+    uuid enrichment_id FK
+    text outcome
+    text likely_cause
+    jsonb tool_calls
+  }
+  cases {
+    uuid interaction_id FK
+    text target_team
+    boolean needs_review
+    jsonb reason_codes
+    text router_version
+  }
+  decision_log {
+    uuid case_id FK
+    integer seq
+    text step
+    text rule_applied
+  }
+  reviews {
+    uuid case_id FK
+    text reviewer
+    text decision
+    text corrected_intent
+    text corrected_team
+  }
+  unmask_log {
+    uuid case_id FK
+    text reviewer
+    text reason
+  }
+```
+
+The mock CRM, generated from the dataset by `npm run crm:generate` so it matches the messages (including deliberately not-found and ambiguous customers):
+
+```mermaid
+erDiagram
+  crm_customers ||--o{ crm_services : has
+  crm_customers ||--o{ crm_tickets : opened
+  crm_services |o--o{ crm_tickets : about
+  crm_services ||--|| crm_line_status : "line state"
+  crm_customers {
+    uuid id PK
+    text customer_number UK
+    text email
+    text segment
+  }
+  crm_services {
+    uuid customer_id FK
+    text service_type
+    text contract_number UK
+    text phone
+    text area
+    text status
+  }
+  crm_tickets {
+    uuid customer_id FK
+    uuid service_id FK
+    text category
+    timestamptz closed_at
+  }
+  crm_line_status {
+    uuid service_id PK
+    text state
+  }
+  outages {
+    text area
+    text service_type
+    timestamptz started_at
+    timestamptz resolved_at
+  }
+```
 
 ## Checks
 

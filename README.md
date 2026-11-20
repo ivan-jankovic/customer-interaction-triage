@@ -72,7 +72,7 @@ Each step stores what it did, and a retried job reuses what earlier attempts sto
 
 ## Data model
 
-The pipeline's tables, with their key columns (every column is in [tech-stack.md, "Data model"](specs/tech-stack.md#data-model-initial)):
+Every message is an `interactions` row. The steps' results hang off it, and the case ties them together:
 
 ```mermaid
 erDiagram
@@ -81,120 +81,16 @@ erDiagram
   interactions ||--o{ enrichments : "attempts"
   interactions ||--o{ investigations : "attempts"
   interactions ||--o| cases : "ends as one"
-  classifications ||--o{ enrichments : "used by"
-  enrichments ||--o{ investigations : "used by"
-  classifications |o--o{ cases : "used by"
-  enrichments |o--o{ cases : "used by"
   cases ||--|{ decision_log : "one entry per step"
   cases ||--o| reviews : "at most one"
   cases ||--o{ unmask_log : "every raw-text view"
-
-  interactions {
-    uuid id PK
-    text external_id UK
-    text channel
-    text language
-    text raw_text
-    text masked_text
-    text status
-  }
-  masked_identifiers {
-    uuid interaction_id FK
-    text placeholder
-    text type
-    text value
-  }
-  classifications {
-    uuid interaction_id FK
-    text outcome
-    text intent
-    real confidence
-    text prompt_version
-    text served_model
-    numeric cost_usd
-  }
-  enrichments {
-    uuid classification_id FK
-    text outcome
-    uuid customer_id
-    jsonb outage_ids
-  }
-  investigations {
-    uuid enrichment_id FK
-    text outcome
-    text likely_cause
-    jsonb tool_calls
-  }
-  cases {
-    uuid interaction_id FK
-    text target_team
-    boolean needs_review
-    jsonb reason_codes
-    text router_version
-  }
-  decision_log {
-    uuid case_id FK
-    integer seq
-    text step
-    text rule_applied
-  }
-  reviews {
-    uuid case_id FK
-    text reviewer
-    text decision
-    text corrected_intent
-    text corrected_team
-  }
-  unmask_log {
-    uuid case_id FK
-    text reviewer
-    text reason
-  }
 ```
 
 - **Attempts are rows, never updates.** Every classification, enrichment and investigation attempt is a new row, including invalid ones and errors. A case names the attempts it used.
 - **One case per message**, written once, with its decision log in the same transaction. The log holds IDs, versions, outcomes and placeholders only: no message text and no identifier values.
 - **A review never changes the case.** A correction is a row of its own with the intent and team that should have been chosen.
 
-The mock CRM, generated from the dataset so it matches the messages (including deliberately not-found and ambiguous customers):
-
-```mermaid
-erDiagram
-  crm_customers ||--o{ crm_services : has
-  crm_customers ||--o{ crm_tickets : opened
-  crm_services |o--o{ crm_tickets : about
-  crm_services ||--|| crm_line_status : "line state"
-  crm_customers {
-    uuid id PK
-    text customer_number UK
-    text email
-    text segment
-  }
-  crm_services {
-    uuid customer_id FK
-    text service_type
-    text contract_number UK
-    text phone
-    text area
-    text status
-  }
-  crm_tickets {
-    uuid customer_id FK
-    uuid service_id FK
-    text category
-    timestamptz closed_at
-  }
-  crm_line_status {
-    uuid service_id PK
-    text state
-  }
-  outages {
-    text area
-    text service_type
-    timestamptz started_at
-    timestamptz resolved_at
-  }
-```
+The enrichment and the investigation read a **mock CRM** (customers, services, tickets, line status and outages), generated from the dataset so it matches the messages. Every table with its key columns, and the mock CRM, are in the [guide, Data model](docs/guide.md#data-model); every column is in [tech-stack.md](specs/tech-stack.md#data-model-initial).
 
 ## Key decisions
 
