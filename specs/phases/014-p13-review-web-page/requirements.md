@@ -151,3 +151,34 @@ Message text is untrusted (P11), and so are summaries, findings and notes.
 - **Two reviewers on the same case** are handled by P09's `ON CONFLICT (case_id) DO NOTHING`: the second gets the 409 page with the first review.
 - **`buildApp` gains an optional `review` option** (the database and the review key). The intake unit tests don't pass it, so they don't change.
 - **Docs consulted during implementation:** `@fastify/cookie` (signing, `setCookie` options) and `@fastify/formbody`, through `ctx7`. After installing them, `npm run audit` must pass.
+
+## Implementation notes
+
+- **Form field names must not collide with the filters.** Every action form carries the queue filters as hidden fields (`team`, `reason`, `spot_check`). The correct form's team select and the unmask form's reason field were first named `team` and `reason` too, so with a filter active the browser would post the field twice, the body would fail validation, and the action would be refused. An integration test caught the first; a unit test now checks that no form has two fields with the same name, and caught the second. The fields are `new_team` and `unmask_reason`.
+- **Two more queue queries.** The plan listed only `listReviewed`. The queue list needs rows with the classification and reasons (`listQueue`, paged by the last case ID), and the case page needs its place in the queue (`queuePosition`). Both are in `src/review/queue.ts`, built on the same query as `nextCase`, so the list, the count and "Start reviewing" always agree.
+- **The page layout lives in `pages.ts`, not `html.ts`.** The header's logout form needs the CSRF token, which is session data; `html.ts` stays the escaping helper only.
+- **Prettier leaves the `html` templates alone.** Prettier formats `html`-tagged templates as HTML, which changes whitespace inside `<pre>` and rewrapped the test expectations. `.prettierrc.json` turns `embeddedLanguageFormatting` off for `src/review/web/`, `test/review/web/` and the review web integration test.
+- **The login form has no CSRF token.** There is no session before login to tie one to. A forged login can only log a browser in with the attacker's own key and handle, and it still needs the key.
+- **The session check runs in `preValidation`**, after the body is parsed and before it is validated, so a post without a session (401) or with a wrong token (403) is refused before its fields are looked at.
+- **Test support:** the case-view fixture of the CLI screen test moved to `test/support/case-view.ts`, shared with the page tests; `storeMessage` takes an optional text (the escaping test appends hostile HTML to a dataset message, keeping its start, which the scripted model matches on).
+- **After the demo, two small changes** (requested during review of the demo): a line above the queue table saying it is in the order the cases were processed, which is the review order and can differ from the Received time; and "1 turn" instead of "1 turns" in the shared decision-log formatter (`src/format/decision-log.ts`), which also fixes `npm run route`, `npm run process` and the CLI screen.
+
+## Results (recorded during implementation)
+
+- **Tests:** 988 unit tests and 241 integration tests pass locally, including 31 integration tests that drive every review route through `fastify.inject`.
+- **Demo** on a separate `triage_demo` database with Redis database 1 and the API on port 3001, after `crm:seed`, with a throwaway `REVIEW_API_KEY`; dropped and flushed afterwards. Eight dataset messages went through the API and the worker for **$0.144** (8 classifications $0.102, 2 investigations $0.042; estimated $0.10–0.15).
+
+  | Message | Team | Reasons |
+  | --- | --- | --- |
+  | msg-013 | `retention` | `cancellation` |
+  | msg-082 | `general` | `low_confidence` (0.45) |
+  | msg-010 | `complaints` | `complaint` |
+  | msg-001 | `complaints` | `complaint`, `customer_not_found` |
+  | msg-022 | `billing` | `customer_ambiguous` |
+  | msg-008 | `general` | `crm_mismatch_unmatched_key` |
+  | msg-007 | `technical_support` | `customer_unidentified`, `investigation_inconclusive` |
+  | msg-011 | `technical_support` | none (auto-routed; investigation: `area_outage`, 3 tool calls) |
+
+  The user reviewed in Chrome as `reviewer-5`: logged in; filtered the queue by reason and back; confirmed msg-010; corrected msg-082's team only (`other` → `technical_support`); unmasked msg-008 (reason "need additional change info from the customer"), and the reload showed the masked text with the unmasking listed; skipped msg-001, which the queue then tagged "skipped"; tried a correction of msg-022 with a blank note (400, "A correction needs a note saying why.", choices kept), then corrected it to `complaint` with the intent's team (`complaints`); spot-checked msg-011 (`?spot_check=1`, "Case 1 of 1", the investigation with its tool calls) and confirmed it; opened the reviewed list; logged out.
+
+  Stored: 4 `reviews` rows (msg-010 confirmed; msg-082 corrected to `other`/`technical_support`; msg-022 corrected to `complaint`/`complaints`; msg-011 confirmed, `spot_check` true) and 1 `unmask_log` row (msg-008). The server log of the session holds no cookie, form text or review key. The corrections were made only to show the flow, and msg-022's note says so.
