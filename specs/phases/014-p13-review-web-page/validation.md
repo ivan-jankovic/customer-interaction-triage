@@ -72,7 +72,7 @@ How each check is marked:
 
 - [x] [tech-stack.md](../../tech-stack.md) describes the review page (HTTP API row, "Review queue"). **(manual)**
 - [x] `README.md` explains how to open the review page, log in, and what unmasking records. **(manual)**
-- [ ] P13 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
+- [x] P13 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 

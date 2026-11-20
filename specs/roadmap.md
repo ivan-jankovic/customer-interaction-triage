@@ -128,7 +128,7 @@ Phases P00–P14 are the **MVP**. P15–P17 are optional.
 **Demo:** a CI run with the evaluation summary; the comparison table.
 **Done when:** CI fails if the subset drops below the threshold.
 
-## P13: Review web page
+## ✅ P13: Review web page
 
 - Minimal server-rendered page: case list, case detail with evidence and reasons, confirm/correct.
 
