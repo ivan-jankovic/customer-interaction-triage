@@ -151,7 +151,8 @@ ${filterForm(f)}
   }</p>
 ${
   opts.rows.length
-    ? html`<table>
+    ? html`<p class="hint">In the order the cases were processed, which is the order you review them in. It can differ from the Received time.</p>
+<table>
 <thead><tr><th>Message</th><th>Received</th><th>Channel</th><th>Classification</th><th>Team</th><th>Reasons</th></tr></thead>
 <tbody>${rows}</tbody>
 </table>`

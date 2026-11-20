@@ -25,7 +25,7 @@ export function describeStep(entry: DecisionLogEntry): string {
       return `${show(o.outcome)}; customer ${show(o.customer_id)}, unmatched ${show(o.unmatched_placeholders)}, area ${show(o.area)}, outages ${(o.outage_ids as string[]).length}`;
     case "investigate":
       if (o.skipped) return `skipped: ${show(o.skipped)}`;
-      return `${show(o.outcome)}; cause ${show(o.likely_cause)}, confidence ${show(o.confidence)}, ${show(o.steps)} turns, tools ${show(o.tools_called)}`;
+      return `${show(o.outcome)}; cause ${show(o.likely_cause)}, confidence ${show(o.confidence)}, ${show(o.steps)} turn${o.steps === 1 ? "" : "s"}, tools ${show(o.tools_called)}`;
     case "route":
       return `team ${show(o.target_team)}, review ${o.needs_review ? "yes" : "no"}`;
   }

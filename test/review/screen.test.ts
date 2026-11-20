@@ -157,4 +157,24 @@ describe("renderCase: the investigation (P10)", () => {
       "  2. investigate (investigate.v1 / claude-opus-5-5) valid; cause line_fault, confidence 0.85, 2 turns, tools get_line_status",
     );
   });
+
+  it("says '1 turn', not '1 turns'", () => {
+    const v = view();
+    v.case = {
+      ...v.case,
+      log: [
+        {
+          seq: 1,
+          step: "investigate",
+          inputSummary: { investigation_id: "inv-1" },
+          output: { outcome: "valid", likely_cause: "inconclusive", confidence: 0.2, steps: 1, tools_called: [] },
+          ruleApplied: "investigate.v1 / claude-opus-5-5",
+          createdAt: T,
+        },
+      ],
+    };
+    expect(renderCase(v, { index: 1, total: 1 }).join("\n")).toContain(
+      "valid; cause inconclusive, confidence 0.2, 1 turn, tools none",
+    );
+  });
 });

@@ -74,6 +74,7 @@ describe("queuePage", () => {
     const page = queuePage({ viewer, filters: f, total: 41, rows: [row], skipped: [CASE], nextAfter: CASE });
     expect(page).toContain(`<a href="/review/cases/${CASE}?team=billing">msg-008</a> <span class="tag">skipped</span>`);
     expect(page).toContain("<strong>41</strong> cases waiting for review.");
+    expect(page).toContain("In the order the cases were processed");
     expect(page).toContain('href="/review/next?team=billing">Start reviewing');
     expect(page).toContain(`href="/review?team=billing&amp;after=${CASE}">Next 50`);
     expect(page).toContain('<option value="billing" selected>billing</option>');
