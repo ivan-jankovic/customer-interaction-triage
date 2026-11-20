@@ -22,8 +22,8 @@ How each check is marked:
 
 ## Diagrams
 
-- [ ] The architecture and pipeline diagrams are Mermaid `flowchart`s and render on GitHub. **(manual)**
-- [ ] The README's data model is a Mermaid `erDiagram` of the pipeline tables and their relations (no columns), linking to the guide's "Data model" with the two detailed `erDiagram`s (pipeline tables; mock CRM); all render on GitHub, and every table and relation in them exists in the migrations. **(manual)**
+- [x] The architecture and pipeline diagrams are Mermaid `flowchart`s and render on GitHub. **(manual)**
+- [x] The README's data model is a Mermaid `erDiagram` of the pipeline tables and their relations (no columns), linking to the guide's "Data model" with the two detailed `erDiagram`s (pipeline tables; mock CRM); all render on GitHub, and every table and relation in them exists in the migrations. **(manual)**
 
 ## Key decisions
 
@@ -58,12 +58,12 @@ A fresh subagent with no project context reads only the README and answers these
 10. What would you need to run it locally, and what costs money?
 
 - [x] A fresh subagent answers all 10 correctly from the README alone; its answers and any fixes are recorded in requirements.md (Results). **(manual)**
-- [ ] The user has read the README on GitHub and has no open questions about the design, the decisions or the results. **(manual)**
+- [x] The user has read the README on GitHub and has no open questions about the design, the decisions or the results. **(manual)**
 
 ## Specs updated
 
 - [x] [tech-stack.md](../../tech-stack.md)'s repository layout includes `docs/`. **(manual)**
-- [ ] P14 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
+- [x] P14 is marked done in [roadmap.md](../../roadmap.md) after review. **(manual)**
 
 ## Scope checks
 

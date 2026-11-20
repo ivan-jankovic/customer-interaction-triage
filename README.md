@@ -133,7 +133,7 @@ The enrichment and the investigation read a **mock CRM** (customers, services, t
 
 ### A workflow, with one bounded agent
 
-**Decision:** the pipeline is a fixed sequence of steps. The only agent investigates technical faults, with three read-only tools, at most 6 model turns and 12 tool calls, and a validated answer.
+**Decision:** most of the pipeline is a fixed sequence of steps: the code decides what happens next, and each model call gives one answer. Only one step is an agent, where the model chooses its own actions: investigating technical faults. It has three read-only tools, at most 6 model turns and 12 tool calls, and its answer is validated.
 **Alternative:** one agent that reads the message and decides everything with tools.
 **Why:** most of the work is the same every time, and a fixed sequence is cheaper, testable and predictable. Open-ended searching helps in one place: working out why a line is down. Even there the agent decides nothing; an inconclusive answer sends the case to review. ([P10](specs/phases/011-p10-investigating-agent/requirements.md))
 
@@ -183,7 +183,7 @@ The enrichment and the investigation read a **mock CRM** (customers, services, t
 
 **Decision:** one review per case, never edited. Reviewers see the masked text; the raw text needs a reason and is logged before it is shown. The web page reuses the CLI's logic. It is protected by one access key shared by all reviewers (not a per-person login), a signed session cookie and CSRF tokens.
 **Alternative:** editable cases, or showing the raw text by default.
-**Why:** a case and its review stay an audit trail of who decided what and why. Masking protects the model boundary; logging makes staff access to personal data visible. ([P09](specs/phases/010-p09-review-queue-cli/requirements.md), [P13](specs/phases/014-p13-review-web-page/requirements.md))
+**Why:** a case and its review stay an audit trail of who decided what and why. Masking protects the model boundary; logging makes staff access to personal data visible (to the typed handle, until reviewers have their own logins in P15). ([P09](specs/phases/010-p09-review-queue-cli/requirements.md), [P13](specs/phases/014-p13-review-web-page/requirements.md))
 
 ## Limitations
 
@@ -192,17 +192,18 @@ The enrichment and the investigation read a **mock CRM** (customers, services, t
 - **Identifier formats are Czech and Slovak only.**
 - **Two known injection limits:** a confidently wrong intent (a cancellation read as a billing question at confidence 0.7 or more is auto-routed), and a misleading summary without identifiers. Both are pinned down by tests that show the behaviour (`KNOWN LIMIT` in [the security tests](test/security/fooled-model.test.ts)).
 - **Review rules are conservative and untuned:** 56% of the dataset goes to review. Corrections are stored but not used yet.
-- **The reviewer is not authenticated.** The handle is recorded, not verified, and the web page's key is shared. There is no login rate limit, because it only runs locally.
+- **The reviewer is not authenticated.** The handle is recorded, not verified, and the web page's key is shared. There is no login rate limit, because it only runs locally. Per-person logins are the next phase (P15).
 - **No hosted deployment.** Everything runs on one machine with Docker Compose.
 - **The default model is the more expensive one,** although Sonnet matched it on this dataset; switching is a separate decision.
 
 ## Next steps
 
-From the [roadmap](specs/roadmap.md), all optional:
+From the [roadmap](specs/roadmap.md):
 
-- **Transcription (P15):** speech-to-text for synthetic call recordings at the start of the pipeline, and its effect on classification.
-- **MCP server (P16):** the read-only CRM and outage tools for any MCP client.
-- **Confidence gate comparison (P17):** self-reported confidence vs. self-consistency vs. probabilities over the intents vs. a classical TF-IDF baseline, compared on calibration and review recall.
+- **Reviewer logins (P15):** a separate login for each reviewer instead of the shared key, so every review and every unmask is recorded under a verified person.
+- **MCP server (P16, optional):** the read-only CRM and outage tools for any MCP client.
+- **Transcription (P17, optional):** speech-to-text for synthetic call recordings at the start of the pipeline, and its effect on classification.
+- **Confidence gate comparison (P18, optional):** self-reported confidence vs. self-consistency vs. probabilities over the intents vs. a classical TF-IDF baseline, compared on calibration and review recall.
 - **Ideas for later** (roadmap): reply drafts for simple cases, sent only after review; learning from review corrections; a queue dashboard.
 - **A harder dataset:** more ambiguous and messier messages from a new generation prompt, as the [dataset README](eval/data/README.md) suggests, so the evaluation can tell alternatives apart.
 
