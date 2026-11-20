@@ -4,7 +4,7 @@
 
 import { sql, type Kysely } from "kysely";
 import type { Database } from "../db/database.js";
-import type { ReasonCode, Team } from "../taxonomy.js";
+import type { Channel, Intent, Language, ReasonCode, Team } from "../taxonomy.js";
 
 export interface QueueFilters {
   /** Auto-routed cases (no review needed) instead of the ones that need review. */
@@ -41,4 +41,67 @@ export async function queueSize(db: Kysely<Database>, filters: QueueFilters = {}
     .select((eb) => eb.fn.countAll<string>().as("n"))
     .executeTakeFirstOrThrow();
   return Number(row.n);
+}
+
+/** One row of the web page's queue list (P13). No message text and no identifier values. */
+export interface QueueRow {
+  caseId: string;
+  interactionId: string;
+  externalId: string | null;
+  receivedAt: Date;
+  channel: Channel;
+  language: Language | null;
+  /** Null when there is no classification (a failure case before classifying). */
+  outcome: "valid" | "invalid" | "error" | null;
+  intent: Intent | null;
+  confidence: number | null;
+  targetTeam: Team;
+  reasonCodes: ReasonCode[];
+}
+
+/**
+ * A page of the queue, oldest first, for the web page's list (P13). `after` is the last case ID
+ * of the previous page (case IDs are time-ordered uuidv7, as nextCase's order relies on).
+ */
+export async function listQueue(
+  db: Kysely<Database>,
+  filters: QueueFilters,
+  page: { after?: string | undefined; limit: number },
+): Promise<QueueRow[]> {
+  let q = queueQuery(db, filters)
+    .innerJoin("interactions", "interactions.id", "cases.interaction_id")
+    .leftJoin("classifications", "classifications.id", "cases.classification_id")
+    .select([
+      "cases.id as caseId",
+      "cases.interaction_id as interactionId",
+      "interactions.external_id as externalId",
+      "interactions.received_at as receivedAt",
+      "interactions.channel",
+      "interactions.language",
+      "classifications.outcome",
+      "classifications.intent",
+      "classifications.confidence",
+      "cases.target_team as targetTeam",
+      "cases.reason_codes as reasonCodes",
+    ]);
+  if (page.after) q = q.where("cases.id", ">", page.after);
+  return q.orderBy("cases.id").limit(page.limit).execute();
+}
+
+/**
+ * A case's place in the queue ("3 of 41") for the web page: the queue cases up to and including
+ * it, out of all of them. Null when the case isn't in this queue (reviewed, or the other kind).
+ */
+export async function queuePosition(
+  db: Kysely<Database>,
+  filters: QueueFilters,
+  caseId: string,
+): Promise<{ index: number; total: number } | null> {
+  const inQueue = await queueQuery(db, filters).select("cases.id").where("cases.id", "=", caseId).executeTakeFirst();
+  if (!inQueue) return null;
+  const upTo = await queueQuery(db, filters)
+    .where("cases.id", "<=", caseId)
+    .select((eb) => eb.fn.countAll<string>().as("n"))
+    .executeTakeFirstOrThrow();
+  return { index: Number(upTo.n), total: await queueSize(db, filters) };
 }
