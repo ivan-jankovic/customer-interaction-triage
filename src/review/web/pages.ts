@@ -329,7 +329,7 @@ function actionForms(opts: { view: CaseView; viewer: Viewer; filters: PageFilter
   const common = html`${csrfField(viewer)}${hiddenFilters(f)}`;
   const current = view.classification?.intent ?? null;
   const pickedIntent = val("correct", "intent");
-  const pickedTeam = val("correct", "team") || INTENT_TEAM;
+  const pickedTeam = val("correct", "new_team") || INTENT_TEAM;
 
   return html`<section class="actions">
 <h2>Decide</h2>
@@ -346,7 +346,7 @@ ${err("correct")}${common}
     (i) =>
       html`<option value="${i}"${pickedIntent === i ? html` selected` : null}>${i}${i === current ? " (current)" : ""}</option>`,
   )}</select></label>
-<label>Team <select name="team"><option value="${INTENT_TEAM}"${pickedTeam === INTENT_TEAM ? html` selected` : null}>the intent's team</option>${TEAMS.map(
+<label>Team <select name="new_team"><option value="${INTENT_TEAM}"${pickedTeam === INTENT_TEAM ? html` selected` : null}>the intent's team</option>${TEAMS.map(
     (t) =>
       html`<option value="${t}"${pickedTeam === t ? html` selected` : null}>${t}${t === view.case.targetTeam ? " (current)" : ""}</option>`,
   )}</select></label>
@@ -362,7 +362,7 @@ ${common}
 <form method="post" action="/review/cases/${id}/unmask" class="stack">
 <h3>Unmask</h3>
 ${err("unmask")}${common}
-<label>Reason (required, logged) <input type="text" name="reason" required minlength="${REASON_MIN_LENGTH}" maxlength="${REASON_MAX_LENGTH}" value="${val("unmask", "reason")}"></label>
+<label>Reason (required, logged) <input type="text" name="unmask_reason" required minlength="${REASON_MIN_LENGTH}" maxlength="${REASON_MAX_LENGTH}" value="${val("unmask", "unmask_reason")}"></label>
 <button type="submit">Show the raw text</button>
 </form>
 </section>`;

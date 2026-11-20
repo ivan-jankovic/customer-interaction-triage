@@ -177,7 +177,12 @@ export function processDeps(llm: LlmClient, agent: ConverseClient = scriptedAgen
  * Stores a dataset message as intake would: its text, channel and the seed's received_at, with
  * an external_id that starts with the dataset ID (so a scripted client can find its labels).
  */
-export async function storeMessage(db: Kysely<Database>, messageId: string): Promise<string> {
+/** Stores a dataset message; `text` replaces its text (keep the start, which byMaskedText matches on). */
+export async function storeMessage(
+  db: Kysely<Database>,
+  messageId: string,
+  overrides: { text?: string } = {},
+): Promise<string> {
   const r = record(messageId);
   const m = seed.messages.find((x) => x.message_id === messageId)!;
   const { id } = await db
@@ -186,7 +191,7 @@ export async function storeMessage(db: Kysely<Database>, messageId: string): Pro
       external_id: `${messageId}-${Math.random().toString(36).slice(2)}`,
       channel: r.channel,
       language: r.language,
-      raw_text: r.text,
+      raw_text: overrides.text ?? r.text,
       received_at: m.received_at,
     })
     .returning("id")

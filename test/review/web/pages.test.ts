@@ -188,7 +188,7 @@ describe("casePage", () => {
       error: {
         form: "correct",
         message: "A correction needs a note saying why.",
-        values: { intent: "complaint", team: "general", note: "" },
+        values: { intent: "complaint", new_team: "general", note: "" },
       },
     });
     expect(page).toContain('<p class="notice error" role="alert">A correction needs a note saying why.</p>');
@@ -276,5 +276,21 @@ describe("reviewedPage", () => {
 describe("STYLESHEET", () => {
   it("is plain CSS with no imports or remote URLs", () => {
     expect(STYLESHEET).not.toMatch(/@import|url\(/);
+  });
+});
+
+describe("casePage form fields", () => {
+  it("gives no form two fields with the same name, even with every filter set", () => {
+    const page = casePage({
+      viewer,
+      view: view(),
+      position: null,
+      filters: { team: "billing", reason: "complaint", spotCheck: true },
+    });
+    const posts = page.match(/<form method="post"[\s\S]*?<\/form>/g)!;
+    for (const f of posts) {
+      const names = [...f.matchAll(/<(?:input|select|textarea)[^>]*\sname="([^"]+)"/g)].map((m) => m[1]);
+      expect(new Set(names).size, f.slice(0, 60)).toBe(names.length);
+    }
   });
 });

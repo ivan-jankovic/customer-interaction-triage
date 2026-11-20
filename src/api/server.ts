@@ -16,7 +16,12 @@ import { buildApp } from "./app.js";
  */
 export const LOGGER_OPTIONS = {
   level: process.env.LOG_LEVEL ?? "info",
-  redact: { paths: ['req.headers["x-api-key"]', "req.headers.authorization"], censor: "[redacted]" },
+  // P13: the review page's session cookie too. Form bodies (notes, reasons, the review key) are
+  // never logged either: the request serializer logs no body.
+  redact: {
+    paths: ['req.headers["x-api-key"]', "req.headers.authorization", "req.headers.cookie", 'res.headers["set-cookie"]'],
+    censor: "[redacted]",
+  },
 };
 
 async function main(): Promise<void> {
@@ -32,8 +37,10 @@ async function main(): Promise<void> {
       await sql`select 1`.execute(db);
     },
     enqueue: (id) => enqueue(queue, id),
+    ...(config.reviewApiKey ? { review: { db, reviewKey: config.reviewApiKey } } : {}),
     logger: LOGGER_OPTIONS,
   });
+  if (!config.reviewApiKey) app.log.info("review page disabled: REVIEW_API_KEY not set");
 
   const shutdown = (signal: string) => {
     app.log.info(`${signal} received, shutting down`);
