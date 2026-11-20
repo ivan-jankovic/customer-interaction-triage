@@ -187,6 +187,9 @@ eval/
   results/      evaluation runs
   run.ts
 test/
+docs/
+  guide.md      how to run and use everything (P14)
+  images/       screenshots embedded in the README
 docker-compose.yml
 CLAUDE.md
 README.md
