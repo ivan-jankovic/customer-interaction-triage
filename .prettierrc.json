@@ -1,3 +1,9 @@
 {
-  "printWidth": 120
+  "printWidth": 120,
+  "overrides": [
+    {
+      "files": ["src/review/web/**", "test/review/web/**", "test/integration/review-web*"],
+      "options": { "embeddedLanguageFormatting": "off" }
+    }
+  ]
 }
