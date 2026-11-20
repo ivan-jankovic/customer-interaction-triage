@@ -6,7 +6,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { seedCrm } from "../../src/db/crm.js";
 import { confirmCase, correctCase, InvalidReview, unmaskCase } from "../../src/review/actions.js";
 import { readCaseView } from "../../src/review/case-view.js";
-import { nextCase, queueSize } from "../../src/review/queue.js";
+import { listQueue, nextCase, queuePosition, queueSize } from "../../src/review/queue.js";
+import { listReviewed } from "../../src/review/reviewed.js";
 import type { Database } from "../../src/db/database.js";
 import { processInteraction } from "../../src/pipeline/process.js";
 import {
@@ -150,6 +151,33 @@ describe("queue", () => {
     await confirmCase(db, cases.cancellation!, { reviewer: "reviewer-1" });
     expect(await nextCase(db)).toBe(cases.ambiguous);
     expect(await queueSize(db)).toBe(2);
+  });
+
+  it("lists the queue for the web page (P13): oldest first, filters, pages", async () => {
+    const rows = await listQueue(db, {}, { limit: 50 });
+    expect(rows.map((r) => r.caseId)).toEqual([cases.ambiguous, cases.unidentified]);
+    expect(rows[0]).toMatchObject({
+      externalId: expect.stringMatching(/^msg-022/) as unknown,
+      outcome: "valid",
+      intent: labelsOf("msg-022").intent,
+      reasonCodes: expect.arrayContaining(["customer_ambiguous"]) as unknown,
+    });
+    expect(JSON.stringify(rows)).not.toContain("text");
+    expect((await listQueue(db, {}, { limit: 1 })).map((r) => r.caseId)).toEqual([cases.ambiguous]);
+    expect((await listQueue(db, {}, { after: cases.ambiguous, limit: 1 })).map((r) => r.caseId)).toEqual([
+      cases.unidentified,
+    ]);
+    expect((await listQueue(db, { spotCheck: true }, { limit: 50 })).map((r) => r.caseId)).toEqual([cases.auto]);
+    expect((await listQueue(db, { team: "technical_support" }, { limit: 50 })).map((r) => r.caseId)).toEqual([
+      cases.unidentified,
+    ]);
+  });
+
+  it("gives a case's position in its queue, or null outside it", async () => {
+    expect(await queuePosition(db, {}, cases.unidentified!)).toEqual({ index: 2, total: 2 });
+    expect(await queuePosition(db, { spotCheck: true }, cases.auto!)).toEqual({ index: 1, total: 1 });
+    expect(await queuePosition(db, {}, cases.auto!)).toBeNull();
+    expect(await queuePosition(db, {}, cases.cancellation!)).toBeNull(); // reviewed
   });
 });
 
@@ -298,5 +326,50 @@ describe("actions", () => {
     expect(raw).toBe(record("msg-001").text);
     const view = await readCaseView(db, caseId);
     expect(view.unmaskings).toMatchObject([{ reviewer: "reviewer-1", reason: "search the CRM by phone" }]);
+  });
+});
+
+describe("reviewed list (P13)", () => {
+  let first: string;
+  let second: string;
+  let third: string;
+  beforeAll(async () => {
+    await sql`truncate reviews, unmask_log`.execute(db);
+    first = await makeCase("msg-013"); // cancellation → retention
+    second = await makeCase("msg-013");
+    third = await makeCase("msg-011"); // auto-routed
+    await confirmCase(db, first, { reviewer: "reviewer-1" });
+    await correctCase(db, second, { reviewer: "reviewer-2", intent: "complaint", team: "complaints", note: "angry" });
+    await confirmCase(db, third, { reviewer: "reviewer-1", note: "outage explains it" });
+  });
+
+  it("lists reviews newest first with the original and effective decision", async () => {
+    const rows = await listReviewed(db, {}, { limit: 50 });
+    expect(rows.map((r) => r.caseId)).toEqual([third, second, first]);
+    expect(rows[1]).toMatchObject({
+      externalId: expect.stringMatching(/^msg-013/) as unknown,
+      reviewer: "reviewer-2",
+      decision: "corrected",
+      spotCheck: false,
+      note: "angry",
+      original: { intent: "cancellation", team: "retention" },
+      effective: { status: "corrected", intent: "complaint", team: "complaints" },
+    });
+    expect(rows[0]).toMatchObject({
+      spotCheck: true,
+      effective: { status: "confirmed", intent: labelsOf("msg-011").intent },
+    });
+  });
+
+  it("filters by reviewer and decision, and pages with before", async () => {
+    expect((await listReviewed(db, { reviewer: "reviewer-1" }, { limit: 50 })).map((r) => r.caseId)).toEqual([
+      third,
+      first,
+    ]);
+    expect((await listReviewed(db, { decision: "corrected" }, { limit: 50 })).map((r) => r.caseId)).toEqual([second]);
+    const page1 = await listReviewed(db, {}, { limit: 2 });
+    expect(page1.map((r) => r.caseId)).toEqual([third, second]);
+    const page2 = await listReviewed(db, {}, { before: page1.at(-1)!.reviewId, limit: 2 });
+    expect(page2.map((r) => r.caseId)).toEqual([first]);
   });
 });

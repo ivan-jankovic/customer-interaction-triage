@@ -6,7 +6,10 @@ import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-
 import { Ajv, type ErrorObject } from "ajv";
 import addFormatsModule from "ajv-formats";
 import Fastify, { type FastifyError, type FastifyInstance, type FastifyServerOptions } from "fastify";
+import type { Kysely } from "kysely";
+import type { Database } from "../db/database.js";
 import type { Interaction, InteractionStore } from "../db/interactions.js";
+import { reviewRoutes } from "../review/web/routes.js";
 import {
   BODY_LIMIT_BYTES,
   createInteractionBody,
@@ -36,6 +39,11 @@ export interface AppOptions {
    */
   enqueue: (interactionId: string) => Promise<"queued" | "failed">;
   logger?: FastifyServerOptions["logger"];
+  /**
+   * The review web page (P13), served under /review; left out when REVIEW_API_KEY is not set.
+   * It has its own login and session, separate from the intake key.
+   */
+  review?: { db: Kysely<Database>; reviewKey: string; now?: () => Date };
 }
 
 /**
@@ -68,7 +76,7 @@ function sameKey(given: string, expected: string): boolean {
   return timingSafeEqual(a, b);
 }
 
-export function buildApp({ store, apiKey, checkDb, enqueue, logger = false }: AppOptions): FastifyInstance {
+export function buildApp({ store, apiKey, checkDb, enqueue, review, logger = false }: AppOptions): FastifyInstance {
   const app = Fastify({ logger, bodyLimit: BODY_LIMIT_BYTES }).withTypeProvider<JsonSchemaToTsProvider>();
 
   app.setValidatorCompiler(({ schema, httpPart }) => (httpPart === "body" ? bodyAjv : textAjv).compile(schema));
@@ -181,6 +189,8 @@ export function buildApp({ store, apiKey, checkDb, enqueue, logger = false }: Ap
 
     done();
   });
+
+  if (review) void app.register(reviewRoutes, { prefix: "/review", ...review });
 
   return app;
 }

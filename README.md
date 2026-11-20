@@ -161,6 +161,22 @@ Each case shows its team and reasons, the classification and summary, the **mask
 
 A review is stored in `reviews`, one per case, and is final: if someone else got there first, the loop says who and moves on. The case itself is never changed; a correction records the intent and team that should have been chosen. Reviewer handles are recorded, not verified (there is no login). The design is in the [P09 spec](specs/phases/010-p09-review-queue-cli/requirements.md).
 
+### In the browser
+
+The same queue and actions are on a small web page, served by the API under `/review`. It is off until you set a review key:
+
+1. Set `REVIEW_API_KEY` in `.env` (at least 32 characters, different from `INTAKE_API_KEY`: `openssl rand -hex 32`), then start the API (`npm run dev`, or `docker compose up -d`).
+2. Open <http://localhost:3000/review> and log in with the key and your reviewer handle (for example `reviewer-1`). The session lasts 8 hours.
+
+The queue list has the CLI's filters (team, reason, spot check); **Start reviewing** opens the oldest case. Each case page shows what the CLI shows, with forms to confirm, correct, skip or unmask, and then moves on to the next case. **Reviewed** lists the decisions made so far, newest first, with corrections next to what the case said.
+
+- **Unmasking** asks for a reason, writes `unmask_log` first, and shows the raw text only in that response. Reloading the case shows the masked text again, so every view of the raw text is logged.
+- **Skip** is kept for your session only, as in the CLI: skipped cases come back after you log in again.
+- **The key is shared.** It keeps the page from being open to anyone who can reach the port; the handle you type is recorded but not verified, as in the CLI.
+- **Plain HTML.** No JavaScript: the page sends a Content Security Policy that forbids scripts, every value is escaped (messages can contain HTML aimed at the reviewer), and responses aren't cached.
+
+The design is in the [P13 spec](specs/phases/014-p13-review-web-page/requirements.md).
+
 ## Evaluating
 
 `npm run eval` classifies the labelled dataset with the same understanding step, grades each summary with a separate judge model, and writes a report. It calls paid models: it prints an estimate and asks before any call, and stops at `--max-cost` (default $3).
@@ -236,7 +252,7 @@ The design, the pass rule and the results are in the [P11 spec](specs/phases/012
 | Command | What it does |
 | --- | --- |
 | `npm test` | Unit tests. No Docker, no network, never calls a model. |
-| `npm run test:integration` | Tests against the Compose services (migrations, API with PostgreSQL, loader, masking, mock CRM and enrichment, routing, the queue and worker, the review queue). The Redis outage tests stop and start the Compose Redis, so they run last. |
+| `npm run test:integration` | Tests against the Compose services (migrations, API with PostgreSQL, loader, masking, mock CRM and enrichment, routing, the queue and worker, the review queue and its web page). The Redis outage tests stop and start the Compose Redis, so they run last. |
 | `npm run lint` | ESLint with type-aware rules. |
 | `npm run format` / `format:check` | Prettier. |
 | `npm run typecheck` | TypeScript 7 type check. |

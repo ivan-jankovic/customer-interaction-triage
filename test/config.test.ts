@@ -46,9 +46,26 @@ describe("loadApiConfig", () => {
       databaseUrl: DB,
       redisUrl: REDIS,
       intakeApiKey: KEY,
+      reviewApiKey: null,
       host: "127.0.0.1",
       port: 3000,
     });
+  });
+
+  it("reads an optional REVIEW_API_KEY (P13)", () => {
+    const review = "r".repeat(32);
+    expect(
+      loadApiConfig({ DATABASE_URL: DB, REDIS_URL: REDIS, INTAKE_API_KEY: KEY, REVIEW_API_KEY: ` ${review} ` }),
+    ).toMatchObject({ reviewApiKey: review });
+    expect(
+      loadApiConfig({ DATABASE_URL: DB, REDIS_URL: REDIS, INTAKE_API_KEY: KEY, REVIEW_API_KEY: "  " }),
+    ).toMatchObject({ reviewApiKey: null });
+  });
+
+  it("refuses a REVIEW_API_KEY shorter than 32 characters", () => {
+    expect(() =>
+      loadApiConfig({ DATABASE_URL: DB, REDIS_URL: REDIS, INTAKE_API_KEY: KEY, REVIEW_API_KEY: "short" }),
+    ).toThrow("REVIEW_API_KEY must be at least 32 characters.");
   });
 
   it("reads HOST and PORT", () => {

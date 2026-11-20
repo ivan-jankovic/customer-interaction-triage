@@ -6,7 +6,7 @@
 |---|---|---|
 | Language | **TypeScript** (strict mode) | TypeScript 7 runs the type check. ESLint's type-aware rules use the TypeScript 6 API (`@typescript/typescript6`) until typescript-eslint supports TS 7.1+ (decided in P01). |
 | Runtime | **Node.js LTS** | |
-| HTTP API | **Fastify** | Intake API; later also serves the review web page. |
+| HTTP API | **Fastify** | Intake API; from P13 also the review web page under `/review` (when `REVIEW_API_KEY` is set), with **@fastify/cookie** (signed session cookie) and **@fastify/formbody** (HTML forms), both registered only in the review routes' scope. |
 | Database | **PostgreSQL** + **Kysely** | Messages, cases, decision log, review corrections, mock CRM and outage data. Kysely (typed query builder on `pg`) with its built-in migrator; migrations in `src/db/migrations/`, one per change, each table added by the phase that uses it. |
 | Queue | **Redis** + **BullMQ** | Asynchronous processing with retries (from P08): one `process` queue, one job per interaction (job ID = interaction ID, data = the ID only, so Redis holds no message text). A worker (`src/worker.ts`) runs the pipeline. Redis runs as a container in Docker Compose with append-only persistence and a volume. Client: ioredis (BullMQ's own). See "Queue consistency" below. |
 | LLM | **Claude** via the **Anthropic SDK** | Structured output through `output_config.format` with a JSON Schema (forced tool use is rejected by the current models; decided in P03). Model and effort configurable (`TRIAGE_MODEL`, default `claude-opus-5-5`; `TRIAGE_EFFORT`, default `low`). The classifier uses server-side refusal fallbacks and records the model that answered. The investigating agent (P10) uses the same client's multi-turn method with strict tools, no fallbacks, and `INVESTIGATE_MODEL` / `INVESTIGATE_EFFORT` (default: the classifier's). One client in `src/llm/`, shared with the dataset scripts. |
@@ -156,7 +156,11 @@ In `src/pipeline/investigate.ts`, versioned (`investigate.v1` from P10, prompt `
 - **CLI first (P09):** `npm run review` is an interactive loop over unreviewed cases that need review, oldest first (`--team` and `--reason` narrow it; `--spot-check` goes through auto-routed cases instead). Each case is shown with its reasons, classification, **masked** text, enrichment evidence and decision log, then: confirm (optional note), correct (intent and team, the team defaulting to the intent's; a note is required), skip (this session only), unmask or quit. One review per case, final; a second is refused with who reviewed it and when.
 - **Unmasking:** the raw text is shown only on request, with a reason, and every view is written to `unmask_log` first and listed on the case. Masking protects the model boundary; this makes staff access visible. It is an audit trail, not access control: the reviewer handle is recorded, not verified.
 - **Shared logic:** the queue, the case view and the actions live in `src/review/`, independent of the terminal, so the web page reuses them.
-- **Later, a minimal web page (P13):** server-rendered by Fastify, no frontend framework; same actions as the CLI.
+- **The web page (P13):** server-rendered by Fastify under `/review` in the same app as intake (`src/review/web/`), no frontend framework and no JavaScript. Off unless `REVIEW_API_KEY` is set (at least 32 characters, separate from the intake key). The full rules are in the P13 spec.
+  - **Access:** a login form with the shared review key and a reviewer handle sets one signed cookie (`HttpOnly`, `SameSite=Strict`, `Path=/review`, 8 hours) holding the handle, a CSRF token and the session's skipped cases; its signing secret is derived from the key. A GET without a session redirects to the login page, a POST gets 401, and every POST must carry the CSRF token (403 otherwise). The handle is unverified, as in the CLI.
+  - **Pages:** the queue list with the CLI's filters (team, reason, spot check), the case page (what the CLI shows, with forms to confirm, correct, skip and unmask), and a read-only list of reviewed cases with the effective decision. After a decision the page moves on to the next case; a refused input gives 400 with the error on the form, and a case someone else reviewed first gives 409 with their review.
+  - **Unmasking** is a POST with a required reason; the raw text appears only in that response, after the `unmask_log` row is written.
+  - **Safe rendering:** one escaping `html` tagged template builds every page; a Content Security Policy with `default-src 'none'` (no script source), `Cache-Control: no-store`, `Referrer-Policy: no-referrer` and `nosniff` on every response; cookies are redacted from the logs.
 
 ## Optional later
 
@@ -172,11 +176,11 @@ specs/
   phases/
     NNN-pNN-<slug>/                       one folder per phase, in build order
 src/
-  api/          intake API, review web page
+  api/          intake API (the Fastify app, which also mounts the review page)
   pipeline/     mask, understand, enrich, investigate, route, record
   llm/          client, prompts (versioned), schemas
   db/           migrations, queries
-  review/       CLI
+  review/       review logic and CLI; web/ the review web page (P13)
   cli/          other commands (classify)
 eval/
   data/         labelled dataset, injection set
